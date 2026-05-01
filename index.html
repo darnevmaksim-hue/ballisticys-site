@@ -11,17 +11,60 @@
 </head>
 <body>
   <div class="background-grid"></div>
+
   <header class="hero reveal">
-    <p>адвокат лох</p>
-    <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
-    <h1>Ballisticys Mods Hub</h1>
-    <div class="hero-actions">
-      <a class="btn primary" href="#downloads">Скачать</a>
-      <a class="btn ghost" href="#guide">Быстрый гайд</a>
+    <div class="hero-copy">
+      <p class="top-note">адвокат лох</p>
+      <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
+      <h1>Ballisticys Fire-Control Hub</h1>
+      <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#downloads">Скачать</a>
+        <a class="btn ghost" href="#lab">Открыть Lab</a>
+      </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+      <div class="cannon-shell">
+        <div class="barrel"></div>
+        <div class="barrel-core"></div>
+        <div class="muzzle-flash"></div>
+      </div>
+      <div class="radar-ring ring-a"></div>
+      <div class="radar-ring ring-b"></div>
+      <div class="radar-ring ring-c"></div>
+      <div class="telemetry-badge">TARGET LOCK: ACTIVE</div>
     </div>
   </header>
 
   <main>
+    <section class="panel reveal telemetry" id="telemetry">
+      <h2>Сводка системы</h2>
+      <div class="telemetry-grid">
+        <article class="telemetry-card">
+          <p class="metric-title">Стабильность траектории</p>
+          <p class="metric-value" data-count="98">0%</p>
+          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
+            <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
+          </svg>
+        </article>
+        <article class="telemetry-card">
+          <p class="metric-title">Точность PVO</p>
+          <p class="metric-value" data-count="94">0%</p>
+          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
+            <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
+          </svg>
+        </article>
+        <article class="telemetry-card">
+          <p class="metric-title">Скорость захвата цели</p>
+          <p class="metric-value" data-count="112">0ms</p>
+          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
+            <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
+          </svg>
+        </article>
+      </div>
+    </section>
+
     <section class="panel reveal" id="stages">
       <h2>Этапы установки</h2>
       <div class="stage-grid">
@@ -33,12 +76,12 @@
         <article class="stage-card">
           <span class="num">02</span>
           <h3>Скачай файл</h3>
-          <p>Нажми кнопку на карточке. Все файлы уже лежат локально в папке <code>downloads/</code>.</p>
+          <p>Файлы лежат в <code>downloads/</code>. Моды скачиваются как <code>.jar</code>, инжектор как <code>.zip</code>.</p>
         </article>
         <article class="stage-card">
           <span class="num">03</span>
           <h3>Установи и запусти</h3>
-          <p>Помести jar в <code>mods</code> или запусти инжектор через <code>Start-Ballisticys.ps1</code>.</p>
+          <p>Положи jar в <code>mods</code> или запусти инжектор через <code>Start-Ballisticys.ps1</code>.</p>
         </article>
       </div>
     </section>
@@ -46,9 +89,9 @@
     <section class="panel reveal" id="about">
       <h2>Что делает мод и зачем он нужен</h2>
       <p>
-        Ballisticys моды добавляют клиентские инструменты для удобной стрельбы и контроля целей: баллистический калькулятор,
-        мини-HUD, экран истории, PVO-интерфейс, захват/сброс цели и команды управления. Это сокращает время на расчёты и
-        повышает точность в PvP/PvE-сценариях с артиллерией и автопушками.
+        Ballisticys моды добавляют клиентские инструменты для точной стрельбы и контроля целей: баллистический калькулятор,
+        мини-HUD, экран истории, PVO-интерфейс, захват/сброс цели и команды управления. Это снижает ошибки в расчётах и
+        ускоряет прицеливание в сценариях с артиллерией и автопушками.
       </p>
       <div class="chips">
         <span>Баллистический расчёт</span>
@@ -56,6 +99,45 @@
         <span>PVO и трекинг целей</span>
         <span>История расчётов</span>
         <span>Client-side</span>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="lab">
+      <h2>Ballistics Lab</h2>
+      <p class="lab-sub">Интерактивный стенд: меняй параметры и смотри траекторию в реальном времени.</p>
+
+      <div class="lab-grid">
+        <div class="lab-controls">
+          <label>
+            <span>Скорость, м/с: <strong id="velocityValue">160</strong></span>
+            <input type="range" id="velocityInput" min="80" max="260" value="160" />
+          </label>
+
+          <label>
+            <span>Угол, °: <strong id="angleValue">38</strong></span>
+            <input type="range" id="angleInput" min="10" max="70" value="38" />
+          </label>
+
+          <label>
+            <span>Дистанция цели, м: <strong id="distanceValue">240</strong></span>
+            <input type="range" id="distanceInput" min="80" max="420" value="240" />
+          </label>
+
+          <label>
+            <span>Ветер, м/с: <strong id="windValue">0</strong></span>
+            <input type="range" id="windInput" min="-20" max="20" value="0" />
+          </label>
+
+          <div class="lab-stats">
+            <p>Время полёта: <strong id="flightTime">0.00s</strong></p>
+            <p>Точка падения: <strong id="impactPoint">0m</strong></p>
+            <p>Отклонение: <strong id="targetError">0m</strong></p>
+          </div>
+        </div>
+
+        <div class="lab-canvas-wrap">
+          <canvas id="trajectoryCanvas" width="760" height="360"></canvas>
+        </div>
       </div>
     </section>
 
@@ -123,7 +205,7 @@
 
     <section class="panel reveal" id="guide">
       <h2>Быстрый гайд</h2>
-      <p><strong>Важно:</strong> файл мода в формате <code>.jar</code> может открываться архиватором как zip внутри, это нормально. Его не нужно распаковывать.</p>
+      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip внутри, это нормально. Его не нужно распаковывать.</p>
       <div class="guide-grid">
         <article>
           <h3>Fabric установка</h3>
@@ -154,7 +236,7 @@
   </main>
 
   <footer class="footer reveal">
-    <p>Ballisticys Project • Локальная страница загрузок</p>
+    <p>Ballisticys Project • Persistent Web Build</p>
   </footer>
 
   <script src="script.js"></script>
