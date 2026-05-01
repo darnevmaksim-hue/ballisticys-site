@@ -1,0 +1,32 @@
+const filterButtons = document.querySelectorAll('.filter');
+const cards = document.querySelectorAll('.mod-card');
+
+filterButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+
+    filterButtons.forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    cards.forEach((card) => {
+      const core = card.dataset.core;
+      const visible = filter === 'all' || filter === core;
+      card.classList.toggle('hidden', !visible);
+    });
+  });
+});
+
+const revealNodes = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.12 }
+);
+
+revealNodes.forEach((node) => revealObserver.observe(node));

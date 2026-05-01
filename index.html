@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ballisticys Mods</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="background-grid"></div>
+  <header class="hero reveal">
+    <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
+    <h1>Ballisticys Mods Hub</h1>
+    <p class="lead">
+      Сайт для твоих модов и инжектора: полные описания, совместимость, и прямые скачивания без лишних шагов.
+    </p>
+    <div class="hero-actions">
+      <a class="btn primary" href="#downloads">Скачать</a>
+      <a class="btn ghost" href="#guide">Быстрый гайд</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel reveal" id="stages">
+      <h2>Этапы установки</h2>
+      <div class="stage-grid">
+        <article class="stage-card">
+          <span class="num">01</span>
+          <h3>Выбери сборку</h3>
+          <p>Fabric Port для Fabric-клиента, Forge-версию для Forge-сборки, или инжектор для PolitCraft.</p>
+        </article>
+        <article class="stage-card">
+          <span class="num">02</span>
+          <h3>Скачай файл</h3>
+          <p>Нажми кнопку на карточке. Все файлы уже лежат локально в папке <code>downloads/</code>.</p>
+        </article>
+        <article class="stage-card">
+          <span class="num">03</span>
+          <h3>Установи и запусти</h3>
+          <p>Помести jar в <code>mods</code> или запусти инжектор через <code>Start-Ballisticys.ps1</code>.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="about">
+      <h2>Что делает мод и зачем он нужен</h2>
+      <p>
+        Ballisticys моды добавляют клиентские инструменты для удобной стрельбы и контроля целей: баллистический калькулятор,
+        мини-HUD, экран истории, PVO-интерфейс, захват/сброс цели и команды управления. Это сокращает время на расчёты и
+        повышает точность в PvP/PvE-сценариях с артиллерией и автопушками.
+      </p>
+      <div class="chips">
+        <span>Баллистический расчёт</span>
+        <span>Мини HUD</span>
+        <span>PVO и трекинг целей</span>
+        <span>История расчётов</span>
+        <span>Client-side</span>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="downloads">
+      <h2>Скачать файлы</h2>
+      <div class="filter-row">
+        <button class="filter active" data-filter="all">Все</button>
+        <button class="filter" data-filter="fabric">Fabric</button>
+        <button class="filter" data-filter="forge">Forge</button>
+        <button class="filter" data-filter="injector">Инжектор</button>
+      </div>
+
+      <div class="mod-grid">
+        <article class="mod-card" data-core="fabric">
+          <p class="tag fabric">Fabric</p>
+          <h3>Ballistics Fabric Port</h3>
+          <p>Порт клиентского Ballistics/PVO мода на Fabric. Подходит для быстрой установки через Fabric Loader.</p>
+          <ul>
+            <li>Minecraft: <strong>1.20.1</strong></li>
+            <li>Ядро: <strong>Fabric Loader >= 0.15.0</strong></li>
+            <li>API: <strong>Fabric API</strong></li>
+            <li>Версия мода: <strong>2.0pre4-fabric-port</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download>Скачать Fabric jar</a>
+          </div>
+        </article>
+
+        <article class="mod-card" data-core="forge">
+          <p class="tag forge">Forge</p>
+          <h3>Blur Ballistics (Forge)</h3>
+          <p>Forge-сборка с баллистическим калькулятором и клиентскими элементами управления/индикации.</p>
+          <ul>
+            <li>Minecraft: <strong>1.20.1</strong></li>
+            <li>Ядро: <strong>Forge 47+</strong></li>
+            <li>Версия мода: <strong>1.0.0</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download>Скачать Forge jar</a>
+          </div>
+        </article>
+
+        <article class="mod-card" data-core="injector">
+          <p class="tag injector">Injector</p>
+          <h3>Ballisticys Injector Toolkit</h3>
+          <p>
+            Автоинжектор для PolitCraft: копирует mod/agent в <code>libraries/custom</code>,
+            патчит <code>profileInfo.json</code> и добавляет аргументы запуска с <code>-javaagent</code>.
+          </p>
+          <ul>
+            <li>Цель: <strong>PolitCraft offline-mode профиль</strong></li>
+            <li>Agent: <strong>ballisticys-fabric-agent-1.0.0</strong></li>
+            <li>Внутри zip: <strong>PS1 + PY + payload</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/ballisticys-injector-toolkit.zip" download>Скачать Injector ZIP</a>
+            <a class="btn ghost" href="downloads/ballisticys-fabric-agent-1.0.0.jar" download>Скачать Agent jar</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="guide">
+      <h2>Быстрый гайд</h2>
+      <div class="guide-grid">
+        <article>
+          <h3>Fabric установка</h3>
+          <ol>
+            <li>Установи Fabric Loader для 1.20.1.</li>
+            <li>Положи jar в папку <code>mods</code>.</li>
+            <li>Убедись, что установлен Fabric API.</li>
+          </ol>
+        </article>
+        <article>
+          <h3>Forge установка</h3>
+          <ol>
+            <li>Установи Forge 47+ для 1.20.1.</li>
+            <li>Положи Forge jar в папку <code>mods</code>.</li>
+            <li>Запусти клиент на Java 17.</li>
+          </ol>
+        </article>
+        <article>
+          <h3>Injector запуск</h3>
+          <ol>
+            <li>Скачай и распакуй toolkit zip.</li>
+            <li>Запусти <code>Start-Ballisticys.ps1</code>.</li>
+            <li>Проверь <code>inject-launch.log</code> после запуска.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer reveal">
+    <p>Ballisticys Project • Локальная страница загрузок</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
