@@ -1,0 +1,13 @@
+# local tunnel/dev artifacts
+*.log
+*.pid
+public-url.txt
+.tunnel.keepalive
+
+# local tools
+tools/
+
+# local tunnel scripts
+public-link-daemon.ps1
+start-public-link.ps1
+stop-public-link.ps1
