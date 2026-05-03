@@ -1,234 +1,123 @@
 :root {
-  --bg-dark: #020406;
-  --terminal-green: #00ff41;
+  --bg-color: #05070a;
+  --panel-bg: rgba(13, 17, 23, 0.85);
+  --accent-primary: #00f2ff;
+  --accent-secondary: #7000ff;
+  --text-main: #e6edf3;
+  --text-dim: #8b949e;
+  --font-main: 'JetBrains Mono', monospace;
+  --font-header: 'Russo One', sans-serif;
   --terminal-blue: #00f2ff;
+  --terminal-green: #00ff41;
   --terminal-red: #ff3e3e;
-  --panel-bg: rgba(2, 6, 12, 0.9);
-  --font-mono: 'JetBrains Mono', 'Courier New', monospace;
-  --scanline-color: rgba(0, 242, 255, 0.05);
 }
 
 body {
-  background-color: var(--bg-dark);
-  color: var(--terminal-blue);
-  font-family: var(--font-mono);
+  background-color: var(--bg-color);
+  color: var(--text-main);
+  font-family: var(--font-main);
   margin: 0;
   overflow-x: hidden;
-  text-transform: uppercase;
+  line-height: 1.6;
 }
 
-/* Эффект старого монитора */
+/* Эффекты монитора */
 .crt-overlay {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: linear-gradient(var(--scanline-color) 50%, transparent 50%);
+  background: linear-gradient(rgba(0, 242, 255, 0.03) 50%, transparent 50%);
   background-size: 100% 4px;
   z-index: 100;
   pointer-events: none;
-  opacity: 0.3;
+  opacity: 0.2;
 }
 
-.crt-overlay::before {
-  content: " ";
-  display: block;
-  position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  z-index: 2;
-  background-size: 100% 2px, 3px 100%;
-  pointer-events: none;
-}
-
-/* Сетка фона с параллаксом */
+/* Сетки */
 .background-grid {
   position: fixed;
-  width: 200%; height: 200%;
-  top: -50%; left: -50%;
-  background-image: 
-    linear-gradient(to right, rgba(0, 242, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-  transform: perspective(500px) rotateX(60deg);
+  width: 200%; height: 200%; top: -50%; left: -50%;
+  background-image: linear-gradient(rgba(0, 242, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 242, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
   z-index: -1;
+  transform: perspective(500px) rotateX(60deg);
   animation: grid-move 20s linear infinite;
 }
 
 .background-grid-secondary {
   position: fixed;
-  width: 200%; height: 200%;
-  top: -50%; left: -50%;
-  background-image: 
-    linear-gradient(to right, rgba(112, 0, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(112, 0, 255, 0.03) 1px, transparent 1px);
-  background-size: 150px 150px;
-  transform: perspective(500px) rotateX(60deg);
+  width: 200%; height: 200%; top: -50%; left: -50%;
+  background-image: linear-gradient(rgba(112, 0, 255, 0.02) 2px, transparent 2px), linear-gradient(90deg, rgba(112, 0, 255, 0.02) 2px, transparent 2px);
+  background-size: 120px 120px;
   z-index: -2;
+  transform: perspective(500px) rotateX(60deg);
   animation: grid-move 40s linear infinite reverse;
-}
-
-/* Эффект глитча */
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
-}
-
-.glitch-trigger:hover {
-  animation: glitch 0.2s infinite;
-  color: var(--terminal-red) !important;
-  border-color: var(--terminal-red) !important;
 }
 
 @keyframes grid-move {
   from { transform: perspective(500px) rotateX(60deg) translateY(0); }
-  to { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+  to { transform: perspective(500px) rotateX(60deg) translateY(40px); }
 }
 
-.hero {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  border-bottom: 2px solid var(--terminal-blue);
-  box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
-}
-
-h1 {
-  font-size: 4rem;
-  margin: 0;
-  text-shadow: 0 0 15px var(--terminal-blue);
-  letter-spacing: 10px;
-}
-
-.hero-sub {
-  color: var(--terminal-green);
-  margin-top: 10px;
-  font-size: 1.2rem;
-  background: rgba(0, 255, 65, 0.1);
-  padding: 5px 20px;
-}
-
-.panel {
-  max-width: 1200px;
-  margin: 40px auto;
-  background: var(--panel-bg);
-  border: 1px solid var(--terminal-blue);
-  padding: 30px;
-  position: relative;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%);
-}
-
-.panel::after {
-  content: "SYSTEM_STATUS: OK";
-  position: absolute;
-  bottom: 5px; right: 30px;
-  font-size: 0.7rem;
-  opacity: 0.5;
-}
-
-.btn {
-  background: transparent;
-  border: 1px solid var(--terminal-blue);
-  color: var(--terminal-blue);
-  padding: 15px 40px;
-  font-family: var(--font-mono);
-  cursor: pointer;
-  transition: 0.3s;
-  text-decoration: none;
-  position: relative;
-}
-
-.btn:hover {
-  background: var(--terminal-blue);
-  color: #000;
-  box-shadow: 0 0 30px var(--terminal-blue);
-}
-
-/* Исправление гайда и графиков */
-.stage-grid, .guide-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-  width: 100%;
-}
-
-.stage-card, .guide-card, .mod-card {
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  hyphens: auto;
-  border: 1px solid rgba(0, 242, 255, 0.2);
-  padding: 20px;
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.sparkline {
-  width: 100%;
-  height: 50px;
-  stroke: var(--terminal-blue);
-  stroke-width: 2;
-  fill: none;
-  filter: drop-shadow(0 0 5px var(--terminal-blue));
-  margin-top: 10px;
-}
-
-.telemetry-card {
-  flex: 1;
-  min-width: 250px;
-  padding: 20px;
-  border: 1px solid rgba(0, 242, 255, 0.1);
-  background: rgba(0, 0, 0, 0.2);
-  text-align: center;
-}
-
-.sparkline {
-  width: 100%;
-  height: 40px;
-  stroke: var(--terminal-blue);
-  stroke-width: 1.5;
-  fill: none;
-  opacity: 0.6;
-  margin-top: 10px;
-}
-
-/* Угловые рамки визора */
+/* Углы визора */
 .visor-corner {
-  position: fixed;
-  width: 40px; height: 40px;
-  border: 2px solid var(--terminal-blue);
-  z-index: 102;
-  pointer-events: none;
-  opacity: 0.5;
+  position: fixed; width: 30px; height: 30px; border: 1px solid var(--accent-primary); z-index: 102; pointer-events: none; opacity: 0.3;
 }
 .top-left { top: 20px; left: 20px; border-right: none; border-bottom: none; }
 .top-right { top: 20px; right: 20px; border-left: none; border-bottom: none; }
 .bottom-left { bottom: 20px; left: 20px; border-right: none; border-top: none; }
 .bottom-right { bottom: 20px; right: 20px; border-left: none; border-top: none; }
 
-/* Поток логов */
+/* Панели */
+.panel {
+  background: var(--panel-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 242, 255, 0.15);
+  border-radius: 4px;
+  padding: 3rem 2rem;
+  margin: 3rem auto;
+  max-width: 1100px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+}
+
+h1 {
+  font-family: var(--font-header);
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  text-transform: uppercase;
+  background: linear-gradient(to bottom, #fff, var(--accent-primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 15px rgba(0, 242, 255, 0.5));
+  margin: 0;
+}
+
+.hero { height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; }
+
+/* Карточки и графики */
+.telemetry-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.telemetry-card { background: rgba(0, 0, 0, 0.4); padding: 20px; border-left: 3px solid var(--accent-primary); }
+.metric-value { font-size: 2.5rem; font-weight: bold; color: var(--terminal-green); }
+.sparkline { width: 100%; height: 50px; stroke: var(--accent-primary); stroke-width: 2; fill: none; margin-top: 10px; opacity: 0.7; }
+
+/* Кнопки */
+.btn {
+  display: inline-block; padding: 12px 30px; text-decoration: none; text-transform: uppercase; transition: 0.3s; cursor: pointer; border-radius: 2px;
+}
+.btn.primary { background: var(--accent-primary); color: #000; font-weight: bold; }
+.btn.primary:hover { box-shadow: 0 0 20px var(--accent-primary); transform: translateY(-2px); }
+.btn.ghost { border: 1px solid var(--accent-primary); color: var(--accent-primary); margin-left: 10px; }
+
+/* Лог-контейнер (тот самый крутой) */
 .log-container {
-  position: fixed;
-  bottom: 40px;
-  left: 40px;
-  width: 300px;
-  height: 120px;
-  font-size: 0.65rem;
-  overflow: hidden;
-  color: var(--terminal-green);
-  background: rgba(0,0,0,0.5);
-  padding: 10px;
-  border-left: 1px solid var(--terminal-green);
-  z-index: 90;
-  pointer-events: none;
+  position: fixed; bottom: 30px; left: 30px; width: 250px; height: 100px; font-size: 0.7rem; color: var(--terminal-green); 
+  background: rgba(0,0,0,0.6); padding: 10px; border-left: 1px solid var(--terminal-green); z-index: 90; pointer-events: none;
 }
+.log-entry { margin-bottom: 3px; opacity: 0.8; }
 
-.log-entry { margin-bottom: 4px; opacity: 0.8; }
+.reveal { opacity: 0; transform: translateY(30px); transition: 1s ease; }
+.reveal.show { opacity: 1; transform: translateY(0); }
 
-/* Режим опасности */
-body.danger-mode {
-  box-shadow: inset 0 0 100px rgba(255, 62, 62, 0.2);
-}
+.mod-card { background: rgba(255,255,255,0.03); padding: 2rem; border: 1px solid rgba(255,255,255,0.05); }
+.mod-card:hover { border-color: var(--accent-primary); background: rgba(255,255,255,0.06); }
+.tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 2px; font-weight: bold; }
+.tag.fabric { background: #f0ad4e; color: #000; }
+.tag.forge { background: #3273dc; color: #fff; }
