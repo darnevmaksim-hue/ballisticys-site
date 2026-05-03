@@ -20,20 +20,7 @@
       <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
       <div class="hero-actions">
         <a class="btn primary" href="#downloads">Скачать</a>
-        <a class="btn ghost" href="#lab">Открыть Lab</a>
       </div>
-    </div>
-
-    <div class="hero-visual" aria-hidden="true">
-      <div class="cannon-shell">
-        <div class="barrel"></div>
-        <div class="barrel-core"></div>
-        <div class="muzzle-flash"></div>
-      </div>
-      <div class="radar-ring ring-a"></div>
-      <div class="radar-ring ring-b"></div>
-      <div class="radar-ring ring-c"></div>
-      <div class="telemetry-badge">TARGET LOCK: ACTIVE</div>
     </div>
   </header>
 
@@ -99,45 +86,6 @@
         <span>PVO и трекинг целей</span>
         <span>История расчётов</span>
         <span>Client-side</span>
-      </div>
-    </section>
-
-    <section class="panel reveal" id="lab">
-      <h2>Ballistics Lab</h2>
-      <p class="lab-sub">Интерактивный стенд: меняй параметры и смотри траекторию в реальном времени.</p>
-
-      <div class="lab-grid">
-        <div class="lab-controls">
-          <label>
-            <span>Скорость, м/с: <strong id="velocityValue">160</strong></span>
-            <input type="range" id="velocityInput" min="80" max="260" value="160" />
-          </label>
-
-          <label>
-            <span>Угол, °: <strong id="angleValue">38</strong></span>
-            <input type="range" id="angleInput" min="10" max="70" value="38" />
-          </label>
-
-          <label>
-            <span>Дистанция цели, м: <strong id="distanceValue">240</strong></span>
-            <input type="range" id="distanceInput" min="80" max="420" value="240" />
-          </label>
-
-          <label>
-            <span>Ветер, м/с: <strong id="windValue">0</strong></span>
-            <input type="range" id="windInput" min="-20" max="20" value="0" />
-          </label>
-
-          <div class="lab-stats">
-            <p>Время полёта: <strong id="flightTime">0.00s</strong></p>
-            <p>Точка падения: <strong id="impactPoint">0m</strong></p>
-            <p>Отклонение: <strong id="targetError">0m</strong></p>
-          </div>
-        </div>
-
-        <div class="lab-canvas-wrap">
-          <canvas id="trajectoryCanvas" width="760" height="360"></canvas>
-        </div>
       </div>
     </section>
 
