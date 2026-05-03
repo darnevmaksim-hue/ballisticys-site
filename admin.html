@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ballisticys | Admin Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      padding: 20px;
+    }
+    .admin-card {
+      width: 100%;
+      max-width: 450px;
+      padding: 2rem;
+      background: var(--bg-2);
+      border: 1px solid var(--accent);
+      border-radius: 18px;
+      box-shadow: 0 0 40px rgba(194, 123, 71, 0.15);
+      text-align: center;
+    }
+    .admin-card h1 { margin-bottom: 1.5rem; color: var(--accent); }
+    .admin-card input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 1rem;
+      background: var(--bg-0);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+    }
+    .hidden { display: none !important; }
+    .dashboard {
+      max-width: 1000px;
+      margin: 40px auto;
+    }
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      padding: 1.5rem;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .stat-card h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem; }
+    .stat-card p { font-size: 1.8rem; font-family: 'Russo One'; color: var(--accent); margin: 0; }
+  </style>
+</head>
+<body>
+  <div class="background-grid"></div>
+
+  <!-- Экран входа -->
+  <div id="login-zone" class="admin-container">
+    <div class="admin-card reveal show">
+      <h1>ADMIN ACCESS</h1>
+      <p style="margin-bottom: 1.5rem; color: var(--muted);">Введите ключ доступа для управления системой</p>
+      <input type="password" id="admin-pass" placeholder="Ключ доступа..." autofocus>
+      <button class="btn primary" style="width: 100%" onclick="tryLogin()">Авторизация</button>
+      <p id="error-msg" style="color: var(--danger); margin-top: 1rem; font-size: 0.85rem;" class="hidden">ОШИБКА: Ключ не распознан</p>
+    </div>
+  </div>
+
+  <!-- Панель управления -->
+  <div id="admin-dashboard" class="dashboard hidden">
+    <header class="panel" style="display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 style="font-size: 1.5rem;">Ballisticys Control Center</h1>
+        <p style="color: var(--muted); margin: 0;">Статус системы: <span style="color: #7eecc4;">ONLINE</span></p>
+      </div>
+      <button class="btn ghost" onclick="logout()">Завершить сеанс</button>
+    </header>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <h3>Всего загрузок</h3>
+        <p>1,248</p>
+      </div>
+      <div class="stat-card">
+        <h3>Активных сессий</h3>
+        <p>42</p>
+      </div>
+      <div class="stat-card">
+        <h3>Ошибок инжектора</h3>
+        <p style="color: var(--danger);">0</p>
+      </div>
+    </div>
+
+    <section class="panel">
+      <h2>Управление файлами</h2>
+      <p>Функции редактирования списка файлов через Git API будут добавлены в следующем модуле.</p>
+      <div style="opacity: 0.5; pointer-events: none;">
+         <button class="btn primary">Обновить Fabric Jar</button>
+         <button class="btn primary">Обновить Forge Jar</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const PASS = 'admin123'; // Смени этот пароль!
+
+    function tryLogin() {
+      const input = document.getElementById('admin-pass').value;
+      if (input === PASS) {
+        document.getElementById('login-zone').classList.add('hidden');
+        document.getElementById('admin-dashboard').classList.remove('hidden');
+        localStorage.setItem('admin_auth', 'true');
+      } else {
+        const err = document.getElementById('error-msg');
+        err.classList.remove('hidden');
+        setTimeout(() => err.classList.add('hidden'), 2000);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('admin_auth');
+      location.reload();
+    }
+
+    // Проверка сессии при загрузке
+    if (localStorage.getItem('admin_auth') === 'true') {
+      document.getElementById('login-zone').classList.add('hidden');
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+    }
+
+    // Вход по Enter
+    document.getElementById('admin-pass').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') tryLogin();
+    });
+  </script>
+</body>
+</html>
