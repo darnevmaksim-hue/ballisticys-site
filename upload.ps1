@@ -10,12 +10,11 @@ if (!(Get-Command git -ErrorAction SilentlyContinue)) {
     exit
 }
 
-# Добавляем изменения
-git add index.html
-git add downloads/*
+# Добавляем абсолютно всё
+git add --all
 
 # Создаем коммит
-git commit -m "Фикс ссылок и добавление файлов для скачивания"
+git commit -m "Force update all files including downloads"
 
 Write-Host "Сейчас откроется окно GitHub для входа (если вы еще не вошли)." -ForegroundColor Yellow
 Write-Host "Пожалуйста, подтвердите вход в браузере, чтобы файлы загрузились." -ForegroundColor Yellow
