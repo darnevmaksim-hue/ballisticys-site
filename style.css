@@ -1,11 +1,11 @@
 :root {
-  --bg: #0a0a0b;
-  --panel: #111113;
-  --accent: #ffb400;
-  --accent-dim: rgba(255, 180, 0, 0.05);
-  --text: #e0e0e0;
-  --dim: #777;
-  --border: #222;
+  --bg: #08090b;
+  --card-bg: rgba(17, 19, 23, 0.7);
+  --accent: #2e7fff;
+  --text: #ffffff;
+  --text-dim: #9499a3;
+  --border: rgba(255, 255, 255, 0.08);
+  --glass: blur(12px);
 }
 
 body {
@@ -13,126 +13,144 @@ body {
   color: var(--text);
   font-family: 'JetBrains Mono', monospace;
   margin: 0;
-  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Ограничитель ширины */
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 0 20px;
+.background-glow {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: 
+    radial-gradient(circle at 80% 20%, rgba(46, 127, 255, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(112, 0, 255, 0.05) 0%, transparent 40%);
+  z-index: -1;
 }
 
 .hero {
-  height: 60vh;
+  height: 70vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
 }
 
 h1 {
-  font-family: 'Russo One', sans-serif;
-  font-size: clamp(2.5rem, 8vw, 5rem);
-  margin: 0 0 20px 0;
-  letter-spacing: -1px;
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -3px;
+  margin: 0;
+  background: linear-gradient(180deg, #fff 0%, #666 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .panel {
-  background: var(--panel);
+  background: var(--card-bg);
+  backdrop-filter: var(--glass);
   border: 1px solid var(--border);
-  border-top: 2px solid var(--accent);
-  margin: 40px auto;
-  padding: 40px;
+  border-radius: 24px;
+  padding: 48px;
+  max-width: 1100px;
+  margin: 0 auto 32px;
 }
 
 .panel-title {
-  color: var(--accent);
-  font-family: 'Russo One', sans-serif;
-  font-size: 1.2rem;
-  margin-bottom: 30px;
+  font-size: 0.8rem;
+  letter-spacing: 4px;
   text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+  display: block;
 }
 
-/* Исправленная сетка телеметрии */
 .telemetry-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Ровно 3 колонки */
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .telemetry-card {
-  background: #0d0d0f;
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
 }
 
-.value {
-  font-size: 2.2rem;
-  font-weight: bold;
-  color: var(--accent);
-  line-height: 1;
-  margin: 10px 0;
+.metric-val {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 8px 0;
 }
 
-.label {
+.metric-label {
   font-size: 0.7rem;
-  color: var(--dim);
+  color: var(--text-dim);
 }
 
-/* Исправленная сетка модов */
 .mod-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
 }
 
 .mod-card {
-  background: #161618;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
-  padding: 25px;
-  display: flex;
-  flex-direction: column;
+  border-radius: 20px;
+  padding: 32px;
+  transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
-.mod-card h3 { margin: 0 0 10px 0; font-family: 'Russo One', sans-serif; font-size: 1.1rem; }
+.mod-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent);
+  transform: translateY(-8px);
+}
 
 .btn {
-  display: inline-block;
-  padding: 12px 24px;
-  font-size: 0.85rem;
-  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 32px;
+  border-radius: 12px;
+  font-weight: 600;
   text-decoration: none;
-  text-transform: uppercase;
-  transition: 0.2s;
-  text-align: center;
+  transition: 0.3s;
+  font-size: 0.9rem;
 }
 
-.btn.primary { background: var(--accent); color: #000; }
-.btn.primary:hover { background: #fff; }
-
-.btn.ghost { border: 1px solid var(--accent); color: var(--accent); }
-
-/* Гайд */
-.guide-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.btn.primary {
+  background: var(--text);
+  color: var(--bg);
 }
 
-.guide-item {
-  padding: 20px;
-  background: rgba(255,255,255,0.02);
+.btn.primary:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn.ghost {
   border: 1px solid var(--border);
+  color: var(--text);
 }
 
-.step-num { color: var(--accent); font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; display: block; }
-
-@media (max-width: 900px) {
-  .telemetry-grid, .guide-grid { grid-template-columns: 1fr; }
+.tag {
+  font-size: 0.65rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  display: inline-block;
 }
+
+.sparkline {
+  width: 100%; height: 40px; stroke: var(--accent); stroke-width: 2; fill: none; opacity: 0.4;
+}
+
+.reveal { opacity: 0; transform: translateY(40px); transition: 1.2s cubic-bezier(0.2, 1, 0.3, 1); }
+.reveal.show { opacity: 1; transform: translateY(0); }
+
+.hidden { display: none; }
