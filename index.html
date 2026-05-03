@@ -33,30 +33,30 @@
     <main>
         <section class="panel" id="telemetry">
             <h2>// СИСТЕМНАЯ_ТЕЛЕМЕТРИЯ</h2>
-            <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
-                <article class="telemetry-card">
-          <p class="metric-title">Стабильность траектории</p>
-          <p class="metric-value" data-count="98">0%</p>
-          <svg viewBox="0 0 220 60" class="sparkline">
-            <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
-          </svg>
-        </article>
-        <article class="telemetry-card">
-          <p class="metric-title">Точность PVO</p>
-          <p class="metric-value" data-count="94">0%</p>
-          <svg viewBox="0 0 220 60" class="sparkline">
-            <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
-          </svg>
-        </article>
-        <article class="telemetry-card">
-          <p class="metric-title">Захват цели</p>
-          <p class="metric-value" data-count="112">0ms</p>
-          <svg viewBox="0 0 220 60" class="sparkline">
-            <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
-          </svg>
-        </article>
-      </div>
-    </section>
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
+                <div class="telemetry-card">
+                    <div class="metric-title">TRAJECTORY_STABILITY</div>
+                    <div class="metric-value" data-count="98">98%</div>
+                    <svg viewBox="0 0 220 60" class="sparkline">
+                        <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
+                    </svg>
+                </div>
+                <div class="telemetry-card">
+                    <div class="metric-title">TARGET_LOCK_TIME</div>
+                    <div class="metric-value" data-count="112">112ms</div>
+                    <svg viewBox="0 0 220 60" class="sparkline">
+                        <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
+                    </svg>
+                </div>
+                <div class="telemetry-card">
+                    <div class="metric-title">PVO_ACCURACY</div>
+                    <div class="metric-value" data-count="94">94%</div>
+                    <svg viewBox="0 0 220 60" class="sparkline">
+                        <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
+                    </svg>
+                </div>
+            </div>
+        </section>
 
     <section class="panel" id="guide">
       <h2>// БЫСТРЫЙ_ГАЙД</h2>
