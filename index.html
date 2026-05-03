@@ -1,181 +1,105 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ballisticys Mods</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BALLISTICYS // COMMAND CENTER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="background-grid"></div>
+    <div class="visor-corner top-left"></div>
+    <div class="visor-corner top-right"></div>
+    <div class="visor-corner bottom-left"></div>
+    <div class="visor-corner bottom-right"></div>
+    
+    <div class="crt-overlay"></div>
+    <div class="background-grid"></div>
+    <div class="background-grid-secondary"></div>
 
-  <header class="hero reveal">
-    <div class="hero-copy">
-      <p class="top-note">адвокат лох</p>
-      <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
-      <h1>Ballisticys Fire-Control Hub</h1>
-      <p class="hero-sub">Интерфейс управления баллистикой. Телеметрия, расчеты траекторий и модули захвата целей для артиллерии Minecraft.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#downloads">Перейти к загрузкам</a>
-        <a class="btn ghost" href="#about">О системе</a>
-      </div>
-    </div>
-  </header>
+    <header class="hero">
+        <div class="status-bar" style="position:absolute; top:20px; left:20px; font-size:0.8rem;">
+            [ STATUS: <span style="color:var(--terminal-green); animation: blink 1s infinite;">OPERATIONAL</span> ]<br>
+            [ COORD: 55.7558° N, 37.6173° E ]
+        </div>
+        <h1>BALLISTICYS</h1>
+        <p class="hero-sub">FIRE-CONTROL & TELEMETRY HUB // V2.0</p>
+        <div style="margin-top: 30px;">
+            <a href="#downloads" class="btn">ACCESS_FILES</a>
+        </div>
+    </header>
 
-  <main>
-    <section class="panel reveal telemetry" id="telemetry">
-      <h2><span style="color:var(--accent-primary)">[</span> Сводка системы <span style="color:var(--accent-primary)">]</span></h2>
-      <div class="telemetry-grid">
-        <article class="telemetry-card">
+    <main>
+        <section class="panel" id="telemetry">
+            <h2>// СИСТЕМНАЯ_ТЕЛЕМЕТРИЯ</h2>
+            <div style="display: flex; justify-content: space-around; flex-wrap: wrap;">
+                <article class="telemetry-card">
           <p class="metric-title">Стабильность траектории</p>
           <p class="metric-value" data-count="98">0%</p>
+          <svg viewBox="0 0 220 60" class="sparkline">
+            <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
+          </svg>
         </article>
         <article class="telemetry-card">
           <p class="metric-title">Точность PVO</p>
           <p class="metric-value" data-count="94">0%</p>
+          <svg viewBox="0 0 220 60" class="sparkline">
+            <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
+          </svg>
         </article>
         <article class="telemetry-card">
           <p class="metric-title">Захват цели</p>
           <p class="metric-value" data-count="112">0ms</p>
+          <svg viewBox="0 0 220 60" class="sparkline">
+            <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
+          </svg>
         </article>
       </div>
     </section>
 
-    <section class="panel reveal" id="stages">
-      <h2>Установка в три этапа</h2>
-      <div class="stage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
-        <article class="stage-card">
-          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">01. Выбор</h3>
-          <p>Определите ядро вашего клиента: Fabric для скорости или Forge для совместимости.</p>
-        </article>
-        <article class="stage-card">
-          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">02. Загрузка</h3>
-          <p>Скачайте JAR-файл или ZIP-тулкит напрямую с нашего узла.</p>
-        </article>
-        <article class="stage-card">
-          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">03. Инжекция</h3>
-          <p>Разместите файлы в <code>mods</code> или запустите автоматический скрипт запуска.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel reveal" id="about">
-      <h2>Что делает мод и зачем он нужен</h2>
-      <p>
-        Ballisticys моды добавляют клиентские инструменты для точной стрельбы и контроля целей: баллистический калькулятор,
-        мини-HUD, экран истории, PVO-интерфейс, захват/сброс цели и команды управления. Это снижает ошибки в расчётах и
-        ускоряет прицеливание в сценариях с артиллерией и автопушками.
-      </p>
-      <div class="chips">
-        <span>Баллистический расчёт</span>
-        <span>Мини HUD</span>
-        <span>PVO и трекинг целей</span>
-        <span>История расчётов</span>
-        <span>Client-side</span>
-      </div>
-    </section>
-
-    <section class="panel reveal" id="downloads">
-      <h2>Скачать файлы</h2>
-      <div class="filter-row">
-        <button class="filter active" data-filter="all">Все</button>
-        <button class="filter" data-filter="fabric">Fabric</button>
-        <button class="filter" data-filter="forge">Forge</button>
-        <button class="filter" data-filter="injector">Инжектор</button>
-      </div>
-
-      <div class="mod-grid">
-        <article class="mod-card" data-core="fabric">
-          <p class="tag fabric">Fabric</p>
-          <h3>Ballistics Fabric Port</h3>
-          <p>Порт клиентского Ballistics/PVO мода на Fabric. Подходит для быстрой установки через Fabric Loader.</p>
-          <ul>
-            <li>Minecraft: <strong>1.20.1</strong></li>
-            <li>Ядро: <strong>Fabric Loader >= 0.15.0</strong></li>
-            <li>API: <strong>Fabric API</strong></li>
-            <li>Версия мода: <strong>2.0pre4-fabric-port</strong></li>
-            <li>Java: <strong>17+</strong></li>
-          </ul>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download>Скачать Fabric jar</a>
-          </div>
-        </article>
-
-        <article class="mod-card" data-core="forge">
-          <p class="tag forge">Forge</p>
-          <h3>Blur Ballistics (Forge)</h3>
-          <p>Forge-сборка с баллистическим калькулятором и клиентскими элементами управления/индикации.</p>
-          <ul>
-            <li>Minecraft: <strong>1.20.1</strong></li>
-            <li>Ядро: <strong>Forge 47+</strong></li>
-            <li>Версия мода: <strong>1.0.0</strong></li>
-            <li>Java: <strong>17+</strong></li>
-          </ul>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download>Скачать Forge jar</a>
-          </div>
-        </article>
-
-        <article class="mod-card" data-core="injector">
-          <p class="tag injector">Injector</p>
-          <h3>Ballisticys Injector Toolkit</h3>
-          <p>
-            Автоинжектор для PolitCraft: копирует mod/agent в <code>libraries/custom</code>,
-            патчит <code>profileInfo.json</code> и добавляет аргументы запуска с <code>-javaagent</code>.
-          </p>
-          <ul>
-            <li>Цель: <strong>PolitCraft offline-mode профиль</strong></li>
-            <li>Agent: <strong>ballisticys-fabric-agent-1.0.0</strong></li>
-            <li>Внутри zip: <strong>PS1 + PY + payload</strong></li>
-            <li>Java: <strong>17+</strong></li>
-          </ul>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/ballisticys-injector-toolkit.zip" download>Скачать Injector ZIP</a>
-            <a class="btn ghost" href="downloads/ballisticys-fabric-agent-1.0.0.jar" download>Скачать Agent jar</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel reveal" id="guide">
-      <h2>Быстрый гайд</h2>
-      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip внутри, это нормально. Его не нужно распаковывать.</p>
+    <section class="panel" id="guide">
+      <h2>// БЫСТРЫЙ_ГАЙД</h2>
       <div class="guide-grid">
-        <article>
-          <h3>Fabric установка</h3>
-          <ol>
-            <li>Установи Fabric Loader для 1.20.1.</li>
-            <li>Положи jar в папку <code>mods</code>.</li>
-            <li>Убедись, что установлен Fabric API.</li>
-          </ol>
+        <article class="guide-card">
+          <h3>FABRIC</h3>
+          <p>1. Установи Fabric Loader 1.20.1.<br>2. Помести JAR в <code>/mods</code>.<br>3. Установи Fabric API.</p>
         </article>
-        <article>
-          <h3>Forge установка</h3>
-          <ol>
-            <li>Установи Forge 47+ для 1.20.1.</li>
-            <li>Положи Forge jar в папку <code>mods</code>.</li>
-            <li>Запусти клиент на Java 17.</li>
-          </ol>
+        <article class="guide-card">
+          <h3>FORGE</h3>
+          <p>1. Установи Forge 47+.<br>2. Помести JAR в <code>/mods</code>.<br>3. Запусти через Java 17+.</p>
         </article>
-        <article>
-          <h3>Injector запуск</h3>
-          <ol>
-            <li>Скачай и распакуй toolkit zip.</li>
-            <li>Запусти <code>Start-Ballisticys.ps1</code>.</li>
-            <li>Проверь <code>inject-launch.log</code> после запуска.</li>
-          </ol>
+        <article class="guide-card">
+          <h3>INJECTOR</h3>
+          <p>1. Распакуй ZIP.<br>2. Запусти <code>Start-Ballisticys.ps1</code>.<br>3. Проверь логи запуска.</p>
         </article>
       </div>
     </section>
-  </main>
 
-  <footer class="footer reveal">
-    <p>Ballisticys Project • Persistent Web Build • <a href="admin.html" style="color: inherit; text-decoration: none; opacity: 0.3;">Admin</a></p>
-  </footer>
+        <section class="panel" id="downloads">
+            <h2>// ДОСТУПНЫЕ_МОДУЛИ</h2>
+            <div class="mod-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <article class="mod-card">
+                    <h3>FABRIC_PORT.JAR</h3>
+                    <p>Клиентский модуль для ядер Fabric 1.20.1</p>
+                    <a href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" class="btn" download>DOWNLOAD_CORE</a>
+                </article>
+                <article class="mod-card">
+                    <h3>FORGE_CORE.JAR</h3>
+                    <p>Стабильная сборка для Forge 47.x</p>
+                    <a href="downloads/blur-mod-1.0.0-forge.jar" class="btn" download>DOWNLOAD_CORE</a>
+                </article>
+            </div>
+        </section>
+    </main>
 
-  <script src="script.js"></script>
+    <footer style="text-align: center; padding: 40px; opacity: 0.5; font-size: 0.8rem;">
+        &copy; 2026 BALLISTICYS_PROJECT // ENCRYPTED_CONNECTION
+    </footer>
+
+    <script src="script.js"></script>
+    <style>
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    </style>
 </body>
 </html>

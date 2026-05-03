@@ -1,93 +1,98 @@
-// Фильтрация карточек
-const filterButtons = document.querySelectorAll('.filter');
-const cards = document.querySelectorAll('.mod-card');
-
-filterButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const filter = btn.dataset.filter;
-
-    filterButtons.forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    cards.forEach((card) => {
-      const core = card.dataset.core;
-      const visible = filter === 'all' || filter === core;
-      
-      if (visible) {
-        card.classList.remove('hidden');
-        setTimeout(() => card.style.opacity = '1', 10);
-      } else {
-        card.style.opacity = '0';
-        setTimeout(() => card.classList.add('hidden'), 300);
-      }
-    });
-  });
-});
-
-// Анимация появления при скролле
-const revealNodes = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('show');
-        if (entry.target.classList.contains('telemetry')) {
-          animateCounters();
-        }
-      }
-    });
-  },
-  { threshold: 0.1 }
-);
-
-revealNodes.forEach((node) => revealObserver.observe(node));
-
-// Анимация счетчиков
-function animateCounters() {
-  const counters = document.querySelectorAll('.metric-value[data-count]');
-  counters.forEach((counter) => {
-    if (counter.classList.contains('animated')) return;
-    counter.classList.add('animated');
-
-    const target = Number(counter.dataset.count || 0);
-    const suffix = counter.textContent.includes('ms') ? 'ms' : '%';
-    const duration = 2000;
-    const start = performance.now();
-
-    const step = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const easeProgress = 1 - Math.pow(1 - progress, 4); // easeOutQuart
-      const value = Math.round(target * easeProgress);
-      counter.textContent = `${value}${suffix}`;
-      if (progress < 1) requestAnimationFrame(step);
+document.addEventListener('DOMContentLoaded', () => {
+    // Эффект расшифровки текста
+    const scrambleText = (el) => {
+        const originalText = el.innerText;
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+';
+        let iteration = 0;
+        
+        const interval = setInterval(() => {
+            el.innerText = originalText.split('')
+                .map((char, index) => {
+                    if(index < iteration) return originalText[index];
+                    return chars[Math.floor(Math.random() * chars.length)];
+                })
+                .join('');
+            
+            if(iteration >= originalText.length) clearInterval(interval);
+            iteration += 1 / 3;
+        }, 30);
     };
 
-    requestAnimationFrame(step);
-  });
-}
+    const title = document.querySelector('h1');
+    if(title) scrambleText(title);
 
-// Эффект параллакса для фона
-document.addEventListener('mousemove', (e) => {
-  const grid = document.querySelector('.background-grid');
-  const x = e.clientX / window.innerWidth;
-  const y = e.clientY / window.innerHeight;
-  grid.style.transform = `translate(${x * 10}px, ${y * 10}px)`;
+    // Линия сканирования
+    const scanner = document.createElement('div');
+    scanner.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:2px; background:rgba(0,242,255,0.2); box-shadow:0 0 10px rgba(0,242,255,0.5); z-index:101; pointer-events:none;';
+    document.body.appendChild(scanner);
+
+    let scannerPos = 0;
+    const animateScanner = () => {
+        scannerPos += 2;
+        if(scannerPos > window.innerHeight) scannerPos = 0;
+        scanner.style.top = scannerPos + 'px';
+        requestAnimationFrame(animateScanner);
+    };
+    animateScanner();
+
+    // Генератор логов
+    const logContainer = document.createElement('div');
+    logContainer.className = 'log-container';
+    document.body.appendChild(logContainer);
+
+    const logMessages = [
+        '> INITIALIZING BALLISTIC_CORE...',
+        '> SCANNING FOR TARGETS...',
+        '> CALC_TRAJECTORY: SUCCESS',
+        '> INJECTOR_STATUS: READY',
+        '> CONNECTION: ENCRYPTED',
+        '> PARSING_MAP_DATA...',
+        '> WIND_COMPENSATION: ACTIVE'
+    ];
+
+    setInterval(() => {
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerText = logMessages[Math.floor(Math.random() * logMessages.length)];
+        logContainer.appendChild(entry);
+        if(logContainer.childNodes.length > 8) logContainer.removeChild(logContainer.firstChild);
+    }, 2000);
+
+    // Режим опасности при наведении на кнопки
+    const btns = document.querySelectorAll('.btn');
+    btns.forEach(b => {
+        b.addEventListener('mouseenter', () => document.body.classList.add('danger-mode'));
+        b.addEventListener('mouseleave', () => document.body.classList.remove('danger-mode'));
+    });
+
+    // Слежение за мышью (Радар)
+    const radar = document.createElement('div');
+    radar.style.cssText = 'position:fixed; width:100px; height:100px; border:1px solid rgba(0,242,255,0.3); border-radius:50%; pointer-events:none; z-index:999; transform:translate(-50%, -50%); transition: 0.1s ease-out;';
+    radar.innerHTML = '<div style="position:absolute; top:50%; left:-10%; width:120%; height:1px; background:rgba(0,242,255,0.2)"></div><div style="position:absolute; left:50%; top:-10%; height:120%; width:1px; background:rgba(0,242,255,0.2)"></div>';
+    document.body.appendChild(radar);
+
+    document.addEventListener('mousemove', (e) => {
+        radar.style.left = e.clientX + 'px';
+        radar.style.top = e.clientY + 'px';
+    });
+
+    // Оживляем телеметрию (флуктуации)
+    const metrics = document.querySelectorAll('.metric-value');
+    setInterval(() => {
+        metrics.forEach(m => {
+            const base = parseInt(m.getAttribute('data-count'));
+            const random = Math.floor(Math.random() * 3) - 1;
+            const suffix = m.innerText.includes('ms') ? 'ms' : '%';
+            m.innerText = (base + random) + suffix;
+        });
+    }, 1500);
+
+    // Фильтры с глитч-эффектом
+    const filterButtons = document.querySelectorAll('.filter');
+    filterButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.body.style.filter = 'invert(1) hue-rotate(90deg)';
+            setTimeout(() => document.body.style.filter = '', 50);
+        });
+    });
 });
-
-// Добавляем эффект "печати" для заголовка
-function typeWriter(element) {
-  const text = element.textContent;
-  element.textContent = '';
-  let i = 0;
-  function type() {
-    if (i < text.length) {
-      element.textContent += text.charAt(i);
-      i++;
-      setTimeout(type, 50);
-    }
-  }
-  type();
-}
-
-const mainTitle = document.querySelector('.hero-copy h1');
-if (mainTitle) typeWriter(mainTitle);
