@@ -5,122 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Ballisticys Mods</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="visor-corner top-left"></div>
-  <div class="visor-corner top-right"></div>
-  <div class="visor-corner bottom-left"></div>
-  <div class="visor-corner bottom-right"></div>
-
-  <div class="crt-overlay"></div>
   <div class="background-grid"></div>
-  <div class="background-grid-secondary"></div>
 
   <header class="hero reveal">
     <div class="hero-copy">
-      <p class="top-note" style="color:var(--accent-primary); font-size:0.8rem; margin-bottom:10px;">[ SYSTEM_STATUS: OPERATIONAL ]</p>
-      <h1>Ballisticys Fire-Control Hub</h1>
-      <p class="hero-sub">Интерфейс управления баллистикой. Телеметрия, расчеты траекторий и модули захвата целей для артиллерии Minecraft.</p>
+      <h1>Ballisticys Hub</h1>
+      <p style="color:var(--text-dim); margin-bottom:2rem;">Баллистические калькуляторы и инструменты для Minecraft 1.20.1</p>
       <div class="hero-actions">
-        <a class="btn primary" href="#downloads">Перейти к загрузкам</a>
-        <a class="btn ghost" href="#about">О системе</a>
+        <a class="btn primary" href="#downloads">Скачать моды</a>
       </div>
     </div>
   </header>
 
   <main>
-    <section class="panel reveal telemetry" id="telemetry">
-      <h2><span style="color:var(--accent-primary)">[</span> Сводка системы <span style="color:var(--accent-primary)">]</span></h2>
+    <section class="panel reveal" id="telemetry">
+      <h2 style="font-family:var(--font-header); margin-bottom:2rem;">Сводка системы</h2>
       <div class="telemetry-grid">
         <article class="telemetry-card">
-          <p class="metric-title">Стабильность траектории</p>
-          <p class="metric-value" data-count="98">0%</p>
+          <p style="font-size:0.8rem; color:var(--text-dim);">СТАБИЛЬНОСТЬ</p>
+          <p style="font-size:2.5rem; font-weight:bold; color:var(--accent-primary);">98%</p>
           <svg viewBox="0 0 220 60" class="sparkline">
             <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
           </svg>
         </article>
         <article class="telemetry-card">
-          <p class="metric-title">Точность PVO</p>
-          <p class="metric-value" data-count="94">0%</p>
+          <p style="font-size:0.8rem; color:var(--text-dim);">ТОЧНОСТЬ PVO</p>
+          <p style="font-size:2.5rem; font-weight:bold; color:var(--accent-primary);">94%</p>
           <svg viewBox="0 0 220 60" class="sparkline">
             <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
-          </svg>
-        </article>
-        <article class="telemetry-card">
-          <p class="metric-title">Захват цели</p>
-          <p class="metric-value" data-count="112">0ms</p>
-          <svg viewBox="0 0 220 60" class="sparkline">
-            <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
           </svg>
         </article>
       </div>
     </section>
 
     <section class="panel reveal" id="downloads">
-      <h2>Скачать файлы</h2>
-      <div class="filter-row">
-        <button class="filter active" data-filter="all">Все</button>
-        <button class="filter" data-filter="fabric">Fabric</button>
-        <button class="filter" data-filter="forge">Forge</button>
-        <button class="filter" data-filter="injector">Инжектор</button>
-      </div>
-
+      <h2 style="font-family:var(--font-header); margin-bottom:2rem;">Загрузки</h2>
       <div class="mod-grid">
-        <article class="mod-card" data-core="fabric">
-          <p class="tag fabric">Fabric</p>
+        <article class="mod-card">
+          <span class="tag fabric">Fabric</span>
           <h3>Ballistics Fabric Port</h3>
-          <p>Порт клиентского Ballistics/PVO мода на Fabric.</p>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download>Скачать Fabric jar</a>
-          </div>
+          <p style="color:var(--text-dim); font-size:0.9rem; margin:1rem 0;">Версия 2.0pre4 для Fabric 1.20.1</p>
+          <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download style="width:100%; text-align:center;">Скачать JAR</a>
         </article>
-
-        <article class="mod-card" data-core="forge">
-          <p class="tag forge">Forge</p>
+        <article class="mod-card">
+          <span class="tag forge">Forge</span>
           <h3>Blur Ballistics (Forge)</h3>
-          <p>Forge-сборка с баллистическим калькулятором.</p>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download>Скачать Forge jar</a>
-          </div>
-        </article>
-
-        <article class="mod-card" data-core="injector">
-          <p class="tag injector">Injector</p>
-          <h3>Ballisticys Injector</h3>
-          <p>Автоинжектор для PolitCraft.</p>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/ballisticys-injector-toolkit.zip" download>Скачать ZIP</a>
-            <a class="btn ghost" href="downloads/ballisticys-fabric-agent-1.0.0.jar" download>Скачать Agent</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="panel reveal" id="guide">
-      <h2>Этапы установки</h2>
-      <div class="stage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
-        <article class="stage-card">
-          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">01. Выбор</h3>
-          <p>Определите ядро вашего клиента: Fabric или Forge.</p>
-        </article>
-        <article class="stage-card">
-          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">02. Загрузка</h3>
-          <p>Скачайте JAR-файл напрямую с нашего узла.</p>
-        </article>
-        <article class="stage-card">
-          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">03. Инжекция</h3>
-          <p>Разместите файлы в <code>mods</code> или запустите скрипт.</p>
+          <p style="color:var(--text-dim); font-size:0.9rem; margin:1rem 0;">Версия 1.0.0 для Forge 1.20.1</p>
+          <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download style="width:100%; text-align:center;">Скачать JAR</a>
         </article>
       </div>
     </section>
   </main>
-
-  <footer class="footer reveal" style="text-align: center; padding: 50px; opacity: 0.5;">
-    <p>Ballisticys Project • 2026 • Encrypted Connection</p>
-  </footer>
 
   <script src="script.js"></script>
 </body>
