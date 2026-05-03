@@ -1,145 +1,148 @@
 :root {
-  --bg: #040508;
-  --accent: #3b82f6;
-  --accent-glow: rgba(59, 130, 246, 0.5);
-  --panel-bg: rgba(10, 12, 18, 0.8);
-  --border: rgba(255, 255, 255, 0.1);
-  --text: #ffffff;
-  --text-dim: #94a3b8;
+  --cyan: #00f2ff;
+  --bg: #000;
+  --text: #fff;
+  --font: 'JetBrains Mono', monospace;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font);
   margin: 0;
   overflow-x: hidden;
+  /* Хроматическая аберрация на весь сайт */
+  text-shadow: 2px 0 1px rgba(255,0,0,0.5), -2px 0 1px rgba(0,0,255,0.5);
 }
 
-/* Контейнер для геометрического фона */
+/* Фоновый холст для 3D геометрии */
 #canvas-bg {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   z-index: -1;
-  opacity: 0.4;
 }
 
-.hero {
+/* Эффект шума и помех */
+.noise-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Static_Noise_v1.png');
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.main-wrapper {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
   height: 100vh;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
 }
 
 h1 {
-  font-size: clamp(4rem, 15vw, 8rem);
-  font-weight: 800;
-  letter-spacing: -5px;
-  line-height: 0.9;
+  font-size: clamp(4rem, 15vw, 10rem);
+  font-weight: 900;
   margin: 0;
-  background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.2) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  line-height: 0.8;
+  letter-spacing: -5px;
+  animation: title-glitch 3s infinite;
 }
 
-/* Асимметричная сетка панелей */
-.main-layout {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 30px;
-  max-width: 1400px;
-  margin: 0 auto 100px;
-  padding: 0 40px;
+@keyframes title-glitch {
+  0% { transform: skew(0deg); }
+  1% { transform: skew(10deg); filter: blur(2px); }
+  2% { transform: skew(0deg); filter: blur(0); }
 }
 
 .panel {
-  background: var(--panel-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.1);
   padding: 40px;
-  border-radius: 2px; /* Острые технологичные углы */
+  margin-bottom: 30px;
+  backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
 }
 
 .panel::before {
-  content: "";
+  content: "DATA_STREAM";
   position: absolute;
-  top: 0; left: 0; width: 100%; height: 2px;
-  background: linear-gradient(90deg, var(--accent), transparent);
+  top: 5px; right: 10px;
+  font-size: 0.6rem;
+  opacity: 0.3;
 }
 
-.panel-title {
-  font-size: 0.7rem;
-  letter-spacing: 5px;
-  color: var(--accent);
-  margin-bottom: 30px;
-  display: block;
-}
-
-/* Сводка системы (3 колонки) */
 .telemetry-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
-.telemetry-card {
-  border-left: 1px solid var(--border);
-  padding-left: 20px;
-}
-
-.metric-val { font-size: 2rem; font-weight: bold; margin: 10px 0; }
-
-/* Моды (2 колонки) */
-.mod-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 25px;
+.value {
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--cyan);
+  display: block;
 }
 
 .mod-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid var(--border);
+  border: 1px solid rgba(255,255,255,0.1);
   padding: 30px;
-  transition: 0.4s;
+  transition: 0.2s;
+  background: rgba(0,0,0,0.5);
 }
 
 .mod-card:hover {
-  background: rgba(59, 130, 246, 0.05);
-  border-color: var(--accent);
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: #000;
+  transform: scale(1.05) rotate(1deg);
 }
 
 .btn {
-  display: inline-flex;
-  padding: 15px 30px;
-  border: 1px solid var(--accent);
-  color: #fff;
+  display: inline-block;
+  padding: 20px 50px;
+  background: #fff;
+  color: #000;
   text-decoration: none;
-  font-size: 0.8rem;
-  font-weight: bold;
-  transition: 0.3s;
-  background: transparent;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.2rem;
+  transition: 0.2s;
+  border: none;
 }
 
 .btn:hover {
-  background: var(--accent);
-  box-shadow: 0 0 30px var(--accent-glow);
+  background: var(--cyan);
+  box-shadow: 0 0 50px var(--cyan);
+  letter-spacing: 5px;
 }
 
-.btn.ghost { border-color: rgba(255,255,255,0.2); }
+/* Blueprint HUD элементы */
+.hud-line {
+  position: fixed;
+  background: var(--cyan);
+  opacity: 0.2;
+  z-index: 99;
+}
+.v-line { width: 1px; height: 100%; top: 0; }
+.h-line { height: 1px; width: 100%; left: 0; }
 
-/* Теги и списки */
-.tag-list { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-.chip { font-size: 0.6rem; padding: 4px 10px; border: 1px solid var(--border); color: var(--text-dim); }
+.reveal {
+  opacity: 0;
+  transform: scale(0.8) rotate(-5deg);
+  transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-ul { list-style: none; padding: 0; font-size: 0.8rem; color: var(--text-dim); }
-li { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 8px; }
-li strong { color: #fff; }
-
-.reveal { opacity: 0; transform: translateY(50px); transition: 1.5s cubic-bezier(0.19, 1, 0.22, 1); }
-.reveal.show { opacity: 1; transform: translateY(0); }
-
-@media (max-width: 1100px) {
-  .main-layout { grid-template-columns: 1fr; }
+.reveal.show {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
 }

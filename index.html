@@ -3,117 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BALLISTICYS // ENGINE</title>
+    <title>BALLISTICYS // EDIT_V3</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="noise-overlay"></div>
     <canvas id="canvas-bg"></canvas>
 
-    <header class="hero reveal">
-        <div class="hero-inner">
-            <span style="font-size:0.7rem; letter-spacing:10px; color:var(--accent);">INIT_SYSTEM_V2</span>
+    <!-- HUD Lines -->
+    <div class="hud-line v-line" style="left: 5%;"></div>
+    <div class="hud-line v-line" style="right: 5%;"></div>
+    <div class="hud-line h-line" style="top: 5%;"></div>
+    <div class="hud-line h-line" style="bottom: 5%;"></div>
+
+    <div class="main-wrapper">
+        <header class="reveal">
+            <span style="letter-spacing: 15px; font-size: 0.8rem; opacity: 0.5;">[ ACCESSING_SERVER ]</span>
             <h1>BALLISTICYS</h1>
-            <div style="margin-top: 40px; display: flex; gap: 20px; justify-content: center;">
-                <a href="#downloads" class="btn">ACCESS_MODULES</a>
-                <a href="#about" class="btn ghost">DOCUMENTATION</a>
+            <div style="margin-top: 50px;">
+                <a href="#downloads" class="btn">GET_FILES</a>
             </div>
-        </div>
-    </header>
+        </header>
 
-    <main class="main-layout">
-        <!-- Левая колонка (основная) -->
-        <div class="left-col">
-            <section class="panel reveal" id="telemetry">
-                <span class="panel-title">LIVE_TELEMETRY</span>
-                <div class="telemetry-grid">
-                    <div class="telemetry-card">
-                        <span style="font-size:0.6rem; color:var(--text-dim);">STABILITY</span>
-                        <div class="metric-val" data-count="98">98%</div>
-                    </div>
-                    <div class="telemetry-card">
-                        <span style="font-size:0.6rem; color:var(--text-dim);">ACCURACY</span>
-                        <div class="metric-val" data-count="94">94%</div>
-                    </div>
-                    <div class="telemetry-card">
-                        <span style="font-size:0.6rem; color:var(--text-dim);">LOCK_TIME</span>
-                        <div class="metric-val" data-count="112">112ms</div>
-                    </div>
+        <section class="panel reveal" id="telemetry">
+            <h2 style="font-size: 1rem; letter-spacing: 5px;">// TELEMETRY</h2>
+            <div class="telemetry-grid">
+                <div class="telemetry-item">
+                    <span class="value">98</span>
+                    <span style="font-size: 0.7rem;">STABILITY_CORE</span>
                 </div>
-            </section>
+                <div class="telemetry-item">
+                    <span class="value">112</span>
+                    <span style="font-size: 0.7rem;">LOCK_SPEED_MS</span>
+                </div>
+                <div class="telemetry-item">
+                    <span class="value">94</span>
+                    <span style="font-size: 0.7rem;">ACCURACY_PVO</span>
+                </div>
+            </div>
+        </section>
 
-            <section class="panel reveal" id="downloads" style="margin-top:30px;">
-                <span class="panel-title">CORE_DISTRIBUTION</span>
-                <div class="mod-grid">
-                    <div class="mod-card">
-                        <span style="color:var(--accent); font-size:0.7rem; font-weight:bold;">[ FABRIC ]</span>
-                        <h3 style="margin:10px 0;">Ballistics_Core</h3>
-                        <ul>
-                            <li>MC_VERSION: <strong>1.20.1</strong></li>
-                            <li>LOADER: <strong>Fabric</strong></li>
-                            <li>BUILD: <strong>2.0pre4</strong></li>
-                        </ul>
-                        <a href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" class="btn" download style="width:100%; text-align:center;">DOWNLOAD_JAR</a>
-                    </div>
-                    <div class="mod-card">
-                        <span style="color:var(--accent); font-size:0.7rem; font-weight:bold;">[ FORGE ]</span>
-                        <h3 style="margin:10px 0;">Blur_Engine</h3>
-                        <ul>
-                            <li>MC_VERSION: <strong>1.20.1</strong></li>
-                            <li>LOADER: <strong>Forge 47+</strong></li>
-                            <li>BUILD: <strong>1.0.0</strong></li>
-                        </ul>
-                        <a href="downloads/blur-mod-1.0.0-forge.jar" class="btn" download style="width:100%; text-align:center;">DOWNLOAD_JAR</a>
-                    </div>
+        <section class="panel reveal" id="downloads">
+            <h2 style="font-size: 1rem; letter-spacing: 5px;">// MODULES</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="mod-card">
+                    <h3>FABRIC_2.0</h3>
+                    <p>MAIN_CLIENT_MODULE</p>
+                    <a href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download style="color:inherit;">DOWNLOAD</a>
                 </div>
-            </section>
-        </div>
+                <div class="mod-card">
+                    <h3>FORGE_1.0</h3>
+                    <p>ENGINE_STABLE_BUILD</p>
+                    <a href="downloads/blur-mod-1.0.0-forge.jar" download style="color:inherit;">DOWNLOAD</a>
+                </div>
+            </div>
+        </section>
 
-        <!-- Правая колонка (детали) -->
-        <div class="right-col">
-            <section class="panel reveal" id="about">
-                <span class="panel-title">SYSTEM_OVERVIEW</span>
-                <p style="font-size:0.85rem; color:var(--text-dim); line-height:1.8;">
-                    Ballisticys Engine — это комплексное решение для управления артиллерийским огнем в Minecraft. 
-                    Включает баллистические калькуляторы, системы захвата целей и HUD телеметрии.
-                </p>
-                <div class="tag-list">
-                    <span class="chip">Ballistics</span>
-                    <span class="chip">HUD_Telemetry</span>
-                    <span class="chip">Target_Lock</span>
-                    <span class="chip">Client_Side</span>
-                </div>
-            </section>
+        <section class="panel reveal" style="text-align: center;">
+            <h2 style="font-size: 1rem; letter-spacing: 5px;">// INSTALLATION</h2>
+            <p style="font-size: 1.5rem; font-weight: 900;">1. CHOOSE_CORE <br> 2. INJECT_MODS <br> 3. RUN_SYSTEM</p>
+        </section>
 
-            <section class="panel reveal" id="guide" style="margin-top:30px;">
-                <span class="panel-title">INSTALL_PROCEDURE</span>
-                <div style="font-size:0.8rem;">
-                    <p style="color:var(--accent);">01. SELECTION</p>
-                    <p style="margin-bottom:15px;">Выберите ядро клиента (Fabric/Forge).</p>
-                    
-                    <p style="color:var(--accent);">02. INJECTION</p>
-                    <p style="margin-bottom:15px;">Загрузите JAR в директорию /mods.</p>
-                    
-                    <p style="color:var(--accent);">03. EXECUTION</p>
-                    <p>Запустите клиент. Проверьте HUD в игре.</p>
-                </div>
-            </section>
-            
-            <section class="panel reveal" id="injector" style="margin-top:30px;">
-                <span class="panel-title">INJECTOR_TOOLKIT</span>
-                <p style="font-size:0.8rem; margin-bottom:20px;">Автоматический инжектор для PolitCraft.</p>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <a href="downloads/ballisticys-injector-toolkit.zip" class="btn" download style="text-align:center;">GET_TOOLKIT_ZIP</a>
-                    <a href="downloads/ballisticys-fabric-agent-1.0.0.jar" class="btn ghost" download style="text-align:center;">GET_AGENT_JAR</a>
-                </div>
-            </section>
-        </div>
-    </main>
-
-    <footer style="padding: 60px; text-align: center; border-top: 1px solid var(--border); font-size: 0.6rem; color: var(--text-dim);">
-        BALLISTICYS_PROJECT // 2026 // END_OF_TRANSMISSION
-    </footer>
+        <footer style="padding: 100px; text-align: center; font-size: 0.7rem; letter-spacing: 5px; opacity: 0.3;">
+            BALLISTICYS // END_OF_TRANSMISSION // 2026
+        </footer>
+    </div>
 
     <script src="script.js"></script>
 </body>
