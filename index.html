@@ -1,66 +1,65 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ballisticys Mods</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ballisticys Mods | Fire-Control Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Умные пути для GitHub Pages -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="background-grid"></div>
+    <div class="background-grid"></div>
 
-  <header class="hero reveal">
-    <div class="hero-copy">
-      <h1>Ballisticys Hub</h1>
-      <p style="color:var(--text-dim); margin-bottom:2rem;">Баллистические калькуляторы и инструменты для Minecraft 1.20.1</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="#downloads">Скачать моды</a>
-      </div>
-    </div>
-  </header>
+    <header class="hero reveal">
+        <div class="hero-content">
+            <p class="system-status">[ CONNECTION_ESTABLISHED ]</p>
+            <h1>Ballisticys Hub</h1>
+            <p class="hero-tagline">Продвинутые системы управления огнем и баллистические модули для Minecraft 1.20.1</p>
+            <div class="hero-btns">
+                <a href="#downloads" class="btn primary">ПОЛУЧИТЬ МОДЫ</a>
+                <a href="#telemetry" class="btn ghost">ТЕЛЕМЕТРИЯ</a>
+            </div>
+        </div>
+    </header>
 
-  <main>
-    <section class="panel reveal" id="telemetry">
-      <h2 style="font-family:var(--font-header); margin-bottom:2rem;">Сводка системы</h2>
-      <div class="telemetry-grid">
-        <article class="telemetry-card">
-          <p style="font-size:0.8rem; color:var(--text-dim);">СТАБИЛЬНОСТЬ</p>
-          <p style="font-size:2.5rem; font-weight:bold; color:var(--accent-primary);">98%</p>
-          <svg viewBox="0 0 220 60" class="sparkline">
-            <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
-          </svg>
-        </article>
-        <article class="telemetry-card">
-          <p style="font-size:0.8rem; color:var(--text-dim);">ТОЧНОСТЬ PVO</p>
-          <p style="font-size:2.5rem; font-weight:bold; color:var(--accent-primary);">94%</p>
-          <svg viewBox="0 0 220 60" class="sparkline">
-            <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
-          </svg>
-        </article>
-      </div>
-    </section>
+    <main>
+        <section class="panel reveal" id="telemetry">
+            <h2 class="panel-title">// СИСТЕМНАЯ_ТЕЛЕМЕТРИЯ</h2>
+            <div class="telemetry-grid">
+                <div class="telemetry-card">
+                    <span class="label">TRAJECTORY_STABILITY</span>
+                    <span class="value" data-count="98">98%</span>
+                    <svg viewBox="0 0 220 60" class="sparkline"><polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline></svg>
+                </div>
+                <div class="telemetry-card">
+                    <span class="label">PVO_ACCURACY</span>
+                    <span class="value" data-count="94">94%</span>
+                    <svg viewBox="0 0 220 60" class="sparkline"><polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline></svg>
+                </div>
+            </div>
+        </section>
 
-    <section class="panel reveal" id="downloads">
-      <h2 style="font-family:var(--font-header); margin-bottom:2rem;">Загрузки</h2>
-      <div class="mod-grid">
-        <article class="mod-card">
-          <span class="tag fabric">Fabric</span>
-          <h3>Ballistics Fabric Port</h3>
-          <p style="color:var(--text-dim); font-size:0.9rem; margin:1rem 0;">Версия 2.0pre4 для Fabric 1.20.1</p>
-          <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download style="width:100%; text-align:center;">Скачать JAR</a>
-        </article>
-        <article class="mod-card">
-          <span class="tag forge">Forge</span>
-          <h3>Blur Ballistics (Forge)</h3>
-          <p style="color:var(--text-dim); font-size:0.9rem; margin:1rem 0;">Версия 1.0.0 для Forge 1.20.1</p>
-          <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download style="width:100%; text-align:center;">Скачать JAR</a>
-        </article>
-      </div>
-    </section>
-  </main>
+        <section class="panel reveal" id="downloads">
+            <h2 class="panel-title">// ДОСТУПНЫЕ_МОДУЛИ</h2>
+            <div class="mod-grid">
+                <div class="mod-card">
+                    <div class="core-tag fabric">FABRIC</div>
+                    <h3>Ballistics Core</h3>
+                    <p>Основной модуль баллистики для Fabric 1.20.1</p>
+                    <a href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" class="btn primary" download>СКАЧАТЬ JAR</a>
+                </div>
+                <div class="mod-card">
+                    <div class="core-tag forge">FORGE</div>
+                    <h3>Blur Ballistics</h3>
+                    <p>Стабильная Forge-версия калькулятора</p>
+                    <a href="downloads/blur-mod-1.0.0-forge.jar" class="btn primary" download>СКАЧАТЬ JAR</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
