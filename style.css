@@ -1,10 +1,11 @@
 :root {
-  --bg: #030508;
-  --panel: rgba(10, 15, 25, 0.9);
-  --cyan: #00f2ff;
-  --purple: #7000ff;
-  --text: #e6edf3;
-  --dim: #8b949e;
+  --bg: #0a0a0b;
+  --panel: #141416;
+  --accent: #ffb400; /* Тактический золотой/оранжевый */
+  --accent-dim: rgba(255, 180, 0, 0.1);
+  --text: #e0e0e0;
+  --dim: #666666;
+  --danger: #ff3333;
 }
 
 body {
@@ -13,121 +14,112 @@ body {
   font-family: 'JetBrains Mono', monospace;
   margin: 0;
   line-height: 1.6;
-  scroll-behavior: smooth;
 }
 
 .background-grid {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
-  background: 
-    linear-gradient(rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 242, 255, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 50% 50%, rgba(112, 0, 255, 0.1) 0%, var(--bg) 80%);
-  background-size: 40px 40px, 40px 40px, 100% 100%;
+  background-image: 
+    linear-gradient(rgba(255, 180, 0, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 180, 0, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
   z-index: -1;
-}
-
-.hero {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
 }
 
 h1 {
   font-family: 'Russo One', sans-serif;
-  font-size: clamp(3rem, 10vw, 6rem);
-  margin: 0;
-  background: linear-gradient(#fff, var(--cyan));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.4));
+  font-size: clamp(3rem, 12vw, 7rem);
+  text-transform: uppercase;
+  color: #fff;
   letter-spacing: -2px;
+  margin: 0;
+  filter: drop-shadow(0 0 10px rgba(255, 180, 0, 0.2));
+}
+
+.hero {
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--accent-dim);
 }
 
 .panel {
   background: var(--panel);
-  border: 1px solid rgba(0, 242, 255, 0.2);
+  border: 1px solid #222;
+  border-top: 3px solid var(--accent);
   max-width: 1100px;
   margin: 40px auto;
-  padding: 50px 40px;
-  border-radius: 4px;
-  backdrop-filter: blur(10px);
+  padding: 50px;
 }
 
 .panel-title {
-  color: var(--cyan);
-  font-size: 1.2rem;
-  margin-bottom: 35px;
-  border-left: 4px solid var(--cyan);
-  padding-left: 15px;
+  color: var(--accent);
   font-family: 'Russo One', sans-serif;
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  text-transform: uppercase;
 }
 
-.telemetry-grid, .mod-grid, .guide-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 25px;
-}
-
-.telemetry-card, .mod-card, .guide-item {
-  background: rgba(255, 255, 255, 0.03);
+.telemetry-card {
+  background: #0d0d0f;
+  border: 1px solid #222;
   padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: 0.3s;
 }
 
-.mod-card:hover {
-  border-color: var(--cyan);
-  background: rgba(0, 242, 255, 0.05);
-  transform: translateY(-5px);
+.value {
+  display: block;
+  font-size: 3.5rem;
+  font-weight: bold;
+  color: var(--accent);
+  margin: 10px 0;
 }
 
-.value { display: block; font-size: 3rem; font-weight: bold; color: #00ff41; margin: 10px 0; }
-.label { font-size: 0.75rem; color: var(--dim); letter-spacing: 1px; }
-
-.sparkline { width: 100%; height: 50px; stroke: var(--cyan); stroke-width: 2; fill: none; }
+.sparkline {
+  width: 100%; height: 50px; stroke: var(--accent); stroke-width: 2; fill: none; opacity: 0.5;
+}
 
 .btn {
   display: inline-block;
-  padding: 15px 35px;
+  padding: 18px 45px;
   text-decoration: none;
   font-weight: bold;
   text-transform: uppercase;
-  transition: 0.3s;
-  cursor: pointer;
-  border-radius: 2px;
-  font-size: 0.9rem;
-  text-align: center;
+  transition: 0.2s;
+  border-radius: 0; /* Острые углы для строгости */
 }
 
-.btn.primary { background: var(--cyan); color: #000; border: none; }
-.btn.primary:hover { box-shadow: 0 0 25px var(--cyan); }
+.btn.primary { background: var(--accent); color: #000; }
+.btn.primary:hover { background: #fff; transform: scale(1.05); }
 
-.btn.ghost { border: 1px solid var(--cyan); color: var(--cyan); }
-.btn.ghost:hover { background: rgba(0, 242, 255, 0.1); }
+.btn.ghost { border: 1px solid var(--accent); color: var(--accent); }
+.btn.ghost:hover { background: var(--accent-dim); }
 
-.filter-row { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
-.filter-btn {
-  background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--dim);
-  padding: 8px 20px; cursor: pointer; border-radius: 20px; transition: 0.3s;
+.mod-card {
+  background: #1a1a1c;
+  border: 1px solid #282828;
+  padding: 30px;
+  position: relative;
 }
-.filter-btn.active, .filter-btn:hover { border-color: var(--cyan); color: var(--cyan); }
 
-.tag-chip { background: rgba(0, 242, 255, 0.1); color: var(--cyan); padding: 5px 15px; border-radius: 20px; font-size: 0.8rem; border: 1px solid rgba(0, 242, 255, 0.2); }
+.mod-card:hover {
+  border-color: var(--accent);
+}
 
-.core-tag { font-size: 0.7rem; padding: 3px 10px; border-radius: 2px; display: inline-block; margin-bottom: 15px; font-weight: bold; }
-.core-tag.fabric { background: #f0ad4e; color: #000; }
-.core-tag.forge { background: #3273dc; color: #fff; }
-.core-tag.injector { background: var(--purple); color: #fff; }
+.core-tag {
+  font-size: 0.7rem; padding: 4px 12px; font-weight: bold; margin-bottom: 20px; display: inline-block;
+}
+.core-tag.fabric { background: #444; color: var(--accent); }
+.core-tag.forge { background: #444; color: #fff; }
+.core-tag.injector { background: var(--danger); color: #fff; }
 
-.mod-card ul { list-style: none; padding: 0; margin: 20px 0; font-size: 0.9rem; color: var(--dim); }
-.mod-card li { margin-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
+.tag-chip {
+  border: 1px solid #333;
+  padding: 6px 15px;
+  font-size: 0.8rem;
+  color: var(--dim);
+}
 
-.step-num { font-size: 2rem; font-weight: bold; color: var(--cyan); opacity: 0.3; display: block; margin-bottom: 10px; }
-
-.reveal { opacity: 0; transform: translateY(30px); transition: 1s; }
+.reveal { opacity: 0; transform: translateY(20px); transition: 0.6s; }
 .reveal.show { opacity: 1; transform: translateY(0); }
-
 .hidden { display: none; }
