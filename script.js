@@ -1,40 +1,53 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Анимация появления
-    const revealNodes = document.querySelectorAll('.reveal');
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('show');
-        });
-    }, { threshold: 0.1 });
-    revealNodes.forEach(node => revealObserver.observe(node));
+const filterButtons = document.querySelectorAll('.filter');
+const cards = document.querySelectorAll('.mod-card');
 
-    // Эффект пульсации радара при клике
-    document.addEventListener('mousedown', (e) => {
-        const ripple = document.createElement('div');
-        ripple.style.cssText = `
-            position: fixed;
-            top: ${e.clientY}px;
-            left: ${e.clientX}px;
-            width: 2px;
-            height: 2px;
-            background: rgba(255, 0, 0, 0.5);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            animation: pulse 1s ease-out forwards;
-            pointer-events: none;
-            z-index: 1000;
-        `;
-        document.body.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 1000);
+filterButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const filter = btn.dataset.filter;
+
+    filterButtons.forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    cards.forEach((card) => {
+      const core = card.dataset.core;
+      const visible = filter === 'all' || filter === core;
+      card.classList.toggle('hidden', !visible);
     });
+  });
 });
 
-// Добавляем анимацию в стили через JS
-const style = document.createElement('style');
-style.textContent = `
-@keyframes pulse {
-    0% { width: 0; height: 0; opacity: 1; border: 2px solid red; }
-    100% { width: 500px; height: 500px; opacity: 0; border: 10px solid red; }
+const revealNodes = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('show');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.12 }
+);
+
+revealNodes.forEach((node) => revealObserver.observe(node));
+
+function animateCounters() {
+  const counters = document.querySelectorAll('.metric-value[data-count]');
+  counters.forEach((counter) => {
+    const target = Number(counter.dataset.count || 0);
+    const isMs = counter.textContent.includes('ms') || target > 100;
+    const duration = 1200;
+    const start = performance.now();
+
+    const step = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const value = Math.round(target * progress);
+      counter.textContent = isMs ? `${value}ms` : `${value}%`;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+
+    requestAnimationFrame(step);
+  });
 }
-`;
-document.head.appendChild(style);
+
+animateCounters();
