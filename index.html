@@ -17,58 +17,47 @@
       <p class="top-note">адвокат лох</p>
       <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
       <h1>Ballisticys Fire-Control Hub</h1>
-      <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
+      <p class="hero-sub">Интерфейс управления баллистикой. Телеметрия, расчеты траекторий и модули захвата целей для артиллерии Minecraft.</p>
       <div class="hero-actions">
-        <a class="btn primary" href="#downloads">Скачать</a>
+        <a class="btn primary" href="#downloads">Перейти к загрузкам</a>
+        <a class="btn ghost" href="#about">О системе</a>
       </div>
     </div>
   </header>
 
   <main>
     <section class="panel reveal telemetry" id="telemetry">
-      <h2>Сводка системы</h2>
+      <h2><span style="color:var(--accent-primary)">[</span> Сводка системы <span style="color:var(--accent-primary)">]</span></h2>
       <div class="telemetry-grid">
         <article class="telemetry-card">
           <p class="metric-title">Стабильность траектории</p>
           <p class="metric-value" data-count="98">0%</p>
-          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
-            <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
-          </svg>
         </article>
         <article class="telemetry-card">
           <p class="metric-title">Точность PVO</p>
           <p class="metric-value" data-count="94">0%</p>
-          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
-            <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
-          </svg>
         </article>
         <article class="telemetry-card">
-          <p class="metric-title">Скорость захвата цели</p>
+          <p class="metric-title">Захват цели</p>
           <p class="metric-value" data-count="112">0ms</p>
-          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
-            <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
-          </svg>
         </article>
       </div>
     </section>
 
     <section class="panel reveal" id="stages">
-      <h2>Этапы установки</h2>
-      <div class="stage-grid">
+      <h2>Установка в три этапа</h2>
+      <div class="stage-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px;">
         <article class="stage-card">
-          <span class="num">01</span>
-          <h3>Выбери сборку</h3>
-          <p>Fabric Port для Fabric-клиента, Forge-версию для Forge-сборки, или инжектор для PolitCraft.</p>
+          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">01. Выбор</h3>
+          <p>Определите ядро вашего клиента: Fabric для скорости или Forge для совместимости.</p>
         </article>
         <article class="stage-card">
-          <span class="num">02</span>
-          <h3>Скачай файл</h3>
-          <p>Файлы лежат в <code>downloads/</code>. Моды скачиваются как <code>.jar</code>, инжектор как <code>.zip</code>.</p>
+          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">02. Загрузка</h3>
+          <p>Скачайте JAR-файл или ZIP-тулкит напрямую с нашего узла.</p>
         </article>
         <article class="stage-card">
-          <span class="num">03</span>
-          <h3>Установи и запусти</h3>
-          <p>Положи jar в <code>mods</code> или запусти инжектор через <code>Start-Ballisticys.ps1</code>.</p>
+          <h3 style="color: var(--accent-primary); margin-bottom: 10px;">03. Инжекция</h3>
+          <p>Разместите файлы в <code>mods</code> или запустите автоматический скрипт запуска.</p>
         </article>
       </div>
     </section>
