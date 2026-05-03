@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Анимация появления (Speed Ramp)
+    // Анимация появления
     const revealNodes = document.querySelectorAll('.reveal');
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -8,76 +8,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { threshold: 0.1 });
     revealNodes.forEach(node => revealObserver.observe(node));
 
-    // 2. 3D ГЕОМЕТРИЯ (PHYSMATH STYLE)
-    const canvas = document.getElementById('canvas-bg');
-    const ctx = canvas.getContext('2d');
-    let points = [];
-    let angle = 0;
-
-    const resize = () => {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', resize);
-    resize();
-
-    // Создаем облако точек для 3D куба
-    for (let x = -1; x <= 1; x += 0.5) {
-        for (let y = -1; y <= 1; y += 0.5) {
-            for (let z = -1; z <= 1; z += 0.5) {
-                points.push({ x, y, z });
-            }
-        }
-    }
-
-    const project = (p) => {
-        // Вращение по осям
-        let x = p.x * Math.cos(angle) - p.z * Math.sin(angle);
-        let z = p.x * Math.sin(angle) + p.z * Math.cos(angle);
-        let y = p.y * Math.cos(angle) - z * Math.sin(angle);
-        z = p.y * Math.sin(angle) + z * Math.cos(angle);
-
-        // Проекция на 2D
-        const factor = 400 / (z + 4);
-        return {
-            x: x * factor + canvas.width / 2,
-            y: y * factor + canvas.height / 2,
-            z: z
-        };
-    };
-
-    const animate = () => {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        angle += 0.01;
-
-        const projected = points.map(project);
-
-        projected.forEach((p, i) => {
-            ctx.fillStyle = `rgba(0, 242, 255, ${0.5 + p.z / 4})`;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Соединяем точки линиями
-            projected.forEach((p2, j) => {
-                const dist = Math.sqrt((p.x - p2.x)**2 + (p.y - p2.y)**2);
-                if (dist < 80) {
-                    ctx.strokeStyle = `rgba(0, 242, 255, ${0.1 * (1 - dist / 80)})`;
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.stroke();
-                }
-            });
-        });
-        requestAnimationFrame(animate);
-    };
-    animate();
-
-    // Глитч-эффект при скролле
-    window.addEventListener('scroll', () => {
-        document.body.style.transform = `skewY(${window.scrollY / 100}deg)`;
-        setTimeout(() => document.body.style.transform = '', 50);
+    // Эффект пульсации радара при клике
+    document.addEventListener('mousedown', (e) => {
+        const ripple = document.createElement('div');
+        ripple.style.cssText = `
+            position: fixed;
+            top: ${e.clientY}px;
+            left: ${e.clientX}px;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse 1s ease-out forwards;
+            pointer-events: none;
+            z-index: 1000;
+        `;
+        document.body.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 1000);
     });
 });
+
+// Добавляем анимацию в стили через JS
+const style = document.createElement('style');
+style.textContent = `
+@keyframes pulse {
+    0% { width: 0; height: 0; opacity: 1; border: 2px solid red; }
+    100% { width: 500px; height: 500px; opacity: 0; border: 10px solid red; }
+}
+`;
+document.head.appendChild(style);

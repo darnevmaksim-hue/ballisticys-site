@@ -3,73 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BALLISTICYS // EDIT_V3</title>
+    <title>BALLISTICYS // HARDCORE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="noise-overlay"></div>
-    <canvas id="canvas-bg"></canvas>
+    <div class="radar-bg"></div>
 
-    <!-- HUD Lines -->
-    <div class="hud-line v-line" style="left: 5%;"></div>
-    <div class="hud-line v-line" style="right: 5%;"></div>
-    <div class="hud-line h-line" style="top: 5%;"></div>
-    <div class="hud-line h-line" style="bottom: 5%;"></div>
+    <header class="hero">
+        <h1>BALLISTICYS</h1>
+    </header>
 
-    <div class="main-wrapper">
-        <header class="reveal">
-            <span style="letter-spacing: 15px; font-size: 0.8rem; opacity: 0.5;">[ ACCESSING_SERVER ]</span>
-            <h1>BALLISTICYS</h1>
-            <div style="margin-top: 50px;">
-                <a href="#downloads" class="btn">GET_FILES</a>
-            </div>
-        </header>
+    <div class="main-container">
+        <div class="grid-layout">
+            <!-- Основной контент -->
+            <main>
+                <section class="reveal">
+                    <h2 class="section-title">SYSTEM_CORE</h2>
+                    <div class="panel">
+                        <div class="mod-card">
+                            <h3>FABRIC_2.0</h3>
+                            <p>PRIMARY_BALLISTIC_ENGINE</p>
+                            <a href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" class="btn" download>DOWNLOAD_CORE</a>
+                        </div>
+                        <div class="mod-card">
+                            <h3>FORGE_1.0</h3>
+                            <p>STABLE_FORGE_BUILD</p>
+                            <a href="downloads/blur-mod-1.0.0-forge.jar" class="btn" download>DOWNLOAD_CORE</a>
+                        </div>
+                    </div>
+                </section>
 
-        <section class="panel reveal" id="telemetry">
-            <h2 style="font-size: 1rem; letter-spacing: 5px;">// TELEMETRY</h2>
-            <div class="telemetry-grid">
-                <div class="telemetry-item">
-                    <span class="value">98</span>
-                    <span style="font-size: 0.7rem;">STABILITY_CORE</span>
-                </div>
-                <div class="telemetry-item">
-                    <span class="value">112</span>
-                    <span style="font-size: 0.7rem;">LOCK_SPEED_MS</span>
-                </div>
-                <div class="telemetry-item">
-                    <span class="value">94</span>
-                    <span style="font-size: 0.7rem;">ACCURACY_PVO</span>
-                </div>
-            </div>
-        </section>
+                <section class="reveal" style="margin-top: 50px;">
+                    <h2 class="section-title">INSTALLATION</h2>
+                    <div class="panel" style="font-size: 1.5rem; font-weight: 900;">
+                        01. SELECT_VERSION <br>
+                        02. MOVE_TO_MODS <br>
+                        03. EXECUTE_CLIENT
+                    </div>
+                </section>
+            </main>
 
-        <section class="panel reveal" id="downloads">
-            <h2 style="font-size: 1rem; letter-spacing: 5px;">// MODULES</h2>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div class="mod-card">
-                    <h3>FABRIC_2.0</h3>
-                    <p>MAIN_CLIENT_MODULE</p>
-                    <a href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download style="color:inherit;">DOWNLOAD</a>
-                </div>
-                <div class="mod-card">
-                    <h3>FORGE_1.0</h3>
-                    <p>ENGINE_STABLE_BUILD</p>
-                    <a href="downloads/blur-mod-1.0.0-forge.jar" download style="color:inherit;">DOWNLOAD</a>
-                </div>
-            </div>
-        </section>
+            <!-- Сайдбар -->
+            <aside>
+                <section class="reveal">
+                    <h2 class="section-title">DATA</h2>
+                    <div class="panel">
+                        <div class="telemetry-item">
+                            <span style="font-size: 0.8rem; opacity: 0.5;">STABILITY</span>
+                            <div class="val">98%</div>
+                        </div>
+                        <div class="telemetry-item">
+                            <span style="font-size: 0.8rem; opacity: 0.5;">LOCK_ON</span>
+                            <div class="val">112ms</div>
+                        </div>
+                    </div>
+                </section>
 
-        <section class="panel reveal" style="text-align: center;">
-            <h2 style="font-size: 1rem; letter-spacing: 5px;">// INSTALLATION</h2>
-            <p style="font-size: 1.5rem; font-weight: 900;">1. CHOOSE_CORE <br> 2. INJECT_MODS <br> 3. RUN_SYSTEM</p>
-        </section>
-
-        <footer style="padding: 100px; text-align: center; font-size: 0.7rem; letter-spacing: 5px; opacity: 0.3;">
-            BALLISTICYS // END_OF_TRANSMISSION // 2026
-        </footer>
+                <section class="reveal" style="margin-top: 50px;">
+                    <h2 class="section-title">INJECTOR</h2>
+                    <div class="panel">
+                        <a href="downloads/ballisticys-injector-toolkit.zip" class="btn" download>GET_ZIP</a>
+                        <a href="downloads/ballisticys-fabric-agent-1.0.0.jar" class="btn" style="background: transparent; color: #fff; border: 2px solid #fff;" download>GET_AGENT</a>
+                    </div>
+                </section>
+            </aside>
+        </div>
     </div>
+
+    <footer style="padding: 100px; text-align: center; border-top: 5px solid var(--accent); font-weight: 900; font-size: 2rem;">
+        BALLISTICYS // 2026
+    </footer>
 
     <script src="script.js"></script>
 </body>

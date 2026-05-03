@@ -1,148 +1,127 @@
 :root {
-  --cyan: #00f2ff;
-  --bg: #000;
-  --text: #fff;
-  --font: 'JetBrains Mono', monospace;
+  --accent: #ff0000;
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --text: #ffffff;
+  --dim: #444444;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--font);
+  font-family: 'JetBrains Mono', monospace;
   margin: 0;
   overflow-x: hidden;
-  /* Хроматическая аберрация на весь сайт */
-  text-shadow: 2px 0 1px rgba(255,0,0,0.5), -2px 0 1px rgba(0,0,255,0.5);
 }
 
-/* Фоновый холст для 3D геометрии */
-#canvas-bg {
+/* Фоновая сетка «Радар» */
+.radar-bg {
   position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
+  top: 50%; left: 50%;
+  width: 200vw; height: 200vw;
+  background: 
+    radial-gradient(circle, transparent 20%, var(--bg) 20%),
+    repeating-radial-gradient(rgba(255, 0, 0, 0.05) 0, rgba(255, 0, 0, 0.05) 1px, transparent 1px, transparent 50px);
+  transform: translate(-50%, -50%);
   z-index: -1;
 }
 
-/* Эффект шума и помех */
-.noise-overlay {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Static_Noise_v1.png');
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: 100;
-}
-
-.main-wrapper {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-header {
+.hero {
   height: 100vh;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
-  text-align: center;
+  justify-content: center;
+  border-bottom: 5px solid var(--accent);
 }
 
 h1 {
-  font-size: clamp(4rem, 15vw, 10rem);
+  font-size: clamp(5rem, 20vw, 15rem);
   font-weight: 900;
   margin: 0;
+  color: var(--text);
   line-height: 0.8;
-  letter-spacing: -5px;
-  animation: title-glitch 3s infinite;
+  letter-spacing: -10px;
+  text-transform: uppercase;
 }
 
-@keyframes title-glitch {
-  0% { transform: skew(0deg); }
-  1% { transform: skew(10deg); filter: blur(2px); }
-  2% { transform: skew(0deg); filter: blur(0); }
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 50px 20px;
+}
+
+.section-title {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent);
+  margin-bottom: 40px;
+  border-bottom: 2px solid var(--accent);
+  display: inline-block;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
 }
 
 .panel {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: var(--panel);
+  border: 1px solid var(--dim);
   padding: 40px;
-  margin-bottom: 30px;
-  backdrop-filter: blur(10px);
   position: relative;
-  overflow: hidden;
 }
 
 .panel::before {
-  content: "DATA_STREAM";
+  content: "";
   position: absolute;
-  top: 5px; right: 10px;
-  font-size: 0.6rem;
-  opacity: 0.3;
+  top: -1px; left: -1px;
+  width: 20px; height: 20px;
+  border-top: 3px solid var(--accent);
+  border-left: 3px solid var(--accent);
 }
 
-.telemetry-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+.telemetry-item {
+  margin-bottom: 30px;
 }
 
-.value {
-  font-size: 4rem;
+.val {
+  font-size: 5rem;
   font-weight: 900;
-  color: var(--cyan);
-  display: block;
-}
-
-.mod-card {
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 30px;
-  transition: 0.2s;
-  background: rgba(0,0,0,0.5);
-}
-
-.mod-card:hover {
-  border-color: var(--cyan);
-  background: var(--cyan);
-  color: #000;
-  transform: scale(1.05) rotate(1deg);
+  color: var(--accent);
+  line-height: 1;
 }
 
 .btn {
-  display: inline-block;
-  padding: 20px 50px;
-  background: #fff;
+  display: block;
+  width: 100%;
+  padding: 25px;
+  background: var(--accent);
   color: #000;
+  text-align: center;
   text-decoration: none;
   font-weight: 900;
-  text-transform: uppercase;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  margin-top: 20px;
   transition: 0.2s;
-  border: none;
 }
 
 .btn:hover {
-  background: var(--cyan);
-  box-shadow: 0 0 50px var(--cyan);
-  letter-spacing: 5px;
+  background: #fff;
+  transform: skew(-5deg);
 }
 
-/* Blueprint HUD элементы */
-.hud-line {
-  position: fixed;
-  background: var(--cyan);
-  opacity: 0.2;
-  z-index: 99;
-}
-.v-line { width: 1px; height: 100%; top: 0; }
-.h-line { height: 1px; width: 100%; left: 0; }
-
-.reveal {
-  opacity: 0;
-  transform: scale(0.8) rotate(-5deg);
-  transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+.mod-card {
+  border-bottom: 1px solid var(--dim);
+  padding: 30px 0;
 }
 
-.reveal.show {
-  opacity: 1;
-  transform: scale(1) rotate(0deg);
+.mod-card h3 { font-size: 2rem; margin: 0; }
+
+.reveal { opacity: 0; transform: translateX(-50px); transition: 0.5s; }
+.reveal.show { opacity: 1; transform: translateX(0); }
+
+@media (max-width: 1000px) {
+  .grid-layout { grid-template-columns: 1fr; }
+  h1 { letter-spacing: -2px; }
 }
