@@ -3,96 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ballisticys Admin</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="0; url=index.html#admin-auth" />
 </head>
 <body>
-  <div class="background-grid"></div>
-
-  <main>
-    <section class="panel reveal" id="admin-auth">
-      <h2>Admin Access</h2>
-      <p class="admin-warning">Введите пароль администратора для доступа к панели.</p>
-      <div class="auth-box">
-        <input id="admin-pass" class="auth-input" type="password" placeholder="Пароль" autocomplete="off" />
-        <button id="admin-login-btn" class="btn primary" type="button">Войти</button>
-      </div>
-      <p id="admin-auth-error" class="auth-error hidden">Неверный пароль</p>
-    </section>
-
-    <section class="panel reveal hidden" id="control">
-      <h2>Control Center</h2>
-      <p class="admin-warning">Панель администратора. Данные берутся из папки <code>downloads/</code> репозитория.</p>
-
-      <div class="actions">
-        <a class="btn ghost" href="index.html">На сайт</a>
-        <button id="admin-logout-btn" class="btn ghost" type="button">Выйти</button>
-      </div>
-
-      <div class="stat-row">
-        <div class="stat-card">
-          <h3>Файлов (Fabric)</h3>
-          <p id="count-fabric">...</p>
-        </div>
-        <div class="stat-card">
-          <h3>Файлов (Forge)</h3>
-          <p id="count-forge">...</p>
-        </div>
-        <div class="stat-card">
-          <h3>Файлов (Injector)</h3>
-          <p id="count-injector">...</p>
-        </div>
-        <div class="stat-card">
-          <h3>Файлов (Agent)</h3>
-          <p id="count-agent">...</p>
-        </div>
-        <div class="stat-card">
-          <h3>Общий размер</h3>
-          <p id="count-total">...</p>
-        </div>
-        <div class="stat-card">
-          <h3>Всего файлов</h3>
-          <p id="count-releases">...</p>
-        </div>
-        <div class="stat-card">
-          <h3>Последнее обновление</h3>
-          <p id="count-assets">...</p>
-        </div>
-      </div>
-
-      <div class="actions">
-        <a href="https://github.com/darnevmaksim-hue/ballisticys-site/tree/main/downloads" target="_blank" class="btn primary" rel="noopener noreferrer">Открыть downloads на GitHub</a>
-        <button class="btn ghost" id="refresh-btn">Обновить данные</button>
-      </div>
-      <p class="meta-row" id="fetch-state">Состояние: ожидание первой загрузки...</p>
-      <p class="meta-row" id="rate-limit">GitHub API rate limit: —</p>
-
-      <div class="table-wrap">
-        <table class="assets-table">
-          <thead>
-            <tr>
-              <th>Тип</th>
-              <th>Файл</th>
-              <th>Путь</th>
-              <th>SHA</th>
-              <th>Размер</th>
-              <th>Обновлен</th>
-              <th>Ссылка</th>
-            </tr>
-          </thead>
-          <tbody id="assets-body">
-            <tr>
-              <td class="empty-row" colspan="7">Загрузка данных...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
+  <p>Переход на единую страницу: <a href="index.html#admin-auth">открыть</a></p>
+  <script>
+    window.location.replace('index.html#admin-auth');
+  </script>
 </body>
 </html>
