@@ -266,6 +266,104 @@ body {
 
 .footer { text-align: center; padding: 4rem 2rem; color: var(--text-dim); font-size: 0.8rem; }
 
+.admin-warning {
+  color: var(--text-dim);
+  margin-bottom: 1.2rem;
+}
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.stat-card {
+  background-color: rgba(13, 17, 23, 0.5);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 1.2rem;
+}
+
+.stat-card h3 {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+.stat-card p {
+  font-family: var(--font-header);
+  color: var(--accent-color);
+  font-size: 1.6rem;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.meta-row {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+.table-wrap {
+  margin-top: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+}
+
+.assets-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.assets-table th,
+.assets-table td {
+  padding: 0.7rem;
+  text-align: left;
+  border-bottom: 1px solid var(--panel-border);
+  vertical-align: top;
+}
+
+.assets-table th {
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  background-color: rgba(13, 17, 23, 0.7);
+}
+
+.assets-table tr:last-child td {
+  border-bottom: none;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.pill.fabric { color: #f0ad4e; border-color: rgba(240, 173, 78, 0.45); }
+.pill.forge { color: #79c0ff; border-color: rgba(121, 192, 255, 0.45); }
+.pill.injector { color: #8b949e; border-color: rgba(139, 148, 158, 0.55); }
+.pill.agent { color: #7eecc4; border-color: rgba(126, 236, 196, 0.55); }
+.pill.other { color: var(--text-dim); }
+
+.empty-row {
+  color: var(--text-dim);
+  text-align: center;
+}
+
 .reveal {
   opacity: 0;
   transform: translateY(20px);

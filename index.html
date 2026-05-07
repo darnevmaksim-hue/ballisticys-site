@@ -20,6 +20,7 @@
       <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
       <div class="hero-actions">
         <a class="btn primary" href="#downloads">Скачать</a>
+        <a class="btn ghost" href="#control">Панель</a>
       </div>
     </div>
   </header>
@@ -181,10 +182,74 @@
         </article>
       </div>
     </section>
+
+    <section class="panel reveal" id="control">
+      <h2>Control Center</h2>
+      <p class="admin-warning">Единая страница: статистика и управление релизами доступны прямо здесь.</p>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <h3>Загрузок (Fabric)</h3>
+          <p id="count-fabric">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Загрузок (Forge)</h3>
+          <p id="count-forge">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Загрузок (Injector)</h3>
+          <p id="count-injector">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Загрузок (Agent)</h3>
+          <p id="count-agent">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Всего скачиваний</h3>
+          <p id="count-total">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Релизов</h3>
+          <p id="count-releases">...</p>
+        </div>
+        <div class="stat-card">
+          <h3>Ассетов</h3>
+          <p id="count-assets">...</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="https://github.com/darnevmaksim-hue/ballisticys-site/releases" target="_blank" class="btn primary" rel="noopener noreferrer">Управление релизами</a>
+        <button class="btn ghost" id="refresh-btn">Обновить данные</button>
+      </div>
+      <p class="meta-row" id="fetch-state">Состояние: ожидание первой загрузки...</p>
+      <p class="meta-row" id="rate-limit">GitHub API rate limit: —</p>
+
+      <div class="table-wrap">
+        <table class="assets-table">
+          <thead>
+            <tr>
+              <th>Тип</th>
+              <th>Файл</th>
+              <th>Релиз</th>
+              <th>Скачивания</th>
+              <th>Размер</th>
+              <th>Обновлен</th>
+              <th>Ссылка</th>
+            </tr>
+          </thead>
+          <tbody id="assets-body">
+            <tr>
+              <td class="empty-row" colspan="7">Загрузка данных...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <footer class="footer reveal">
-    <p>Ballisticys Project • Persistent Web Build • <a href="admin.html" style="color: inherit; text-decoration: none; opacity: 0.3;">Admin</a></p>
+    <p>Ballisticys Project • Persistent Web Build</p>
   </footer>
 
   <script src="script.js"></script>
