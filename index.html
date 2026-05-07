@@ -11,6 +11,20 @@
 </head>
 <body>
   <div class="background-grid"></div>
+  <div class="account-dock">
+    <button class="btn ghost" id="open-auth-modal" type="button">Вход</button>
+    <div id="profile-root" class="profile-root hidden">
+      <button id="profile-trigger" class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+        <span id="profile-initial">U</span>
+      </button>
+      <div id="profile-menu" class="profile-menu hidden" role="menu">
+        <p id="profile-email" class="profile-email">—</p>
+        <button id="profile-manage-btn" class="profile-menu-btn" type="button">Управление аккаунтом</button>
+        <a class="profile-menu-link" href="#downloads">К загрузкам</a>
+        <button id="profile-logout-menu-btn" class="profile-menu-btn danger" type="button">Выйти</button>
+      </div>
+    </div>
+  </div>
 
   <header class="hero reveal">
     <div class="hero-copy">
@@ -20,7 +34,6 @@
       <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
       <div class="hero-actions">
         <a class="btn primary" href="#downloads">Скачать</a>
-        <button class="btn ghost" id="open-auth-modal" type="button">Вход</button>
       </div>
     </div>
   </header>

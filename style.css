@@ -74,6 +74,83 @@ body {
   margin: 0 auto 2.5rem;
 }
 
+.account-dock {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.profile-root {
+  position: relative;
+}
+
+.profile-trigger {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(135deg, #1f6feb, #58a6ff);
+  color: #fff;
+  font-weight: 700;
+  font-family: var(--font-main);
+  cursor: pointer;
+}
+
+.profile-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  padding: 0.8rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: var(--panel-bg);
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.35);
+}
+
+.profile-email {
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-bottom: 0.6rem;
+  word-break: break-all;
+}
+
+.profile-menu-btn,
+.profile-menu-link {
+  width: 100%;
+  text-align: left;
+  padding: 0.55rem 0.7rem;
+  border-radius: 7px;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-main);
+  font-family: var(--font-main);
+  font-size: 0.84rem;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+  margin-bottom: 0.45rem;
+}
+
+.profile-menu-btn:last-child,
+.profile-menu-link:last-child {
+  margin-bottom: 0;
+}
+
+.profile-menu-btn:hover,
+.profile-menu-link:hover {
+  border-color: var(--accent-color);
+  background: rgba(88, 166, 255, 0.08);
+}
+
+.profile-menu-btn.danger {
+  color: #ff7b72;
+}
+
 .btn {
   display: inline-block;
   padding: 0.8rem 2rem;

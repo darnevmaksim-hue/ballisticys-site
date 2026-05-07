@@ -58,6 +58,13 @@ if (authModal) {
   const openAuthBtn = document.getElementById('open-auth-modal');
   const closeAuthBtn = document.getElementById('close-auth-modal');
   const backdropBtn = document.getElementById('auth-modal-backdrop');
+  const profileRoot = document.getElementById('profile-root');
+  const profileTrigger = document.getElementById('profile-trigger');
+  const profileMenu = document.getElementById('profile-menu');
+  const profileEmail = document.getElementById('profile-email');
+  const profileInitial = document.getElementById('profile-initial');
+  const profileManageBtn = document.getElementById('profile-manage-btn');
+  const profileLogoutMenuBtn = document.getElementById('profile-logout-menu-btn');
   const emailInput = document.getElementById('auth-email');
   const passInput = document.getElementById('auth-password');
   const loginBtn = document.getElementById('auth-login-btn');
@@ -123,6 +130,27 @@ if (authModal) {
     document.body.classList.remove('modal-open');
   }
 
+  function closeProfileMenu() {
+    if (!profileMenu || !profileTrigger) return;
+    profileMenu.classList.add('hidden');
+    profileTrigger.setAttribute('aria-expanded', 'false');
+  }
+
+  function openProfileMenu() {
+    if (!profileMenu || !profileTrigger) return;
+    profileMenu.classList.remove('hidden');
+    profileTrigger.setAttribute('aria-expanded', 'true');
+  }
+
+  function toggleProfileMenu() {
+    if (!profileMenu) return;
+    if (profileMenu.classList.contains('hidden')) {
+      openProfileMenu();
+    } else {
+      closeProfileMenu();
+    }
+  }
+
   function hasValidAuthConfig(config) {
     return Boolean(config?.url && config?.anonKey);
   }
@@ -142,6 +170,15 @@ if (authModal) {
       userEmailEl.textContent = '—';
       userBoxEl.classList.add('hidden');
     }
+
+    if (openAuthBtn) openAuthBtn.classList.toggle('hidden', Boolean(user));
+    if (profileRoot) profileRoot.classList.toggle('hidden', !user);
+    if (profileEmail) profileEmail.textContent = user?.email || '—';
+    if (profileInitial) {
+      const first = String(user?.email || 'U').trim().charAt(0);
+      profileInitial.textContent = first ? first.toUpperCase() : 'U';
+    }
+    if (!user) closeProfileMenu();
   }
 
   function setAuthBusy(value) {
@@ -302,8 +339,30 @@ if (authModal) {
   if (openAuthBtn) openAuthBtn.addEventListener('click', openAuthModal);
   if (closeAuthBtn) closeAuthBtn.addEventListener('click', closeAuthModal);
   if (backdropBtn) backdropBtn.addEventListener('click', closeAuthModal);
+  if (profileTrigger) profileTrigger.addEventListener('click', toggleProfileMenu);
+  if (profileManageBtn) {
+    profileManageBtn.addEventListener('click', () => {
+      closeProfileMenu();
+      openAuthModal();
+    });
+  }
+  if (profileLogoutMenuBtn) {
+    profileLogoutMenuBtn.addEventListener('click', async () => {
+      closeProfileMenu();
+      await logoutUser();
+    });
+  }
+  document.addEventListener('click', (event) => {
+    if (!profileRoot || !profileMenu) return;
+    const target = event.target;
+    if (!(target instanceof Node)) return;
+    if (!profileRoot.contains(target)) closeProfileMenu();
+  });
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeAuthModal();
+    if (event.key === 'Escape') {
+      closeAuthModal();
+      closeProfileMenu();
+    }
   });
 
   oauthButtons.forEach((btn) => {
