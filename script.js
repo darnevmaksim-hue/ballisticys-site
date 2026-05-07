@@ -56,10 +56,58 @@ const controlRoot = document.getElementById('control');
 if (controlRoot) {
   const REPO = 'darnevmaksim-hue/ballisticys-site';
   const BRANCH = 'main';
+  const ADMIN_PASSWORD = 'Gfdsaqw.0';
+  const AUTH_STORAGE_KEY = 'ballisticys_admin_auth';
+  const authRoot = document.getElementById('admin-auth');
+  const passInput = document.getElementById('admin-pass');
+  const loginBtn = document.getElementById('admin-login-btn');
+  const logoutBtn = document.getElementById('admin-logout-btn');
+  const authErrorEl = document.getElementById('admin-auth-error');
   const stateEl = document.getElementById('fetch-state');
   const rateLimitEl = document.getElementById('rate-limit');
   const refreshBtn = document.getElementById('refresh-btn');
   const assetsBody = document.getElementById('assets-body');
+  const authRequired = Boolean(authRoot && passInput && loginBtn);
+  let statsLoaded = false;
+
+  function unlockAdmin() {
+    controlRoot.classList.remove('hidden');
+    if (authRoot) authRoot.classList.add('hidden');
+    if (!statsLoaded) {
+      statsLoaded = true;
+      fetchDownloadsStats();
+    }
+  }
+
+  function showAuthError() {
+    if (authErrorEl) authErrorEl.classList.remove('hidden');
+  }
+
+  function hideAuthError() {
+    if (authErrorEl) authErrorEl.classList.add('hidden');
+  }
+
+  function tryAdminLogin() {
+    if (!passInput) return;
+    if (passInput.value === ADMIN_PASSWORD) {
+      localStorage.setItem(AUTH_STORAGE_KEY, '1');
+      hideAuthError();
+      unlockAdmin();
+    } else {
+      showAuthError();
+    }
+  }
+
+  function logoutAdmin() {
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    controlRoot.classList.add('hidden');
+    if (authRoot) authRoot.classList.remove('hidden');
+    if (passInput) {
+      passInput.value = '';
+      passInput.focus();
+    }
+    hideAuthError();
+  }
 
   function setCount(id, value) {
     const el = document.getElementById(id);
@@ -190,5 +238,25 @@ if (controlRoot) {
   if (refreshBtn) {
     refreshBtn.addEventListener('click', fetchDownloadsStats);
   }
-  fetchDownloadsStats();
+
+  if (authRequired) {
+    loginBtn.addEventListener('click', tryAdminLogin);
+    passInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        tryAdminLogin();
+      }
+    });
+    if (logoutBtn) logoutBtn.addEventListener('click', logoutAdmin);
+
+    if (localStorage.getItem(AUTH_STORAGE_KEY) === '1') {
+      unlockAdmin();
+    } else {
+      controlRoot.classList.add('hidden');
+      authRoot.classList.remove('hidden');
+      passInput.focus();
+    }
+  } else {
+    fetchDownloadsStats();
+  }
 }

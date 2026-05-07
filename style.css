@@ -271,6 +271,33 @@ body {
   margin-bottom: 1.2rem;
 }
 
+.auth-box {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.auth-input {
+  flex: 1 1 240px;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  background-color: rgba(13, 17, 23, 0.7);
+  color: var(--text-main);
+  font-family: var(--font-main);
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.auth-error {
+  margin-top: 0.8rem;
+  color: #ff7b72;
+  font-size: 0.9rem;
+}
+
 .stat-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

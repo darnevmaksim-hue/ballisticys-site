@@ -13,12 +13,23 @@
   <div class="background-grid"></div>
 
   <main>
-    <section class="panel reveal" id="control">
+    <section class="panel reveal" id="admin-auth">
+      <h2>Admin Access</h2>
+      <p class="admin-warning">Введите пароль администратора для доступа к панели.</p>
+      <div class="auth-box">
+        <input id="admin-pass" class="auth-input" type="password" placeholder="Пароль" autocomplete="off" />
+        <button id="admin-login-btn" class="btn primary" type="button">Войти</button>
+      </div>
+      <p id="admin-auth-error" class="auth-error hidden">Неверный пароль</p>
+    </section>
+
+    <section class="panel reveal hidden" id="control">
       <h2>Control Center</h2>
       <p class="admin-warning">Панель администратора. Данные берутся из папки <code>downloads/</code> репозитория.</p>
 
       <div class="actions">
         <a class="btn ghost" href="index.html">На сайт</a>
+        <button id="admin-logout-btn" class="btn ghost" type="button">Выйти</button>
       </div>
 
       <div class="stat-row">
