@@ -69,10 +69,33 @@ if (controlRoot) {
   const assetsBody = document.getElementById('assets-body');
   const authRequired = Boolean(authRoot && passInput && loginBtn);
   let statsLoaded = false;
+  let memoryAuth = false;
+
+  function getAuthState() {
+    try {
+      return localStorage.getItem(AUTH_STORAGE_KEY) === '1' || memoryAuth;
+    } catch (_) {
+      return memoryAuth;
+    }
+  }
+
+  function setAuthState(value) {
+    memoryAuth = value;
+    try {
+      if (value) {
+        localStorage.setItem(AUTH_STORAGE_KEY, '1');
+      } else {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+      }
+    } catch (_) {
+      // localStorage may be unavailable in privacy-restricted browsers
+    }
+  }
 
   function unlockAdmin() {
     controlRoot.classList.remove('hidden');
     if (authRoot) authRoot.classList.add('hidden');
+    controlRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (!statsLoaded) {
       statsLoaded = true;
       fetchDownloadsStats();
@@ -89,8 +112,8 @@ if (controlRoot) {
 
   function tryAdminLogin() {
     if (!passInput) return;
-    if (passInput.value === ADMIN_PASSWORD) {
-      localStorage.setItem(AUTH_STORAGE_KEY, '1');
+    if (passInput.value.trim() === ADMIN_PASSWORD) {
+      setAuthState(true);
       hideAuthError();
       unlockAdmin();
     } else {
@@ -99,7 +122,7 @@ if (controlRoot) {
   }
 
   function logoutAdmin() {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
+    setAuthState(false);
     controlRoot.classList.add('hidden');
     if (authRoot) authRoot.classList.remove('hidden');
     if (passInput) {
@@ -249,7 +272,7 @@ if (controlRoot) {
     });
     if (logoutBtn) logoutBtn.addEventListener('click', logoutAdmin);
 
-    if (localStorage.getItem(AUTH_STORAGE_KEY) === '1') {
+    if (getAuthState()) {
       unlockAdmin();
     } else {
       controlRoot.classList.add('hidden');
