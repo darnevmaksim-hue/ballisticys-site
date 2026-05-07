@@ -379,18 +379,17 @@ if (controlRoot) {
       hideAdminPanel();
       setAuthStatus('auth не настроен. Заполните auth-config.js', true);
       setAuthBusy(true);
-      return;
+    } else {
+      supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+        await applySession(session);
+      });
+
+      supabaseClient.auth.getSession().then(async ({ data }) => {
+        await applySession(data?.session || null);
+      });
+
+      if (emailInput) emailInput.focus();
     }
-
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-      await applySession(session);
-    });
-
-    supabaseClient.auth.getSession().then(async ({ data }) => {
-      await applySession(data?.session || null);
-    });
-
-    if (emailInput) emailInput.focus();
   } else {
     fetchDownloadsStats();
   }
