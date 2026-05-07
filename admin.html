@@ -9,38 +9,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <style>
-    .admin-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 80vh;
-      padding: 20px;
-    }
-    .admin-card {
-      width: 100%;
-      max-width: 450px;
-      padding: 2rem;
-      background: var(--bg-2);
-      border: 1px solid var(--accent);
-      border-radius: 18px;
-      box-shadow: 0 0 40px rgba(194, 123, 71, 0.15);
-      text-align: center;
-    }
-    .admin-card h1 { margin-bottom: 1.5rem; color: var(--accent); }
-    .admin-card input {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 1rem;
-      background: var(--bg-0);
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      color: var(--text);
-      font-family: inherit;
-    }
-    .hidden { display: none !important; }
     .dashboard {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 40px auto;
+      padding: 0 1rem;
     }
     .stat-row {
       display: grid;
@@ -50,36 +22,89 @@
     }
     .stat-card {
       padding: 1.5rem;
-      background: var(--panel);
-      border: 1px solid var(--line);
+      background: rgba(13, 17, 23, 0.5);
+      border: 1px solid var(--panel-border);
       border-radius: 12px;
     }
-    .stat-card h3 { font-size: 0.9rem; color: var(--muted); margin-bottom: 0.5rem; }
-    .stat-card p { font-size: 1.8rem; font-family: 'Russo One'; color: var(--accent); margin: 0; }
+    .stat-card h3 { font-size: 0.9rem; color: var(--text-dim); margin-bottom: 0.5rem; }
+    .stat-card p { font-size: 1.8rem; font-family: 'Russo One'; color: var(--accent-color); margin: 0; }
+    .admin-warning {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .meta-row {
+      margin-top: 1rem;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+    }
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--panel-border);
+      border-radius: 10px;
+    }
+    .assets-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      font-size: 0.85rem;
+    }
+    .assets-table th,
+    .assets-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--panel-border);
+      text-align: left;
+      vertical-align: top;
+    }
+    .assets-table th {
+      color: var(--text-dim);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(13, 17, 23, 0.65);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .assets-table tr:last-child td {
+      border-bottom: none;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid var(--panel-border);
+      color: var(--text-main);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+    }
+    .pill.fabric { color: #f0ad4e; border-color: rgba(240, 173, 78, 0.4); }
+    .pill.forge { color: #79c0ff; border-color: rgba(121, 192, 255, 0.4); }
+    .pill.injector { color: #8b949e; border-color: rgba(139, 148, 158, 0.5); }
+    .pill.agent { color: #7eecc4; border-color: rgba(126, 236, 196, 0.5); }
+    .pill.other { color: var(--text-dim); border-color: var(--panel-border); }
+    .empty-row {
+      color: var(--text-dim);
+      text-align: center;
+    }
   </style>
 </head>
 <body>
   <div class="background-grid"></div>
 
-  <!-- Экран входа -->
-  <div id="login-zone" class="admin-container">
-    <div class="admin-card reveal show">
-      <h1>ADMIN ACCESS</h1>
-      <p style="margin-bottom: 1.5rem; color: var(--muted);">Введите ключ доступа для управления системой</p>
-      <input type="password" id="admin-pass" placeholder="Ключ доступа..." autofocus>
-      <button class="btn primary" style="width: 100%" onclick="tryLogin()">Авторизация</button>
-      <p id="error-msg" style="color: var(--danger); margin-top: 1rem; font-size: 0.85rem;" class="hidden">ОШИБКА: Ключ не распознан</p>
-    </div>
-  </div>
-
   <!-- Панель управления -->
-  <div id="admin-dashboard" class="dashboard hidden">
+  <div id="admin-dashboard" class="dashboard">
     <header class="panel" style="display: flex; justify-content: space-between; align-items: center;">
       <div>
         <h1 style="font-size: 1.5rem;">Ballisticys Control Center</h1>
-        <p style="color: var(--muted); margin: 0;">Статус системы: <span style="color: #7eecc4;">ONLINE</span></p>
+        <p style="color: var(--text-dim); margin: 0;">Статус системы: <span style="color: #7eecc4;">ONLINE</span></p>
       </div>
-      <button class="btn ghost" onclick="logout()">Завершить сеанс</button>
+      <a class="btn ghost" href="index.html">На главную</a>
     </header>
 
     <div class="stat-row">
@@ -92,79 +117,188 @@
         <p id="count-forge">...</p>
       </div>
       <div class="stat-card">
+        <h3>Загрузок (Injector)</h3>
+        <p id="count-injector">...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Загрузок (Agent)</h3>
+        <p id="count-agent">...</p>
+      </div>
+      <div class="stat-card">
         <h3>Всего скачиваний</h3>
         <p id="count-total">...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Релизов</h3>
+        <p id="count-releases">...</p>
+      </div>
+      <div class="stat-card">
+        <h3>Ассетов</h3>
+        <p id="count-assets">...</p>
       </div>
     </div>
 
     <section class="panel">
       <h2>Управление файлами</h2>
+      <p class="admin-warning">Страница публичная. Реальное управление доступно только через права GitHub репозитория.</p>
       <p>Статистика подтягивается напрямую из GitHub Releases.</p>
-      <div style="display: flex; gap: 10px;">
+      <div class="actions">
          <a href="https://github.com/darnevmaksim-hue/ballisticys-site/releases" target="_blank" class="btn primary">Управление релизами</a>
-         <button class="btn ghost" onclick="fetchStats()">Обновить данные</button>
+         <button class="btn ghost" id="refresh-btn" onclick="fetchStats()">Обновить данные</button>
+      </div>
+      <p class="meta-row" id="fetch-state">Состояние: ожидание первой загрузки…</p>
+      <p class="meta-row" id="rate-limit">GitHub API rate limit: —</p>
+    </section>
+
+    <section class="panel">
+      <h2>Файлы релизов</h2>
+      <div class="table-wrap">
+        <table class="assets-table">
+          <thead>
+            <tr>
+              <th>Тип</th>
+              <th>Файл</th>
+              <th>Релиз</th>
+              <th>Скачивания</th>
+              <th>Размер</th>
+              <th>Обновлён</th>
+              <th>Ссылка</th>
+            </tr>
+          </thead>
+          <tbody id="assets-body">
+            <tr>
+              <td class="empty-row" colspan="7">Загрузка данных...</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
   </div>
 
   <script>
-    const PASS = 'admin123';
     const REPO = 'darnevmaksim-hue/ballisticys-site';
+    const stateEl = document.getElementById('fetch-state');
+    const rateLimitEl = document.getElementById('rate-limit');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const assetsBody = document.getElementById('assets-body');
+
+    function setCount(id, value) {
+      document.getElementById(id).textContent = value;
+    }
+
+    function detectType(assetName) {
+      const name = String(assetName || '').toLowerCase();
+      if (name.includes('agent')) return 'agent';
+      if (name.includes('injector') || name.includes('toolkit')) return 'injector';
+      if (name.includes('forge') || name.includes('blur')) return 'forge';
+      if (name.includes('fabric')) return 'fabric';
+      return 'other';
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes < 1) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      const value = bytes / Math.pow(1024, i);
+      return `${value.toFixed(i === 0 ? 0 : 2)} ${units[i]}`;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const date = new Date(dateStr);
+      if (Number.isNaN(date.getTime())) return '—';
+      return date.toLocaleString('ru-RU');
+    }
+
+    function renderAssetsRows(rows) {
+      if (!rows.length) {
+        assetsBody.innerHTML = '<tr><td class="empty-row" colspan="7">Ассеты не найдены</td></tr>';
+        return;
+      }
+      assetsBody.innerHTML = rows.map((row) => `
+        <tr>
+          <td><span class="pill ${row.type}">${row.type}</span></td>
+          <td>${row.name}</td>
+          <td>${row.release}</td>
+          <td>${row.downloads}</td>
+          <td>${formatBytes(row.size)}</td>
+          <td>${formatDate(row.updatedAt)}</td>
+          <td><a href="${row.url}" target="_blank" rel="noopener noreferrer">Открыть</a></td>
+        </tr>
+      `).join('');
+    }
 
     async function fetchStats() {
+      refreshBtn.disabled = true;
+      stateEl.textContent = 'Состояние: загрузка данных...';
       try {
         const response = await fetch(`https://api.github.com/repos/${REPO}/releases`);
+        if (!response.ok) {
+          throw new Error(`GitHub API error: ${response.status}`);
+        }
         const releases = await response.json();
-        
+        if (!Array.isArray(releases)) {
+          throw new Error('Invalid GitHub API response');
+        }
+
+        const remaining = response.headers.get('x-ratelimit-remaining');
+        const limit = response.headers.get('x-ratelimit-limit');
+        rateLimitEl.textContent = `GitHub API rate limit: ${remaining ?? '—'} / ${limit ?? '—'}`;
+
         let fabric = 0;
         let forge = 0;
+        let injector = 0;
+        let agent = 0;
         let total = 0;
+        let assetsCount = 0;
+        const rows = [];
 
         releases.forEach(rel => {
-          rel.assets.forEach(asset => {
-            if (asset.name.includes('fabric')) fabric += asset.download_count;
-            if (asset.name.includes('forge')) forge += asset.download_count;
-            total += asset.download_count;
+          const assets = Array.isArray(rel.assets) ? rel.assets : [];
+          assets.forEach(asset => {
+            const type = detectType(asset.name);
+            const downloads = Number(asset.download_count || 0);
+            if (type === 'fabric') fabric += downloads;
+            if (type === 'forge') forge += downloads;
+            if (type === 'injector') injector += downloads;
+            if (type === 'agent') agent += downloads;
+            total += downloads;
+            assetsCount += 1;
+            rows.push({
+              type,
+              name: asset.name || 'unknown',
+              release: rel.tag_name || rel.name || 'untagged',
+              downloads,
+              size: Number(asset.size || 0),
+              updatedAt: asset.updated_at,
+              url: asset.browser_download_url || '#'
+            });
           });
         });
 
-        document.getElementById('count-fabric').textContent = fabric;
-        document.getElementById('count-forge').textContent = forge;
-        document.getElementById('count-total').textContent = total;
-      } catch (e) {
-        console.error("Ошибка загрузки статистики:", e);
+        rows.sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')));
+        renderAssetsRows(rows);
+
+        setCount('count-fabric', fabric);
+        setCount('count-forge', forge);
+        setCount('count-injector', injector);
+        setCount('count-agent', agent);
+        setCount('count-total', total);
+        setCount('count-releases', releases.length);
+        setCount('count-assets', assetsCount);
+        stateEl.textContent = `Состояние: обновлено ${formatDate(new Date().toISOString())}`;
+      } catch (error) {
+        console.error('Ошибка загрузки статистики:', error);
+        ['count-fabric', 'count-forge', 'count-injector', 'count-agent', 'count-total', 'count-releases', 'count-assets']
+          .forEach((id) => setCount(id, '—'));
+        assetsBody.innerHTML = '<tr><td class="empty-row" colspan="7">Ошибка загрузки данных GitHub API</td></tr>';
+        stateEl.textContent = `Состояние: ошибка (${error.message})`;
+      } finally {
+        refreshBtn.disabled = false;
       }
     }
 
-    function tryLogin() {
-      const input = document.getElementById('admin-pass').value;
-      if (input === PASS) {
-        document.getElementById('login-zone').classList.add('hidden');
-        document.getElementById('admin-dashboard').classList.remove('hidden');
-        localStorage.setItem('admin_auth', 'true');
-        fetchStats();
-      } else {
-        const err = document.getElementById('error-msg');
-        err.classList.remove('hidden');
-        setTimeout(() => err.classList.add('hidden'), 2000);
-      }
-    }
-
-    function logout() {
-      localStorage.removeItem('admin_auth');
-      location.reload();
-    }
-
-    if (localStorage.getItem('admin_auth') === 'true') {
-      document.getElementById('login-zone').classList.add('hidden');
-      document.getElementById('admin-dashboard').classList.remove('hidden');
-      fetchStats();
-    }
-
-    // Вход по Enter
-    document.getElementById('admin-pass').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') tryLogin();
-    });
+    fetchStats();
   </script>
 </body>
 </html>
