@@ -56,45 +56,39 @@ const controlRoot = document.getElementById('control');
 if (controlRoot) {
   const REPO = 'darnevmaksim-hue/ballisticys-site';
   const BRANCH = 'main';
-  const ADMIN_PASSWORD = 'Gfdsaqw.0';
-  const AUTH_STORAGE_KEY = 'ballisticys_admin_auth';
   const authRoot = document.getElementById('admin-auth');
-  const passInput = document.getElementById('admin-pass');
-  const loginBtn = document.getElementById('admin-login-btn');
+  const emailInput = document.getElementById('auth-email');
+  const passInput = document.getElementById('auth-password');
+  const loginBtn = document.getElementById('auth-login-btn');
+  const signupBtn = document.getElementById('auth-signup-btn');
+  const oauthButtons = Array.from(document.querySelectorAll('.oauth-btn[data-oauth-provider]'));
   const logoutBtn = document.getElementById('admin-logout-btn');
-  const authErrorEl = document.getElementById('admin-auth-error');
+  const authStatusEl = document.getElementById('auth-status');
+  const userBoxEl = document.getElementById('auth-user-box');
+  const userEmailEl = document.getElementById('auth-user-email');
+  const userLogoutBtn = document.getElementById('auth-logout-btn');
   const stateEl = document.getElementById('fetch-state');
   const rateLimitEl = document.getElementById('rate-limit');
   const refreshBtn = document.getElementById('refresh-btn');
   const assetsBody = document.getElementById('assets-body');
-  const authRequired = Boolean(authRoot && passInput && loginBtn);
+  const authRequired = Boolean(authRoot && emailInput && passInput && loginBtn && signupBtn);
+  const authConfig = window.AUTH_CONFIG || {};
+  const hasAuthConfig = Boolean(authConfig.url && authConfig.anonKey);
+  const supabaseFactory = window.supabase;
+  const supabaseClient = (supabaseFactory && hasAuthConfig)
+    ? supabaseFactory.createClient(authConfig.url, authConfig.anonKey)
+    : null;
+  const allowedProviders = Array.isArray(authConfig.oauthProviders)
+    ? authConfig.oauthProviders.map((p) => String(p).toLowerCase())
+    : ['google', 'discord'];
+  const adminEmails = Array.isArray(authConfig.adminEmails)
+    ? authConfig.adminEmails.map((e) => String(e).trim().toLowerCase()).filter(Boolean)
+    : [];
+  const allowAnySignedIn = authConfig.allowAnySignedIn === true;
   let statsLoaded = false;
-  let memoryAuth = false;
-
-  function getAuthState() {
-    try {
-      return localStorage.getItem(AUTH_STORAGE_KEY) === '1' || memoryAuth;
-    } catch (_) {
-      return memoryAuth;
-    }
-  }
-
-  function setAuthState(value) {
-    memoryAuth = value;
-    try {
-      if (value) {
-        localStorage.setItem(AUTH_STORAGE_KEY, '1');
-      } else {
-        localStorage.removeItem(AUTH_STORAGE_KEY);
-      }
-    } catch (_) {
-      // localStorage may be unavailable in privacy-restricted browsers
-    }
-  }
 
   function unlockAdmin() {
     controlRoot.classList.remove('hidden');
-    if (authRoot) authRoot.classList.add('hidden');
     controlRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (!statsLoaded) {
       statsLoaded = true;
@@ -102,34 +96,131 @@ if (controlRoot) {
     }
   }
 
-  function showAuthError() {
-    if (authErrorEl) authErrorEl.classList.remove('hidden');
-  }
-
-  function hideAuthError() {
-    if (authErrorEl) authErrorEl.classList.add('hidden');
-  }
-
-  function tryAdminLogin() {
-    if (!passInput) return;
-    if (passInput.value.trim() === ADMIN_PASSWORD) {
-      setAuthState(true);
-      hideAuthError();
-      unlockAdmin();
-    } else {
-      showAuthError();
-    }
-  }
-
-  function logoutAdmin() {
-    setAuthState(false);
+  function hideAdminPanel() {
     controlRoot.classList.add('hidden');
-    if (authRoot) authRoot.classList.remove('hidden');
-    if (passInput) {
-      passInput.value = '';
-      passInput.focus();
+  }
+
+  function setAuthStatus(message, isError = false) {
+    if (!authStatusEl) return;
+    authStatusEl.textContent = `Статус: ${message}`;
+    authStatusEl.style.color = isError ? '#ff7b72' : '';
+  }
+
+  function setUserChip(user) {
+    if (!userBoxEl || !userEmailEl) return;
+    if (user && user.email) {
+      userEmailEl.textContent = user.email;
+      userBoxEl.classList.remove('hidden');
+    } else {
+      userEmailEl.textContent = '—';
+      userBoxEl.classList.add('hidden');
     }
-    hideAuthError();
+  }
+
+  function isAdminUser(user) {
+    const email = String(user?.email || '').trim().toLowerCase();
+    if (!email) return false;
+    if (allowAnySignedIn) return true;
+    if (!adminEmails.length) return false;
+    return adminEmails.includes(email);
+  }
+
+  function setAuthBusy(value) {
+    [loginBtn, signupBtn, userLogoutBtn, ...oauthButtons].forEach((el) => {
+      if (el) el.disabled = value;
+    });
+  }
+
+  function getBaseRedirectUrl() {
+    return `${window.location.origin}${window.location.pathname}#admin-auth`;
+  }
+
+  async function applySession(session) {
+    const user = session?.user || null;
+    setUserChip(user);
+    if (!user) {
+      hideAdminPanel();
+      setAuthStatus('не выполнен вход.');
+      return;
+    }
+
+    if (!isAdminUser(user)) {
+      hideAdminPanel();
+      setAuthStatus('вход выполнен, но нет админ-доступа.', true);
+      return;
+    }
+
+    setAuthStatus('админ-доступ подтвержден.');
+    unlockAdmin();
+  }
+
+  async function loginWithPassword() {
+    if (!supabaseClient) return;
+    const email = String(emailInput?.value || '').trim();
+    const password = String(passInput?.value || '');
+    if (!email || !password) {
+      setAuthStatus('введите email и пароль.', true);
+      return;
+    }
+    setAuthBusy(true);
+    setAuthStatus('вход...');
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    setAuthBusy(false);
+    if (error) {
+      setAuthStatus(error.message, true);
+      return;
+    }
+    const { data } = await supabaseClient.auth.getSession();
+    await applySession(data?.session || null);
+  }
+
+  async function signUpWithPassword() {
+    if (!supabaseClient) return;
+    const email = String(emailInput?.value || '').trim();
+    const password = String(passInput?.value || '');
+    if (!email || !password) {
+      setAuthStatus('введите email и пароль.', true);
+      return;
+    }
+    if (password.length < 8) {
+      setAuthStatus('минимум 8 символов в пароле.', true);
+      return;
+    }
+    setAuthBusy(true);
+    setAuthStatus('регистрация...');
+    const { error } = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: getBaseRedirectUrl() }
+    });
+    setAuthBusy(false);
+    if (error) {
+      setAuthStatus(error.message, true);
+      return;
+    }
+    setAuthStatus('регистрация отправлена. Подтвердите email, если включено подтверждение.');
+  }
+
+  async function loginWithOAuth(provider) {
+    if (!supabaseClient) return;
+    setAuthBusy(true);
+    setAuthStatus(`перенаправление в ${provider}...`);
+    const { error } = await supabaseClient.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: getBaseRedirectUrl() }
+    });
+    setAuthBusy(false);
+    if (error) {
+      setAuthStatus(error.message, true);
+    }
+  }
+
+  async function logoutUser() {
+    if (!supabaseClient) return;
+    await supabaseClient.auth.signOut();
+    hideAdminPanel();
+    setUserChip(null);
+    setAuthStatus('выполнен выход.');
   }
 
   function setCount(id, value) {
@@ -263,22 +354,43 @@ if (controlRoot) {
   }
 
   if (authRequired) {
-    loginBtn.addEventListener('click', tryAdminLogin);
+    oauthButtons.forEach((btn) => {
+      const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
+      if (!allowedProviders.includes(provider)) {
+        btn.classList.add('hidden');
+        return;
+      }
+      btn.addEventListener('click', () => loginWithOAuth(provider));
+    });
+
+    loginBtn.addEventListener('click', loginWithPassword);
+    signupBtn.addEventListener('click', signUpWithPassword);
     passInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
         event.preventDefault();
-        tryAdminLogin();
+        loginWithPassword();
       }
     });
-    if (logoutBtn) logoutBtn.addEventListener('click', logoutAdmin);
 
-    if (getAuthState()) {
-      unlockAdmin();
-    } else {
-      controlRoot.classList.add('hidden');
-      authRoot.classList.remove('hidden');
-      passInput.focus();
+    if (userLogoutBtn) userLogoutBtn.addEventListener('click', logoutUser);
+    if (logoutBtn) logoutBtn.addEventListener('click', logoutUser);
+
+    if (!supabaseClient) {
+      hideAdminPanel();
+      setAuthStatus('auth не настроен. Заполните auth-config.js', true);
+      setAuthBusy(true);
+      return;
     }
+
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      await applySession(session);
+    });
+
+    supabaseClient.auth.getSession().then(async ({ data }) => {
+      await applySession(data?.session || null);
+    });
+
+    if (emailInput) emailInput.focus();
   } else {
     fetchDownloadsStats();
   }

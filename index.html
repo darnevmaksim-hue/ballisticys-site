@@ -184,13 +184,30 @@
     </section>
 
     <section class="panel reveal" id="admin-auth">
-      <h2>Admin Access</h2>
-      <p class="admin-warning">Введите пароль администратора для доступа к панели.</p>
+      <h2>Auth Center</h2>
+      <p class="admin-warning">Регистрация и вход через email/пароль или соцсети. Админ-права выдаются только разрешенным аккаунтам.</p>
+
       <div class="auth-box">
-        <input id="admin-pass" class="auth-input" type="password" placeholder="Пароль" autocomplete="off" />
-        <button id="admin-login-btn" class="btn primary" type="button">Войти</button>
+        <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="auth-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
       </div>
-      <p id="admin-auth-error" class="auth-error hidden">Неверный пароль</p>
+      <div class="actions">
+        <button id="auth-login-btn" class="btn primary" type="button">Войти</button>
+        <button id="auth-signup-btn" class="btn ghost" type="button">Регистрация</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="google">Google</button>
+        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="discord">Discord</button>
+        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="vk">VK</button>
+      </div>
+
+      <p id="auth-status" class="auth-status">Статус: не выполнен вход.</p>
+
+      <div id="auth-user-box" class="actions hidden">
+        <span id="auth-user-email" class="auth-chip">—</span>
+        <button id="auth-logout-btn" class="btn ghost" type="button">Выйти</button>
+      </div>
     </section>
 
     <section class="panel reveal hidden" id="control">
@@ -268,6 +285,8 @@
     <p>Ballisticys Project • Persistent Web Build</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth-config.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

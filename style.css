@@ -298,6 +298,22 @@ body {
   font-size: 0.9rem;
 }
 
+.auth-status {
+  margin-top: 0.8rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.auth-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  color: var(--text-main);
+  font-size: 0.85rem;
+}
+
 .stat-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
