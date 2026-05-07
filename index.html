@@ -210,6 +210,17 @@
         <button class="btn ghost oauth-btn" type="button" data-oauth-provider="vk">VK</button>
       </div>
 
+      <div id="auth-setup-box" class="auth-setup hidden">
+        <p class="admin-warning">Первичная настройка: вставь Supabase URL и Anon Key (один раз на этом устройстве).</p>
+        <div class="auth-box">
+          <input id="auth-supabase-url" class="auth-input" type="text" placeholder="https://xxxx.supabase.co" autocomplete="off" />
+          <input id="auth-supabase-key" class="auth-input" type="text" placeholder="Supabase anon key" autocomplete="off" />
+        </div>
+        <div class="actions">
+          <button id="auth-save-config-btn" class="btn primary" type="button">Сохранить настройки</button>
+        </div>
+      </div>
+
       <p id="auth-status" class="auth-status">Статус: не выполнен вход.</p>
       <div id="auth-user-box" class="actions hidden">
         <span id="auth-user-email" class="auth-chip">—</span>

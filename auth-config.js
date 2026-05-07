@@ -3,12 +3,6 @@ window.AUTH_CONFIG = {
   url: '',
   // Required: public anon key from Supabase project settings
   anonKey: '',
-  // Optional: if true, any authenticated user can access admin panel
-  allowAnySignedIn: false,
-  // Optional: explicit admin allowlist (emails in lowercase)
-  adminEmails: [
-    // 'you@example.com'
-  ],
   // Optional: oauth providers to show in UI
-  oauthProviders: ['google', 'discord', 'vk']
+  oauthProviders: ['google', 'discord']
 };

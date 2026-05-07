@@ -314,6 +314,13 @@ body {
   font-size: 0.85rem;
 }
 
+.auth-setup {
+  margin-top: 0.8rem;
+  border: 1px dashed var(--panel-border);
+  border-radius: 10px;
+  padding: 0.9rem;
+}
+
 .modal {
   position: fixed;
   inset: 0;

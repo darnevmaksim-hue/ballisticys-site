@@ -54,6 +54,7 @@ animateCounters();
 
 const authModal = document.getElementById('auth-modal');
 if (authModal) {
+  const RUNTIME_AUTH_KEY = 'ballisticys_auth_runtime_cfg';
   const openAuthBtn = document.getElementById('open-auth-modal');
   const closeAuthBtn = document.getElementById('close-auth-modal');
   const backdropBtn = document.getElementById('auth-modal-backdrop');
@@ -62,20 +63,54 @@ if (authModal) {
   const loginBtn = document.getElementById('auth-login-btn');
   const signupBtn = document.getElementById('auth-signup-btn');
   const oauthButtons = Array.from(document.querySelectorAll('.oauth-btn[data-oauth-provider]'));
+  const setupBox = document.getElementById('auth-setup-box');
+  const setupUrlInput = document.getElementById('auth-supabase-url');
+  const setupKeyInput = document.getElementById('auth-supabase-key');
+  const setupSaveBtn = document.getElementById('auth-save-config-btn');
   const userBoxEl = document.getElementById('auth-user-box');
   const userEmailEl = document.getElementById('auth-user-email');
   const userLogoutBtn = document.getElementById('auth-logout-btn');
   const authStatusEl = document.getElementById('auth-status');
 
-  const authConfig = window.AUTH_CONFIG || {};
-  const hasAuthConfig = Boolean(authConfig.url && authConfig.anonKey);
+  const fileConfig = window.AUTH_CONFIG || {};
   const supabaseFactory = window.supabase;
-  const supabaseClient = (supabaseFactory && hasAuthConfig)
-    ? supabaseFactory.createClient(authConfig.url, authConfig.anonKey)
-    : null;
-  const allowedProviders = Array.isArray(authConfig.oauthProviders)
-    ? authConfig.oauthProviders.map((p) => String(p).toLowerCase())
-    : ['google', 'discord'];
+  let supabaseClient = null;
+  let authBound = false;
+  let effectiveConfig = fileConfig;
+
+  function readRuntimeConfig() {
+    try {
+      const raw = localStorage.getItem(RUNTIME_AUTH_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function getMergedConfig() {
+    const runtime = readRuntimeConfig();
+    return {
+      ...fileConfig,
+      ...runtime,
+      oauthProviders: Array.isArray(runtime.oauthProviders) ? runtime.oauthProviders : fileConfig.oauthProviders
+    };
+  }
+
+  function getAllowedProviders(config) {
+    return Array.isArray(config.oauthProviders)
+      ? config.oauthProviders.map((p) => String(p).toLowerCase())
+      : ['google', 'discord'];
+  }
+
+  function updateProviderButtons(config) {
+    const allowed = getAllowedProviders(config);
+    oauthButtons.forEach((btn) => {
+      const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
+      btn.classList.toggle('hidden', !allowed.includes(provider));
+    });
+  }
 
   function openAuthModal() {
     authModal.classList.remove('hidden');
@@ -86,6 +121,10 @@ if (authModal) {
   function closeAuthModal() {
     authModal.classList.add('hidden');
     document.body.classList.remove('modal-open');
+  }
+
+  function hasValidAuthConfig(config) {
+    return Boolean(config?.url && config?.anonKey);
   }
 
   function setAuthStatus(message, isError = false) {
@@ -106,7 +145,7 @@ if (authModal) {
   }
 
   function setAuthBusy(value) {
-    [loginBtn, signupBtn, userLogoutBtn, ...oauthButtons].forEach((el) => {
+    [loginBtn, signupBtn, userLogoutBtn, setupSaveBtn, ...oauthButtons].forEach((el) => {
       if (el) el.disabled = value;
     });
   }
@@ -126,6 +165,60 @@ if (authModal) {
     closeAuthModal();
   }
 
+  function initSupabaseClient() {
+    effectiveConfig = getMergedConfig();
+    updateProviderButtons(effectiveConfig);
+
+    if (setupUrlInput && !setupUrlInput.value && effectiveConfig.url) {
+      setupUrlInput.value = effectiveConfig.url;
+    }
+    if (setupKeyInput && !setupKeyInput.value && effectiveConfig.anonKey) {
+      setupKeyInput.value = effectiveConfig.anonKey;
+    }
+
+    if (!supabaseFactory || !hasValidAuthConfig(effectiveConfig)) {
+      supabaseClient = null;
+      if (setupBox) setupBox.classList.remove('hidden');
+      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key ниже.', true);
+      return;
+    }
+
+    supabaseClient = supabaseFactory.createClient(effectiveConfig.url, effectiveConfig.anonKey);
+    if (setupBox) setupBox.classList.add('hidden');
+    setAuthStatus('готово к входу.');
+  }
+
+  function bindSessionHandlers() {
+    if (!supabaseClient || authBound) return;
+    authBound = true;
+    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      await applySession(session);
+    });
+    supabaseClient.auth.getSession().then(async ({ data }) => {
+      await applySession(data?.session || null);
+    });
+  }
+
+  function saveRuntimeAuthConfig() {
+    const url = String(setupUrlInput?.value || '').trim();
+    const anonKey = String(setupKeyInput?.value || '').trim();
+    if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
+      setAuthStatus('некорректный Supabase URL.', true);
+      return;
+    }
+    if (anonKey.length < 40) {
+      setAuthStatus('некорректный Anon Key.', true);
+      return;
+    }
+    try {
+      localStorage.setItem(RUNTIME_AUTH_KEY, JSON.stringify({ url, anonKey }));
+      setAuthStatus('настройки сохранены, перезагружаю...');
+      location.reload();
+    } catch (error) {
+      setAuthStatus(`не удалось сохранить настройки: ${error.message}`, true);
+    }
+  }
+
   async function loginWithPassword() {
     const email = String(emailInput?.value || '').trim();
     const password = String(passInput?.value || '');
@@ -134,7 +227,7 @@ if (authModal) {
       return;
     }
     if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполните auth-config.js', true);
+      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
       return;
     }
     setAuthBusy(true);
@@ -161,7 +254,7 @@ if (authModal) {
       return;
     }
     if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполните auth-config.js', true);
+      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
       return;
     }
     setAuthBusy(true);
@@ -181,7 +274,7 @@ if (authModal) {
 
   async function loginWithOAuth(provider) {
     if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполните auth-config.js', true);
+      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
       return;
     }
     setAuthBusy(true);
@@ -198,7 +291,7 @@ if (authModal) {
 
   async function logoutUser() {
     if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполните auth-config.js', true);
+      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
       return;
     }
     await supabaseClient.auth.signOut();
@@ -215,15 +308,12 @@ if (authModal) {
 
   oauthButtons.forEach((btn) => {
     const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
-    if (!allowedProviders.includes(provider)) {
-      btn.classList.add('hidden');
-      return;
-    }
     btn.addEventListener('click', () => loginWithOAuth(provider));
   });
 
   if (loginBtn) loginBtn.addEventListener('click', loginWithPassword);
   if (signupBtn) signupBtn.addEventListener('click', signUpWithPassword);
+  if (setupSaveBtn) setupSaveBtn.addEventListener('click', saveRuntimeAuthConfig);
   if (passInput) {
     passInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') {
@@ -234,17 +324,8 @@ if (authModal) {
   }
   if (userLogoutBtn) userLogoutBtn.addEventListener('click', logoutUser);
 
-  if (!supabaseClient) {
-    setAuthStatus('auth не настроен. Заполните auth-config.js', true);
-  } else {
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-      await applySession(session);
-    });
-
-    supabaseClient.auth.getSession().then(async ({ data }) => {
-      await applySession(data?.session || null);
-    });
-  }
+  initSupabaseClient();
+  bindSessionHandlers();
 
   if (window.location.hash === '#auth') {
     openAuthModal();
