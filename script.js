@@ -55,6 +55,7 @@ animateCounters();
 const controlRoot = document.getElementById('control');
 if (controlRoot) {
   const REPO = 'darnevmaksim-hue/ballisticys-site';
+  const BRANCH = 'main';
   const stateEl = document.getElementById('fetch-state');
   const rateLimitEl = document.getElementById('rate-limit');
   const refreshBtn = document.getElementById('refresh-btn');
@@ -99,8 +100,8 @@ if (controlRoot) {
       <tr>
         <td><span class="pill ${row.type}">${row.type}</span></td>
         <td>${row.name}</td>
-        <td>${row.release}</td>
-        <td>${row.downloads}</td>
+        <td>${row.path}</td>
+        <td>${row.sha}</td>
         <td>${formatBytes(row.size)}</td>
         <td>${formatDate(row.updatedAt)}</td>
         <td><a href="${row.url}" target="_blank" rel="noopener noreferrer">Открыть</a></td>
@@ -108,15 +109,23 @@ if (controlRoot) {
     `).join('');
   }
 
-  async function fetchReleaseStats() {
+  async function fetchLastCommitDate(path) {
+    const response = await fetch(`https://api.github.com/repos/${REPO}/commits?sha=${BRANCH}&path=${encodeURIComponent(path)}&per_page=1`);
+    if (!response.ok) return '';
+    const commits = await response.json();
+    if (!Array.isArray(commits) || !commits.length) return '';
+    return commits[0]?.commit?.committer?.date || commits[0]?.commit?.author?.date || '';
+  }
+
+  async function fetchDownloadsStats() {
     if (refreshBtn) refreshBtn.disabled = true;
     if (stateEl) stateEl.textContent = 'Состояние: загрузка данных...';
     try {
-      const response = await fetch(`https://api.github.com/repos/${REPO}/releases`);
+      const response = await fetch(`https://api.github.com/repos/${REPO}/contents/downloads?ref=${BRANCH}`);
       if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
 
-      const releases = await response.json();
-      if (!Array.isArray(releases)) throw new Error('Invalid GitHub API response');
+      const files = await response.json();
+      if (!Array.isArray(files)) throw new Error('Invalid GitHub API response');
 
       if (rateLimitEl) {
         const remaining = response.headers.get('x-ratelimit-remaining') ?? '-';
@@ -128,31 +137,30 @@ if (controlRoot) {
       let forge = 0;
       let injector = 0;
       let agent = 0;
-      let total = 0;
-      let assetsCount = 0;
+      let totalSize = 0;
+      let filesCount = 0;
       const rows = [];
 
-      releases.forEach((rel) => {
-        const assets = Array.isArray(rel.assets) ? rel.assets : [];
-        assets.forEach((asset) => {
-          const type = detectType(asset.name);
-          const downloads = Number(asset.download_count || 0);
-          if (type === 'fabric') fabric += downloads;
-          if (type === 'forge') forge += downloads;
-          if (type === 'injector') injector += downloads;
-          if (type === 'agent') agent += downloads;
-          total += downloads;
-          assetsCount += 1;
+      const downloadFiles = files.filter((item) => item && item.type === 'file');
+      const updatedAtList = await Promise.all(downloadFiles.map((item) => fetchLastCommitDate(item.path)));
 
-          rows.push({
-            type,
-            name: asset.name || 'unknown',
-            release: rel.tag_name || rel.name || 'untagged',
-            downloads,
-            size: Number(asset.size || 0),
-            updatedAt: asset.updated_at,
-            url: asset.browser_download_url || '#'
-          });
+      downloadFiles.forEach((file, index) => {
+        const type = detectType(file.name);
+        if (type === 'fabric') fabric += 1;
+        if (type === 'forge') forge += 1;
+        if (type === 'injector') injector += 1;
+        if (type === 'agent') agent += 1;
+        totalSize += Number(file.size || 0);
+        filesCount += 1;
+
+        rows.push({
+          type,
+          name: file.name || 'unknown',
+          path: file.path || '-',
+          sha: String(file.sha || '').slice(0, 10) || '-',
+          size: Number(file.size || 0),
+          updatedAt: updatedAtList[index] || '',
+          url: file.html_url || file.download_url || '#'
         });
       });
 
@@ -163,9 +171,9 @@ if (controlRoot) {
       setCount('count-forge', forge);
       setCount('count-injector', injector);
       setCount('count-agent', agent);
-      setCount('count-total', total);
-      setCount('count-releases', releases.length);
-      setCount('count-assets', assetsCount);
+      setCount('count-total', formatBytes(totalSize));
+      setCount('count-releases', filesCount);
+      setCount('count-assets', rows[0]?.updatedAt ? formatDate(rows[0].updatedAt) : '-');
       if (stateEl) stateEl.textContent = `Состояние: обновлено ${formatDate(new Date().toISOString())}`;
     } catch (error) {
       ['count-fabric', 'count-forge', 'count-injector', 'count-agent', 'count-total', 'count-releases', 'count-assets']
@@ -180,7 +188,7 @@ if (controlRoot) {
   }
 
   if (refreshBtn) {
-    refreshBtn.addEventListener('click', fetchReleaseStats);
+    refreshBtn.addEventListener('click', fetchDownloadsStats);
   }
-  fetchReleaseStats();
+  fetchDownloadsStats();
 }
