@@ -56,7 +56,10 @@ const controlRoot = document.getElementById('control');
 if (controlRoot) {
   const REPO = 'darnevmaksim-hue/ballisticys-site';
   const BRANCH = 'main';
-  const authRoot = document.getElementById('admin-auth');
+  const authModal = document.getElementById('auth-modal');
+  const openAuthBtn = document.getElementById('open-auth-modal');
+  const closeAuthBtn = document.getElementById('close-auth-modal');
+  const backdropBtn = document.getElementById('auth-modal-backdrop');
   const emailInput = document.getElementById('auth-email');
   const passInput = document.getElementById('auth-password');
   const loginBtn = document.getElementById('auth-login-btn');
@@ -71,7 +74,7 @@ if (controlRoot) {
   const rateLimitEl = document.getElementById('rate-limit');
   const refreshBtn = document.getElementById('refresh-btn');
   const assetsBody = document.getElementById('assets-body');
-  const authRequired = Boolean(authRoot && emailInput && passInput && loginBtn && signupBtn);
+  const authRequired = Boolean(authModal && emailInput && passInput && loginBtn && signupBtn);
   const authConfig = window.AUTH_CONFIG || {};
   const hasAuthConfig = Boolean(authConfig.url && authConfig.anonKey);
   const supabaseFactory = window.supabase;
@@ -87,8 +90,22 @@ if (controlRoot) {
   const allowAnySignedIn = authConfig.allowAnySignedIn === true;
   let statsLoaded = false;
 
+  function openAuthModal() {
+    if (!authModal) return;
+    authModal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    if (emailInput) emailInput.focus();
+  }
+
+  function closeAuthModal() {
+    if (!authModal) return;
+    authModal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  }
+
   function unlockAdmin() {
     controlRoot.classList.remove('hidden');
+    closeAuthModal();
     controlRoot.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (!statsLoaded) {
       statsLoaded = true;
@@ -132,7 +149,7 @@ if (controlRoot) {
   }
 
   function getBaseRedirectUrl() {
-    return `${window.location.origin}${window.location.pathname}#admin-auth`;
+    return `${window.location.origin}${window.location.pathname}#auth`;
   }
 
   async function applySession(session) {
@@ -354,6 +371,13 @@ if (controlRoot) {
   }
 
   if (authRequired) {
+    if (openAuthBtn) openAuthBtn.addEventListener('click', openAuthModal);
+    if (closeAuthBtn) closeAuthBtn.addEventListener('click', closeAuthModal);
+    if (backdropBtn) backdropBtn.addEventListener('click', closeAuthModal);
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') closeAuthModal();
+    });
+
     oauthButtons.forEach((btn) => {
       const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
       if (!allowedProviders.includes(provider)) {
@@ -379,6 +403,7 @@ if (controlRoot) {
       hideAdminPanel();
       setAuthStatus('auth не настроен. Заполните auth-config.js', true);
       setAuthBusy(true);
+      openAuthModal();
     } else {
       supabaseClient.auth.onAuthStateChange(async (_event, session) => {
         await applySession(session);
@@ -389,6 +414,10 @@ if (controlRoot) {
       });
 
       if (emailInput) emailInput.focus();
+    }
+
+    if (window.location.hash === '#auth') {
+      openAuthModal();
     }
   } else {
     fetchDownloadsStats();

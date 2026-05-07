@@ -314,6 +314,61 @@ body {
   font-size: 0.85rem;
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 6, 10, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  position: relative;
+  width: min(560px, 100%);
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 14px;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.modal-card h2 {
+  font-family: var(--font-header);
+  font-size: 1.7rem;
+  margin-bottom: 1rem;
+}
+
+.modal-close {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.9rem;
+  border: 1px solid var(--panel-border);
+  background: transparent;
+  color: var(--text-dim);
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: var(--text-main);
+  border-color: var(--accent-color);
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+
 .stat-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

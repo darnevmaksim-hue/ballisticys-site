@@ -20,7 +20,7 @@
       <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
       <div class="hero-actions">
         <a class="btn primary" href="#downloads">Скачать</a>
-        <a class="btn ghost" href="#admin-auth">Админ</a>
+        <button class="btn ghost" id="open-auth-modal" type="button">Админ</button>
       </div>
     </div>
   </header>
@@ -183,33 +183,6 @@
       </div>
     </section>
 
-    <section class="panel reveal" id="admin-auth">
-      <h2>Auth Center</h2>
-      <p class="admin-warning">Регистрация и вход через email/пароль или соцсети. Админ-права выдаются только разрешенным аккаунтам.</p>
-
-      <div class="auth-box">
-        <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
-        <input id="auth-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
-      </div>
-      <div class="actions">
-        <button id="auth-login-btn" class="btn primary" type="button">Войти</button>
-        <button id="auth-signup-btn" class="btn ghost" type="button">Регистрация</button>
-      </div>
-
-      <div class="actions">
-        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="google">Google</button>
-        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="discord">Discord</button>
-        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="vk">VK</button>
-      </div>
-
-      <p id="auth-status" class="auth-status">Статус: не выполнен вход.</p>
-
-      <div id="auth-user-box" class="actions hidden">
-        <span id="auth-user-email" class="auth-chip">—</span>
-        <button id="auth-logout-btn" class="btn ghost" type="button">Выйти</button>
-      </div>
-    </section>
-
     <section class="panel reveal hidden" id="control">
       <h2>Control Center</h2>
       <p class="admin-warning">Панель администратора. Данные берутся из папки <code>downloads/</code> репозитория.</p>
@@ -284,6 +257,35 @@
   <footer class="footer reveal">
     <p>Ballisticys Project • Persistent Web Build</p>
   </footer>
+
+  <div id="auth-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+    <div class="modal-backdrop" id="auth-modal-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-modal" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2 id="auth-modal-title">Auth Center</h2>
+      <p class="admin-warning">Вход и регистрация через email/пароль или соцсети.</p>
+
+      <div class="auth-box">
+        <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="auth-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
+      </div>
+      <div class="actions">
+        <button id="auth-login-btn" class="btn primary" type="button">Войти</button>
+        <button id="auth-signup-btn" class="btn ghost" type="button">Регистрация</button>
+      </div>
+      <div class="actions">
+        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="google">Google</button>
+        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="discord">Discord</button>
+        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="vk">VK</button>
+      </div>
+
+      <p id="auth-status" class="auth-status">Статус: не выполнен вход.</p>
+      <div id="auth-user-box" class="actions hidden">
+        <span id="auth-user-email" class="auth-chip">—</span>
+        <button id="auth-logout-btn" class="btn ghost" type="button">Выйти</button>
+      </div>
+    </section>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="auth-config.js"></script>
