@@ -98,10 +98,14 @@ if (authModal) {
 
   function getMergedConfig() {
     const runtime = readRuntimeConfig();
+    // Всегда используем OAuth из fileConfig по умолчанию
+    const defaultOAuth = fileConfig.oauthProviders || ['google', 'discord'];
     return {
       ...fileConfig,
       ...runtime,
-      oauthProviders: Array.isArray(runtime.oauthProviders) ? runtime.oauthProviders : fileConfig.oauthProviders
+      oauthProviders: Array.isArray(runtime.oauthProviders) && runtime.oauthProviders.length > 0 
+        ? runtime.oauthProviders 
+        : defaultOAuth
     };
   }
 
@@ -113,9 +117,12 @@ if (authModal) {
 
   function updateProviderButtons(config) {
     const allowed = getAllowedProviders(config);
+    console.log('[Auth] updateProviderButtons called with allowed:', allowed);
     oauthButtons.forEach((btn) => {
       const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
-      btn.classList.toggle('hidden', !allowed.includes(provider));
+      const shouldHide = !allowed.includes(provider);
+      btn.classList.toggle('hidden', shouldHide);
+      console.log(`[Auth] ${provider} button: ${shouldHide ? 'hidden' : 'shown'}`);
     });
   }
 
@@ -162,22 +169,56 @@ if (authModal) {
   }
 
   function setUserChip(user) {
-    if (!userBoxEl || !userEmailEl) return;
-    if (user && user.email) {
-      userEmailEl.textContent = user.email;
-      userBoxEl.classList.remove('hidden');
-    } else {
-      userEmailEl.textContent = '—';
-      userBoxEl.classList.add('hidden');
+    console.log('[Auth] setUserChip called with:', user?.email || null);
+    
+    // Обновляем карточку пользователя в модалке
+    if (userBoxEl && userEmailEl) {
+      if (user && user.email) {
+        userEmailEl.textContent = user.email;
+        userBoxEl.classList.remove('hidden');
+        console.log('[Auth] User box shown with email:', user.email);
+      } else {
+        userEmailEl.textContent = '—';
+        userBoxEl.classList.add('hidden');
+      }
     }
 
-    if (openAuthBtn) openAuthBtn.classList.toggle('hidden', Boolean(user));
-    if (profileRoot) profileRoot.classList.toggle('hidden', !user);
-    if (profileEmail) profileEmail.textContent = user?.email || '—';
+    // Скрываем кнопку входа, показываем профиль
+    if (openAuthBtn) {
+      if (user) {
+        openAuthBtn.classList.add('hidden');
+        console.log('[Auth] Login button hidden');
+      } else {
+        openAuthBtn.classList.remove('hidden');
+        console.log('[Auth] Login button shown');
+      }
+    }
+    
+    // Показываем/скрываем профиль
+    if (profileRoot) {
+      if (user) {
+        profileRoot.classList.remove('hidden');
+        console.log('[Auth] Profile root shown');
+      } else {
+        profileRoot.classList.add('hidden');
+        console.log('[Auth] Profile root hidden');
+      }
+    }
+    
+    // Обновляем профиль в дропдауне
+    if (profileEmail) {
+      profileEmail.textContent = user?.email || '—';
+      console.log('[Auth] Profile email set to:', user?.email || '—');
+    }
+    
+    // Обновляем инициал в аватаре
     if (profileInitial) {
       const first = String(user?.email || 'U').trim().charAt(0);
       profileInitial.textContent = first ? first.toUpperCase() : 'U';
+      console.log('[Auth] Profile initial set to:', profileInitial.textContent);
     }
+    
+    // Закрываем меню если нет пользователя
     if (!user) closeProfileMenu();
   }
 
@@ -193,13 +234,24 @@ if (authModal) {
 
   async function applySession(session) {
     const user = session?.user || null;
+    console.log('[Auth] applySession called with user:', user?.email || null);
     setUserChip(user);
     if (!user) {
       setAuthStatus('не выполнен вход.');
       return;
     }
-    setAuthStatus('вход выполнен.');
+    setAuthStatus(`вход выполнен: ${user.email}`);
     closeAuthModal();
+    
+    // Явно показываем профиль после входа
+    if (profileRoot) {
+      profileRoot.classList.remove('hidden');
+      console.log('[Auth] Profile root shown');
+    }
+    if (openAuthBtn) {
+      openAuthBtn.classList.add('hidden');
+      console.log('[Auth] Login button hidden');
+    }
   }
 
   function initSupabaseClient() {
@@ -269,13 +321,20 @@ if (authModal) {
     }
     setAuthBusy(true);
     setAuthStatus('вход...');
-    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     setAuthBusy(false);
+    
     if (error) {
       setAuthStatus(error.message, true);
+      console.error('[Auth] Login error:', error);
       return;
     }
-    const { data } = await supabaseClient.auth.getSession();
+    
+    console.log('[Auth] Login successful:', data?.user?.email);
+    setAuthStatus(`вход выполнен: ${email}`);
+    closeAuthModal();
+    
+    // Явно обновляем UI после успешного входа
     await applySession(data?.session || null);
   }
 
