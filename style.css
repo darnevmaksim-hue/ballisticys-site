@@ -531,7 +531,243 @@ body.modal-open {
 
 .hidden { display: none; }
 
+/* === AUTH MODALS === */
+.auth-choice-card {
+  max-width: 400px;
+  text-align: center;
+}
+
+.auth-choice-title {
+  margin-bottom: 1.5rem;
+  color: var(--text-dim);
+}
+
+.auth-choice-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-choice-buttons .btn.large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+.auth-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  color: var(--text-main);
+  font-family: var(--font-main);
+  font-size: 1rem;
+}
+
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+}
+
+.auth-mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  justify-content: center;
+}
+
+.auth-mode-btn {
+  padding: 0.5rem 1.5rem;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-mode-btn.active {
+  background: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
+}
+
+.auth-mode-hint {
+  text-align: center;
+  color: var(--text-dim);
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent-color);
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: var(--font-main);
+}
+
+.note {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: -0.3rem;
+}
+
+.auth-status {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.profile-role {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: 0.2rem;
+}
+
+/* === ADMIN PANEL === */
+.admin-card {
+  max-width: 800px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--panel-border);
+  padding-bottom: 0.5rem;
+}
+
+.admin-tab {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: all 0.2s;
+}
+
+.admin-tab.active {
+  color: var(--accent-color);
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.admin-tab-content {
+  margin-bottom: 1.5rem;
+}
+
+.admin-form {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  align-items: center;
+}
+
+.admin-form select {
+  padding: 0.6rem;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 4px;
+  color: var(--text-main);
+  font-family: var(--font-main);
+}
+
+.promo-result {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: var(--panel-bg);
+  border-radius: 6px;
+}
+
+.promo-code-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.promo-code {
+  padding: 0.5rem 1rem;
+  background: rgba(88, 166, 255, 0.1);
+  border: 1px solid var(--accent-color);
+  border-radius: 4px;
+  font-size: 1.2rem;
+  color: var(--accent-color);
+}
+
+.promo-list, .users-list, .vip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.promo-item, .user-item, .vip-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: var(--panel-bg);
+  border-radius: 4px;
+  gap: 1rem;
+}
+
+.promo-item.used {
+  opacity: 0.5;
+}
+
+.promo-item code, .user-item span, .vip-item span {
+  flex: 1;
+}
+
+.role-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+.role-badge.admin {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+}
+
+.role-badge.vip {
+  background: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+}
+
+.role-badge.user {
+  background: rgba(139, 148, 158, 0.2);
+  color: var(--text-dim);
+}
+
 @media (max-width: 768px) {
   .hero { height: auto; padding: 6rem 1rem; }
   .panel { margin: 1rem; padding: 2rem 1.5rem; }
+  .admin-form { flex-direction: column; align-items: stretch; }
+  .promo-code-display { flex-direction: column; align-items: stretch; }
 }

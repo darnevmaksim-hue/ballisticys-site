@@ -19,8 +19,10 @@
       </button>
       <div id="profile-menu" class="profile-menu hidden" role="menu">
         <p id="profile-email" class="profile-email">—</p>
+        <p id="profile-role" class="profile-role">user</p>
         <button id="profile-manage-btn" class="profile-menu-btn" type="button">Управление аккаунтом</button>
         <a class="profile-menu-link" href="#downloads">К загрузкам</a>
+        <a class="profile-menu-link hidden" id="admin-panel-link" href="#admin">Админ панель</a>
         <button id="profile-logout-menu-btn" class="profile-menu-btn danger" type="button">Выйти</button>
       </div>
     </div>
@@ -29,7 +31,7 @@
   <header class="hero reveal">
     <div class="hero-copy">
       <p class="top-note">system ready</p>
-      <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
+      <p class="eyebrow">Minecraft 1.21.1 • Client Mods • Fabric / Forge / NeoForge</p>
       <h1>Ballisticys Fire-Control Hub</h1>
       <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
       <div class="hero-actions">
@@ -72,7 +74,7 @@
         <article class="stage-card">
           <span class="num">01</span>
           <h3>Выбери сборку</h3>
-          <p>Fabric Port для Fabric-клиента, Forge-версию для Forge-сборки, или инжектор для PolitCraft.</p>
+          <p>Fabric, Forge, NeoForge или инжектор для PolitCraft.</p>
         </article>
         <article class="stage-card">
           <span class="num">02</span>
@@ -109,57 +111,68 @@
         <button class="filter active" data-filter="all">Все</button>
         <button class="filter" data-filter="fabric">Fabric</button>
         <button class="filter" data-filter="forge">Forge</button>
+        <button class="filter" data-filter="neoforge">NeoForge</button>
         <button class="filter" data-filter="injector">Инжектор</button>
       </div>
 
       <div class="mod-grid">
         <article class="mod-card" data-core="fabric">
           <p class="tag fabric">Fabric</p>
-          <h3>Ballistics Fabric Port</h3>
-          <p>Порт клиентского Ballistics/PVO мода на Fabric. Подходит для быстрой установки через Fabric Loader.</p>
+          <h3>Ballistics Calculator (Fabric)</h3>
+          <p>Порт клиентского мода на Fabric. Баллистический калькулятор, PVO, HUD и больше.</p>
           <ul>
-            <li>Minecraft: <strong>1.20.1</strong></li>
-            <li>Ядро: <strong>Fabric Loader >= 0.15.0</strong></li>
-            <li>API: <strong>Fabric API</strong></li>
-            <li>Версия мода: <strong>2.0pre4-fabric-port</strong></li>
-            <li>Java: <strong>17+</strong></li>
+            <li>Minecraft: <strong>1.21.1</strong></li>
+            <li>Loader: <strong>Fabric >= 0.16.9</strong></li>
+            <li>API: <strong>Fabric API 0.106.1+</strong></li>
+            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
+            <li>Java: <strong>21+</strong></li>
           </ul>
           <div class="card-actions">
-            <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download>Скачать Fabric jar</a>
+            <a class="btn primary" href="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar" download>Скачать Fabric</a>
           </div>
         </article>
 
         <article class="mod-card" data-core="forge">
           <p class="tag forge">Forge</p>
-          <h3>Blur Ballistics (Forge)</h3>
-          <p>Forge-сборка с баллистическим калькулятором и клиентскими элементами управления/индикации.</p>
+          <h3>Ballistics Calculator (Forge)</h3>
+          <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
           <ul>
-            <li>Minecraft: <strong>1.20.1</strong></li>
-            <li>Ядро: <strong>Forge 47+</strong></li>
-            <li>Версия мода: <strong>1.0.0</strong></li>
-            <li>Java: <strong>17+</strong></li>
+            <li>Minecraft: <strong>1.21.1</strong></li>
+            <li>Forge: <strong>52.0.15+</strong></li>
+            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
+            <li>Java: <strong>21+</strong></li>
           </ul>
           <div class="card-actions">
-            <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download>Скачать Forge jar</a>
+            <a class="btn primary" href="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar" download>Скачать Forge</a>
+          </div>
+        </article>
+
+        <article class="mod-card" data-core="neoforge">
+          <p class="tag neoforge">NeoForge</p>
+          <h3>Ballistics Calculator (NeoForge)</h3>
+          <p>NeoForge версия с полным набором функций.</p>
+          <ul>
+            <li>Minecraft: <strong>1.21.1</strong></li>
+            <li>NeoForge: <strong>21.1.0+</strong></li>
+            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
+            <li>Java: <strong>21+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/ballistic-calculator-2.0.0-1.21.1-neoforge.jar" download>Скачать NeoForge</a>
           </div>
         </article>
 
         <article class="mod-card" data-core="injector">
           <p class="tag injector">Injector</p>
-          <h3>Ballisticys Injector Toolkit</h3>
-          <p>
-            Автоинжектор для PolitCraft: копирует mod/agent в <code>libraries/custom</code>,
-            патчит <code>profileInfo.json</code> и добавляет аргументы запуска с <code>-javaagent</code>.
-          </p>
+          <h3>Ballisticys Injector</h3>
+          <p>Автоинжектор для PolitCraft с поддержкой промокодов.</p>
           <ul>
-            <li>Цель: <strong>PolitCraft offline-mode профиль</strong></li>
-            <li>Agent: <strong>ballisticys-fabric-agent-1.0.0</strong></li>
-            <li>Внутри zip: <strong>PS1 + PY + payload</strong></li>
-            <li>Java: <strong>17+</strong></li>
+            <li>Цель: <strong>PolitCraft</strong></li>
+            <li>Версия: <strong>1.21.1</strong></li>
+            <li>Содержит: <strong>PS1 + PY + payload</strong></li>
           </ul>
           <div class="card-actions">
-            <a class="btn primary" href="downloads/ballisticys-injector-toolkit.zip" download>Скачать Injector ZIP</a>
-            <a class="btn ghost" href="downloads/ballisticys-fabric-agent-1.0.0.jar" download>Скачать Agent jar</a>
+            <a class="btn primary" href="downloads/ballisticys-injector-1.21.1.zip" download>Скачать Injector</a>
           </div>
         </article>
       </div>
@@ -167,30 +180,31 @@
 
     <section class="panel reveal" id="guide">
       <h2>Быстрый гайд</h2>
-      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip внутри, это нормально. Его не нужно распаковывать.</p>
+      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip, это нормально.</p>
       <div class="guide-grid">
         <article>
           <h3>Fabric установка</h3>
           <ol>
-            <li>Установи Fabric Loader для 1.20.1.</li>
-            <li>Положи jar в папку <code>mods</code>.</li>
-            <li>Убедись, что установлен Fabric API.</li>
+            <li>Установи Fabric Loader 0.16.9+ для 1.21.1</li>
+            <li>Установи Fabric API 0.106.1+</li>
+            <li>Положи jar в папку <code>mods</code></li>
+            <li>Запусти на Java 21+</li>
           </ol>
         </article>
         <article>
           <h3>Forge установка</h3>
           <ol>
-            <li>Установи Forge 47+ для 1.20.1.</li>
-            <li>Положи Forge jar в папку <code>mods</code>.</li>
-            <li>Запусти клиент на Java 17.</li>
+            <li>Установи Forge 52.0.15+ для 1.21.1</li>
+            <li>Положи jar в папку <code>mods</code></li>
+            <li>Запусти на Java 21+</li>
           </ol>
         </article>
         <article>
-          <h3>Injector запуск</h3>
+          <h3>NeoForge установка</h3>
           <ol>
-            <li>Скачай и распакуй toolkit zip.</li>
-            <li>Запусти <code>Start-Ballisticys.ps1</code>.</li>
-            <li>Проверь <code>inject-launch.log</code> после запуска.</li>
+            <li>Установи NeoForge 21.1.0+ для 1.21.1</li>
+            <li>Положи jar в папку <code>mods</code></li>
+            <li>Запусти на Java 21+</li>
           </ol>
         </article>
       </div>
@@ -202,52 +216,134 @@
     <p>Ballisticys Project • Persistent Web Build</p>
   </footer>
 
-  <div id="auth-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-    <div class="modal-backdrop" id="auth-modal-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-auth-modal" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2 id="auth-modal-title">Аккаунт</h2>
-      <p class="admin-warning">Вход и регистрация через email и пароль.</p>
+  <!-- СТРАНИЦА ВЫБОРА: Вход или Регистрация -->
+  <div id="auth-choice-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-choice-backdrop"></div>
+    <section class="modal-card auth-choice-card">
+      <button id="close-auth-choice" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Добро пожаловать</h2>
+      <p class="auth-choice-title">У вас уже есть аккаунт?</p>
+      <div class="auth-choice-buttons">
+        <button id="go-to-login-btn" class="btn primary large" type="button">Да, войти</button>
+        <button id="go-to-signup-btn" class="btn ghost large" type="button">Нет, зарегистрироваться</button>
+      </div>
+    </section>
+  </div>
 
+  <!-- СТРАНИЦА ВХОДА -->
+  <div id="auth-login-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-login-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-login" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Вход в аккаунт</h2>
+      
       <div class="auth-box">
-        <input id="auth-email" class="auth-input" type="email" placeholder="Email (например, user@example.com)" autocomplete="email" />
-        <input id="auth-password" class="auth-input" type="password" placeholder="Пароль (минимум 8 символов)" autocomplete="current-password" />
+        <input id="login-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="login-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
+      </div>
+      
+      <div class="actions">
+        <button id="login-submit-btn" class="btn primary" type="button">Войти</button>
+      </div>
+      
+      <p class="auth-switch">Нет аккаунта? <button id="switch-to-signup" class="link-btn" type="button">Зарегистрироваться</button></p>
+      
+      <p id="login-status" class="auth-status">Статус: ожидаем входа.</p>
+    </section>
+  </div>
+
+  <!-- СТРАНИЦА РЕГИСТРАЦИИ -->
+  <div id="auth-signup-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-signup-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-signup" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Регистрация аккаунта</h2>
+      
+      <div class="auth-box">
+        <input id="signup-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="signup-password" class="auth-input" type="password" placeholder="Пароль (минимум 8 символов)" autocomplete="new-password" />
+        <input id="signup-password-confirm" class="auth-input" type="password" placeholder="Повторите пароль" autocomplete="new-password" />
         <p class="note">Минимум 8 символов в пароле</p>
       </div>
       
-      <div class="auth-mode-toggle">
-        <button id="auth-login-mode-btn" class="auth-mode-btn active" type="button">Вход</button>
-        <button id="auth-signup-mode-btn" class="auth-mode-btn" type="button">Регистрация</button>
+      <div class="actions">
+        <button id="signup-submit-btn" class="btn primary" type="button">Зарегистрироваться</button>
+      </div>
+      
+      <p class="auth-switch">Уже есть аккаунт? <button id="switch-to-login" class="link-btn" type="button">Войти</button></p>
+      
+      <p id="signup-status" class="auth-status">Статус: ожидаем регистрации.</p>
+    </section>
+  </div>
+
+  <!-- МОДАЛКА НАСТРОЕК -->
+  <div id="auth-setup-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-setup-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-setup" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Настройка Supabase</h2>
+      <p class="admin-warning">Вставьте данные из проекта Supabase (Settings → API)</p>
+      
+      <div class="auth-box">
+        <input id="setup-url" class="auth-input" type="text" placeholder="Supabase URL (https://xxxx.supabase.co)" />
+        <input id="setup-key" class="auth-input" type="text" placeholder="Anon/Public Key" />
       </div>
       
       <div class="actions">
-        <button id="auth-login-btn" class="btn primary" type="button">Войти</button>
-        <button id="auth-signup-btn" class="btn ghost" type="button">Зарегистрироваться</button>
+        <button id="setup-save-btn" class="btn primary" type="button">Сохранить</button>
       </div>
       
-      <p id="auth-mode-hint" class="auth-mode-hint">Уже есть аккаунт? Войдите</p>
-      <div class="actions">
-        <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="google">Google</button>
-        <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="discord">Discord</button>
-        <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="vk">VK</button>
-      </div>
+      <p id="setup-status" class="auth-status">Статус: не настроено.</p>
+    </section>
+  </div>
 
-      <div id="auth-setup-box" class="auth-setup hidden">
-        <p class="admin-warning">Первичная настройка: вставь Supabase URL и Anon Key (один раз на этом устройстве).</p>
-        <div class="auth-box">
-          <input id="auth-supabase-url" class="auth-input" type="text" placeholder="https://xxxx.supabase.co" autocomplete="off" />
-          <input id="auth-supabase-key" class="auth-input" type="text" placeholder="Supabase anon key" autocomplete="off" />
-        </div>
-        <div class="actions">
-          <button id="auth-save-config-btn" class="btn primary" type="button">Сохранить настройки</button>
-        </div>
+  <!-- АДМИН ПАНЕЛЬ -->
+  <div id="admin-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="admin-backdrop"></div>
+    <section class="modal-card admin-card">
+      <button id="close-admin" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Админ панель</h2>
+      
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="promo">Промокоды</button>
+        <button class="admin-tab" data-tab="users">Пользователи</button>
+        <button class="admin-tab" data-tab="vip">VIP подписки</button>
       </div>
-
-      <p id="auth-status" class="auth-status">Статус: не выполнен вход.</p>
-      <div id="auth-user-box" class="actions hidden">
-        <span id="auth-user-email" class="auth-chip">—</span>
-        <button id="auth-logout-btn" class="btn ghost" type="button">Выйти</button>
+      
+      <!-- Вкладка промокодов -->
+      <div id="admin-promo-tab" class="admin-tab-content">
+        <h3>Создать промокод</h3>
+        <div class="admin-form">
+          <select id="promo-duration">
+            <option value="0">Вечный</option>
+            <option value="1">1 час</option>
+            <option value="2">2 часа</option>
+            <option value="3">3 часа</option>
+            <option value="24">Сутки</option>
+            <option value="168">Неделя</option>
+            <option value="744">Месяц</option>
+            <option value="8760">Год</option>
+          </select>
+          <button id="promo-generate-btn" class="btn primary" type="button">Сгенерировать</button>
+        </div>
+        <div id="promo-result" class="promo-result"></div>
+        <h3>Список промокодов</h3>
+        <div id="promo-list" class="promo-list"></div>
       </div>
+      
+      <!-- Вкладка пользователей -->
+      <div id="admin-users-tab" class="admin-tab-content hidden">
+        <h3>Пользователи</h3>
+        <div id="users-list" class="users-list"></div>
+      </div>
+      
+      <!-- Вкладка VIP -->
+      <div id="admin-vip-tab" class="admin-tab-content hidden">
+        <h3>Активные VIP подписки</h3>
+        <div id="vip-list" class="vip-list"></div>
+      </div>
+      
+      <p id="admin-status" class="auth-status">Статус: ожидаем данных.</p>
     </section>
   </div>
 

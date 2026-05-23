@@ -1,13 +1,12 @@
+// === FILTERT BUTTONS ===
 const filterButtons = document.querySelectorAll('.filter');
 const cards = document.querySelectorAll('.mod-card');
 
 filterButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
     const filter = btn.dataset.filter;
-
     filterButtons.forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
-
     cards.forEach((card) => {
       const core = card.dataset.core;
       const visible = filter === 'all' || filter === core;
@@ -16,6 +15,7 @@ filterButtons.forEach((btn) => {
   });
 });
 
+// === REVEAL ANIMATION ===
 const revealNodes = document.querySelectorAll('.reveal');
 const revealObserver = new IntersectionObserver(
   (entries) => {
@@ -28,9 +28,9 @@ const revealObserver = new IntersectionObserver(
   },
   { threshold: 0.12 }
 );
-
 revealNodes.forEach((node) => revealObserver.observe(node));
 
+// === COUNTER ANIMATION ===
 function animateCounters() {
   const counters = document.querySelectorAll('.metric-value[data-count]');
   counters.forEach((counter) => {
@@ -38,440 +38,490 @@ function animateCounters() {
     const isMs = counter.textContent.includes('ms') || target > 100;
     const duration = 1200;
     const start = performance.now();
-
     const step = (now) => {
       const progress = Math.min((now - start) / duration, 1);
       const value = Math.round(target * progress);
       counter.textContent = isMs ? `${value}ms` : `${value}%`;
       if (progress < 1) requestAnimationFrame(step);
     };
-
     requestAnimationFrame(step);
   });
 }
-
 animateCounters();
 
-const authModal = document.getElementById('auth-modal');
-if (authModal) {
-  const RUNTIME_AUTH_KEY = 'ballisticys_auth_runtime_cfg';
-  const openAuthBtn = document.getElementById('open-auth-modal');
-  const closeAuthBtn = document.getElementById('close-auth-modal');
-  const backdropBtn = document.getElementById('auth-modal-backdrop');
-  const profileRoot = document.getElementById('profile-root');
-  const profileTrigger = document.getElementById('profile-trigger');
-  const profileMenu = document.getElementById('profile-menu');
-  const profileEmail = document.getElementById('profile-email');
-  const profileInitial = document.getElementById('profile-initial');
-  const profileManageBtn = document.getElementById('profile-manage-btn');
-  const profileLogoutMenuBtn = document.getElementById('profile-logout-menu-btn');
-  const emailInput = document.getElementById('auth-email');
-  const passInput = document.getElementById('auth-password');
-  const loginBtn = document.getElementById('auth-login-btn');
-  const signupBtn = document.getElementById('auth-signup-btn');
-  const oauthButtons = Array.from(document.querySelectorAll('.oauth-btn[data-oauth-provider]'));
-  const setupBox = document.getElementById('auth-setup-box');
-  const setupUrlInput = document.getElementById('auth-supabase-url');
-  const setupKeyInput = document.getElementById('auth-supabase-key');
-  const setupSaveBtn = document.getElementById('auth-save-config-btn');
-  const userBoxEl = document.getElementById('auth-user-box');
-  const userEmailEl = document.getElementById('auth-user-email');
-  const userLogoutBtn = document.getElementById('auth-logout-btn');
-  const authStatusEl = document.getElementById('auth-status');
+// === AUTH SYSTEM ===
+const RUNTIME_AUTH_KEY = 'ballisticys_auth_runtime_cfg';
 
-  const fileConfig = window.AUTH_CONFIG || {};
-  const supabaseFactory = window.supabase;
-  let supabaseClient = null;
-  let authBound = false;
-  let effectiveConfig = fileConfig;
+// Modal elements
+const authChoiceModal = document.getElementById('auth-choice-modal');
+const authLoginModal = document.getElementById('auth-login-modal');
+const authSignupModal = document.getElementById('auth-signup-modal');
+const authSetupModal = document.getElementById('auth-setup-modal');
+const adminModal = document.getElementById('admin-modal');
 
-  function readRuntimeConfig() {
-    try {
-      const raw = localStorage.getItem(RUNTIME_AUTH_KEY);
-      if (!raw) return {};
-      const parsed = JSON.parse(raw);
-      return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch (_) {
-      return {};
-    }
-  }
+// Open auth button
+const openAuthBtn = document.getElementById('open-auth-modal');
+const profileRoot = document.getElementById('profile-root');
+const profileTrigger = document.getElementById('profile-trigger');
+const profileMenu = document.getElementById('profile-menu');
+const profileEmail = document.getElementById('profile-email');
+const profileRole = document.getElementById('profile-role');
+const profileInitial = document.getElementById('profile-initial');
+const adminPanelLink = document.getElementById('admin-panel-link');
 
-  function getMergedConfig() {
-    const runtime = readRuntimeConfig();
-    // OAuth отключён — только email/пароль
-    return {
-      ...fileConfig,
-      ...runtime,
-      oauthProviders: [] // Пустой массив — OAuth не показываем
-    };
-  }
+// Choice modal
+const closeAuthChoice = document.getElementById('close-auth-choice');
+const authChoiceBackdrop = document.getElementById('auth-choice-backdrop');
+const goToLoginBtn = document.getElementById('go-to-login-btn');
+const goToSignupBtn = document.getElementById('go-to-signup-btn');
 
-  function getAllowedProviders(config) {
-    // OAuth отключён — всегда возвращаем пустой массив
-    return [];
-  }
+// Login modal
+const closeAuthLogin = document.getElementById('close-auth-login');
+const authLoginBackdrop = document.getElementById('auth-login-backdrop');
+const loginEmail = document.getElementById('login-email');
+const loginPassword = document.getElementById('login-password');
+const loginSubmitBtn = document.getElementById('login-submit-btn');
+const switchToSignup = document.getElementById('switch-to-signup');
+const loginStatus = document.getElementById('login-status');
 
-  function updateProviderButtons(config) {
-    // Всегда скрывать все OAuth-кнопки
-    oauthButtons.forEach((btn) => btn.classList.add('hidden'));
-    console.log('[Auth] Все OAuth-кнопки скрыты');
-  }
+// Signup modal
+const closeAuthSignup = document.getElementById('close-auth-signup');
+const authSignupBackdrop = document.getElementById('auth-signup-backdrop');
+const signupEmail = document.getElementById('signup-email');
+const signupPassword = document.getElementById('signup-password');
+const signupPasswordConfirm = document.getElementById('signup-password-confirm');
+const signupSubmitBtn = document.getElementById('signup-submit-btn');
+const switchToLogin = document.getElementById('switch-to-login');
+const signupStatus = document.getElementById('signup-status');
 
-  function openAuthModal() {
-    authModal.classList.remove('hidden');
-    document.body.classList.add('modal-open');
-    if (emailInput) emailInput.focus();
-  }
+// Setup modal
+const closeAuthSetup = document.getElementById('close-auth-setup');
+const authSetupBackdrop = document.getElementById('auth-setup-backdrop');
+const setupUrl = document.getElementById('setup-url');
+const setupKey = document.getElementById('setup-key');
+const setupSaveBtn = document.getElementById('setup-save-btn');
+const setupStatus = document.getElementById('setup-status');
 
-  function closeAuthModal() {
-    authModal.classList.add('hidden');
-    document.body.classList.remove('modal-open');
-  }
+// Admin modal
+const closeAdmin = document.getElementById('close-admin');
+const adminBackdrop = document.getElementById('admin-backdrop');
+const adminTabs = document.querySelectorAll('.admin-tab');
+const adminTabContents = document.querySelectorAll('.admin-tab-content');
+const promoGenerateBtn = document.getElementById('promo-generate-btn');
+const promoDuration = document.getElementById('promo-duration');
+const promoResult = document.getElementById('promo-result');
+const promoList = document.getElementById('promo-list');
+const usersList = document.getElementById('users-list');
+const vipList = document.getElementById('vip-list');
+const adminStatus = document.getElementById('admin-status');
 
-  function closeProfileMenu() {
-    if (!profileMenu || !profileTrigger) return;
-    profileMenu.classList.add('hidden');
-    profileTrigger.setAttribute('aria-expanded', 'false');
-  }
+let supabaseClient = null;
+let currentUser = null;
+let userRole = 'user';
 
-  function openProfileMenu() {
-    if (!profileMenu || !profileTrigger) return;
-    profileMenu.classList.remove('hidden');
-    profileTrigger.setAttribute('aria-expanded', 'true');
-  }
+// === MODAL FUNCTIONS ===
+function openModal(modal) {
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+}
 
-  function toggleProfileMenu() {
-    if (!profileMenu) return;
-    if (profileMenu.classList.contains('hidden')) {
-      openProfileMenu();
-    } else {
-      closeProfileMenu();
-    }
-  }
+function closeModal(modal) {
+  modal.classList.add('hidden');
+  document.body.classList.remove('modal-open');
+}
 
-  function hasValidAuthConfig(config) {
-    return Boolean(config?.url && config?.anonKey);
-  }
+// === AUTH CHOICE ===
+if (openAuthBtn) {
+  openAuthBtn.addEventListener('click', () => openModal(authChoiceModal));
+}
 
-  function setAuthStatus(message, isError = false) {
-    if (!authStatusEl) return;
-    authStatusEl.textContent = `Статус: ${message}`;
-    authStatusEl.style.color = isError ? '#ff7b72' : '';
-  }
+if (closeAuthChoice) closeAuthChoice.addEventListener('click', () => closeModal(authChoiceModal));
+if (authChoiceBackdrop) authChoiceBackdrop.addEventListener('click', () => closeModal(authChoiceModal));
 
-  function setUserChip(user) {
-    console.log('[Auth] setUserChip called with:', user?.email || null);
-    
-    // Обновляем карточку пользователя в модалке
-    if (userBoxEl && userEmailEl) {
-      if (user && user.email) {
-        userEmailEl.textContent = user.email;
-        userBoxEl.classList.remove('hidden');
-        console.log('[Auth] User box shown with email:', user.email);
-      } else {
-        userEmailEl.textContent = '—';
-        userBoxEl.classList.add('hidden');
-      }
-    }
-
-    // Скрываем кнопку входа, показываем профиль
-    if (openAuthBtn) {
-      if (user) {
-        openAuthBtn.classList.add('hidden');
-        console.log('[Auth] Login button hidden');
-      } else {
-        openAuthBtn.classList.remove('hidden');
-        console.log('[Auth] Login button shown');
-      }
-    }
-    
-    // Показываем/скрываем профиль
-    if (profileRoot) {
-      if (user) {
-        profileRoot.classList.remove('hidden');
-        console.log('[Auth] Profile root shown');
-      } else {
-        profileRoot.classList.add('hidden');
-        console.log('[Auth] Profile root hidden');
-      }
-    }
-    
-    // Обновляем профиль в дропдауне
-    if (profileEmail) {
-      profileEmail.textContent = user?.email || '—';
-      console.log('[Auth] Profile email set to:', user?.email || '—');
-    }
-    
-    // Обновляем инициал в аватаре
-    if (profileInitial) {
-      const first = String(user?.email || 'U').trim().charAt(0);
-      profileInitial.textContent = first ? first.toUpperCase() : 'U';
-      console.log('[Auth] Profile initial set to:', profileInitial.textContent);
-    }
-    
-    // Закрываем меню если нет пользователя
-    if (!user) closeProfileMenu();
-  }
-
-  function setAuthBusy(value) {
-    [loginBtn, signupBtn, userLogoutBtn, setupSaveBtn, ...oauthButtons].forEach((el) => {
-      if (el) el.disabled = value;
-    });
-  }
-
-  function getBaseRedirectUrl() {
-    return `${window.location.origin}${window.location.pathname}#auth`;
-  }
-
-  async function applySession(session) {
-    const user = session?.user || null;
-    console.log('[Auth] applySession called with user:', user?.email || null);
-    setUserChip(user);
-    if (!user) {
-      setAuthStatus('не выполнен вход.');
-      return;
-    }
-    setAuthStatus(`вход выполнен: ${user.email}`);
-    closeAuthModal();
-    
-    // Явно показываем профиль после входа
-    if (profileRoot) {
-      profileRoot.classList.remove('hidden');
-      console.log('[Auth] Profile root shown');
-    }
-    if (openAuthBtn) {
-      openAuthBtn.classList.add('hidden');
-      console.log('[Auth] Login button hidden');
-    }
-  }
-
-  function initSupabaseClient() {
-    effectiveConfig = getMergedConfig();
-    updateProviderButtons(effectiveConfig);
-
-    if (setupUrlInput && !setupUrlInput.value && effectiveConfig.url) {
-      setupUrlInput.value = effectiveConfig.url;
-    }
-    if (setupKeyInput && !setupKeyInput.value && effectiveConfig.anonKey) {
-      setupKeyInput.value = effectiveConfig.anonKey;
-    }
-
-    if (!supabaseFactory || !hasValidAuthConfig(effectiveConfig)) {
-      supabaseClient = null;
-      if (setupBox) setupBox.classList.remove('hidden');
-      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key ниже.', true);
-      return;
-    }
-
-    // Явно включаем сохранение сессии
-    supabaseClient = supabaseFactory.createClient(effectiveConfig.url, effectiveConfig.anonKey, {
-      auth: {
-        persistSession: true,      // Сохранять сессию в localStorage
-        autoRefreshToken: true,    // Автообновление токена
-        detectSessionInUrl: true   // Детектировать сессию в URL после OAuth (на всякий)
-      }
-    });
-    if (setupBox) setupBox.classList.add('hidden');
-    setAuthStatus('готово к входу.');
-  }
-
-  function bindSessionHandlers() {
-    if (!supabaseClient || authBound) return;
-    authBound = true;
-    
-    // Подписка на изменения сессии
-    supabaseClient.auth.onAuthStateChange(async (_event, session) => {
-      console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || null);
-      await applySession(session);
-    });
-    
-    // Восстановление сессии при загрузке страницы
-    supabaseClient.auth.getSession().then(({ data }) => {
-      if (data?.session) {
-        console.log('[Auth] Сессия восстановлена:', data.session.user.email);
-        applySession(data.session);
-      } else {
-        console.log('[Auth] Сессия не найдена');
-      }
-    });
-  }
-
-  function saveRuntimeAuthConfig() {
-    const url = String(setupUrlInput?.value || '').trim();
-    const anonKey = String(setupKeyInput?.value || '').trim();
-    if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
-      setAuthStatus('некорректный Supabase URL.', true);
-      return;
-    }
-    if (anonKey.length < 40) {
-      setAuthStatus('некорректный Anon Key.', true);
-      return;
-    }
-    try {
-      localStorage.setItem(RUNTIME_AUTH_KEY, JSON.stringify({ url, anonKey }));
-      setAuthStatus('настройки сохранены, перезагружаю...');
-      location.reload();
-    } catch (error) {
-      setAuthStatus(`не удалось сохранить настройки: ${error.message}`, true);
-    }
-  }
-
-  async function loginWithPassword() {
-    const email = String(emailInput?.value || '').trim();
-    const password = String(passInput?.value || '');
-    if (!email || !password) {
-      setAuthStatus('введите email и пароль.', true);
-      return;
-    }
-    if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
-      return;
-    }
-    setAuthBusy(true);
-    setAuthStatus('вход...');
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    setAuthBusy(false);
-    
-    if (error) {
-      setAuthStatus(error.message, true);
-      console.error('[Auth] Login error:', error);
-      return;
-    }
-    
-    console.log('[Auth] Login successful:', data?.user?.email);
-    setAuthStatus(`вход выполнен: ${email}`);
-    closeAuthModal();
-    
-    // Явно обновляем UI после успешного входа
-    await applySession(data?.session || null);
-  }
-
-  async function signUpWithPassword() {
-    const email = String(emailInput?.value || '').trim();
-    const password = String(passInput?.value || '');
-    if (!email || !password) {
-      setAuthStatus('введите email и пароль.', true);
-      return;
-    }
-    if (password.length < 8) {
-      setAuthStatus('минимум 8 символов в пароле.', true);
-      return;
-    }
-    if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
-      return;
-    }
-    setAuthBusy(true);
-    setAuthStatus('регистрация...');
-    
-    const { data, error } = await supabaseClient.auth.signUp({
-      email,
-      password,
-      options: { 
-        emailRedirectTo: getBaseRedirectUrl()
-      }
-    });
-    
-    setAuthBusy(false);
-    
-    if (error) {
-      setAuthStatus(error.message, true);
-      console.error('[Auth] Registration error:', error);
-      return;
-    }
-    
-    // Проверяем, есть ли пользователь в ответе
-    if (data?.user) {
-      // Если пользователь создан, но требует подтверждения email
-      setAuthStatus('Регистрация успешна! Проверьте почту для подтверждения. Если подтверждение не требуется, вы можете войти.');
-      
-      // Пробуем автоматически войти после регистрации
-      setTimeout(async () => {
-        const { error: loginError } = await supabaseClient.auth.signInWithPassword({ 
-          email, 
-          password 
-        });
-        
-        if (!loginError) {
-          setAuthStatus(`Регистрация и вход успешны! Добро пожаловать, ${email}`);
-          closeAuthModal();
-          await applySession((await supabaseClient.auth.getSession()).data?.session || null);
-        } else {
-          console.log('[Auth] Auto-login failed (expected if email confirmation required)');
-        }
-      }, 1000);
-    } else {
-      setAuthStatus('Регистрация успешна! Теперь вы можете войти.');
-    }
-  }
-
-  async function loginWithOAuth(provider) {
-    // OAuth отключён
-    setAuthStatus('OAuth отключён. Используйте email и пароль.', true);
-    console.log('[Auth] OAuth отключён');
-  }
-
-  async function logoutUser() {
-    if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
-      return;
-    }
-    await supabaseClient.auth.signOut();
-    setUserChip(null);
-    setAuthStatus('выполнен выход.');
-  }
-
-  if (openAuthBtn) openAuthBtn.addEventListener('click', openAuthModal);
-  if (closeAuthBtn) closeAuthBtn.addEventListener('click', closeAuthModal);
-  if (backdropBtn) backdropBtn.addEventListener('click', closeAuthModal);
-  if (profileTrigger) profileTrigger.addEventListener('click', toggleProfileMenu);
-  if (profileManageBtn) {
-    profileManageBtn.addEventListener('click', () => {
-      closeProfileMenu();
-      openAuthModal();
-    });
-  }
-  if (profileLogoutMenuBtn) {
-    profileLogoutMenuBtn.addEventListener('click', async () => {
-      closeProfileMenu();
-      await logoutUser();
-    });
-  }
-  document.addEventListener('click', (event) => {
-    if (!profileRoot || !profileMenu) return;
-    const target = event.target;
-    if (!(target instanceof Node)) return;
-    if (!profileRoot.contains(target)) closeProfileMenu();
+if (goToLoginBtn) {
+  goToLoginBtn.addEventListener('click', () => {
+    closeModal(authChoiceModal);
+    openModal(authLoginModal);
   });
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-      closeAuthModal();
-      closeProfileMenu();
+}
+
+if (goToSignupBtn) {
+  goToSignupBtn.addEventListener('click', () => {
+    closeModal(authChoiceModal);
+    openModal(authSignupModal);
+  });
+}
+
+// === LOGIN MODAL ===
+if (closeAuthLogin) closeAuthLogin.addEventListener('click', () => closeModal(authLoginModal));
+if (authLoginBackdrop) authLoginBackdrop.addEventListener('click', () => closeModal(authLoginModal));
+
+if (switchToSignup) {
+  switchToSignup.addEventListener('click', () => {
+    closeModal(authLoginModal);
+    openModal(authSignupModal);
+  });
+}
+
+if (loginSubmitBtn) {
+  loginSubmitBtn.addEventListener('click', handleLogin);
+}
+
+// === SIGNUP MODAL ===
+if (closeAuthSignup) closeAuthSignup.addEventListener('click', () => closeModal(authSignupModal));
+if (authSignupBackdrop) authSignupBackdrop.addEventListener('click', () => closeModal(authSignupModal));
+
+if (switchToLogin) {
+  switchToLogin.addEventListener('click', () => {
+    closeModal(authSignupModal);
+    openModal(authLoginModal);
+  });
+}
+
+if (signupSubmitBtn) {
+  signupSubmitBtn.addEventListener('click', handleSignup);
+}
+
+// === SETUP MODAL ===
+if (closeAuthSetup) closeAuthSetup.addEventListener('click', () => closeModal(authSetupModal));
+if (authSetupBackdrop) authSetupBackdrop.addEventListener('click', () => closeModal(authSetupModal));
+
+if (setupSaveBtn) {
+  setupSaveBtn.addEventListener('click', saveSetup);
+}
+
+// === ADMIN MODAL ===
+if (closeAdmin) closeAdmin.addEventListener('click', () => closeModal(adminModal));
+if (adminBackdrop) adminBackdrop.addEventListener('click', () => closeModal(adminModal));
+
+// Admin tabs
+adminTabs.forEach((tab) => {
+  tab.addEventListener('click', () => {
+    const tabName = tab.dataset.tab;
+    adminTabs.forEach((t) => t.classList.remove('active'));
+    tab.classList.add('active');
+    adminTabContents.forEach((content) => {
+      content.classList.toggle('hidden', content.id !== `${tabName}-tab`);
+    });
+    if (tabName === 'promo') loadPromoCodes();
+    if (tabName === 'users') loadUsers();
+    if (tabName === 'vip') loadVIP();
+  });
+});
+
+// === PROFILE MENU ===
+if (profileTrigger) {
+  profileTrigger.addEventListener('click', () => {
+    profileMenu.classList.toggle('hidden');
+  });
+}
+
+if (profileMenu) {
+  document.addEventListener('click', (e) => {
+    if (profileRoot && !profileRoot.contains(e.target)) {
+      profileMenu.classList.add('hidden');
+    }
+  });
+}
+
+// === SUPABASE INIT ===
+function initSupabase() {
+  const runtimeCfg = JSON.parse(localStorage.getItem(RUNTIME_AUTH_KEY) || '{}');
+  const fileCfg = window.AUTH_CONFIG || {};
+  const url = runtimeCfg.url || fileCfg.url;
+  const key = runtimeCfg.key || fileCfg.anonKey;
+
+  if (!url || !key) {
+    setupStatus.textContent = 'Не настроено. Откройте настройки.';
+    setupStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  supabaseClient = window.supabase.createClient(url, key);
+  setupStatus.textContent = 'Готово';
+  setupStatus.style.color = '#4ade80';
+
+  // Listen auth state
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    console.log('Auth state:', event, session?.user?.email);
+    if (event === 'SIGNED_IN' && session) {
+      currentUser = session.user;
+      updateUserProfile();
+      closeModal(authLoginModal);
+      closeModal(authSignupModal);
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      userRole = 'user';
+      updateUI();
     }
   });
 
-  oauthButtons.forEach((btn) => {
-    const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
-    btn.addEventListener('click', () => loginWithOAuth(provider));
+  // Check existing session
+  supabaseClient.auth.getSession().then(({ data }) => {
+    if (data.session) {
+      currentUser = data.session.user;
+      updateUserProfile();
+    }
   });
+}
 
-  if (loginBtn) loginBtn.addEventListener('click', loginWithPassword);
-  if (signupBtn) signupBtn.addEventListener('click', signUpWithPassword);
-  if (setupSaveBtn) setupSaveBtn.addEventListener('click', saveRuntimeAuthConfig);
-  if (passInput) {
-    passInput.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        loginWithPassword();
-      }
-    });
+async function updateUserProfile() {
+  if (!currentUser || !supabaseClient) return;
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('role')
+    .eq('id', currentUser.id)
+    .single();
+
+  if (data) {
+    userRole = data.role;
   }
-  if (userLogoutBtn) userLogoutBtn.addEventListener('click', logoutUser);
 
-  initSupabaseClient();
-  bindSessionHandlers();
+  updateUI();
+}
 
-  if (window.location.hash === '#auth') {
-    openAuthModal();
+function updateUI() {
+  const isLoggedIn = !!currentUser;
+
+  // Show/hide login button
+  if (openAuthBtn) {
+    openAuthBtn.classList.toggle('hidden', isLoggedIn);
+  }
+
+  // Show/hide profile
+  if (profileRoot) {
+    profileRoot.classList.toggle('hidden', !isLoggedIn);
+  }
+
+  if (isLoggedIn && profileEmail) {
+    profileEmail.textContent = currentUser.email;
+    profileRole.textContent = userRole;
+    profileInitial.textContent = currentUser.email.charAt(0).toUpperCase();
+
+    // Show admin panel if admin
+    if (adminPanelLink) {
+      adminPanelLink.classList.toggle('hidden', userRole !== 'admin');
+    }
   }
 }
+
+// === LOGIN ===
+async function handleLogin() {
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value;
+
+  if (!email || !password) {
+    loginStatus.textContent = 'Введите email и пароль';
+    loginStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  loginSubmitBtn.disabled = true;
+  loginStatus.textContent = 'Вход...';
+  loginStatus.style.color = '#fbbf24';
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  loginSubmitBtn.disabled = false;
+
+  if (error) {
+    loginStatus.textContent = error.message;
+    loginStatus.style.color = '#ff7b72';
+  } else {
+    loginStatus.textContent = 'Успешно!';
+    loginStatus.style.color = '#4ade80';
+  }
+}
+
+// === SIGNUP ===
+async function handleSignup() {
+  const email = signupEmail.value.trim();
+  const password = signupPassword.value;
+  const passwordConfirm = signupPasswordConfirm.value;
+
+  if (!email || !password || !passwordConfirm) {
+    signupStatus.textContent = 'Заполните все поля';
+    signupStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    signupStatus.textContent = 'Пароли не совпадают';
+    signupStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  if (password.length < 8) {
+    signupStatus.textContent = 'Минимум 8 символов';
+    signupStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  signupSubmitBtn.disabled = true;
+  signupStatus.textContent = 'Регистрация...';
+  signupStatus.style.color = '#fbbf24';
+
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+  });
+
+  signupSubmitBtn.disabled = false;
+
+  if (error) {
+    signupStatus.textContent = error.message;
+    signupStatus.style.color = '#ff7b72';
+  } else {
+    signupStatus.textContent = 'Успешно! Проверьте почту или войдите.';
+    signupStatus.style.color = '#4ade80';
+    
+    // Try auto-login
+    setTimeout(async () => {
+      const { error: loginError } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (!loginError) {
+        closeModal(authSignupModal);
+      }
+    }, 2000);
+  }
+}
+
+// === SETUP ===
+function saveSetup() {
+  const url = setupUrl.value.trim();
+  const key = setupKey.value.trim();
+
+  if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
+    setupStatus.textContent = 'Неверный URL';
+    setupStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  if (key.length < 20) {
+    setupStatus.textContent = 'Неверный ключ';
+    setupStatus.style.color = '#ff7b72';
+    return;
+  }
+
+  localStorage.setItem(RUNTIME_AUTH_KEY, JSON.stringify({ url, key }));
+  setupStatus.textContent = 'Сохранено! Перезагрузка...';
+  setupStatus.style.color = '#4ade80';
+  setTimeout(() => location.reload(), 1500);
+}
+
+// === ADMIN: GENERATE PROMO ===
+promoGenerateBtn.addEventListener('click', async () => {
+  if (!supabaseClient || userRole !== 'admin') {
+    promoResult.textContent = 'Доступ запрещён';
+    return;
+  }
+
+  const duration = parseInt(promoDuration.value);
+  const code = 'PVO' + Math.random().toString(36).substring(2, 10).toUpperCase();
+  const descriptions = {
+    0: 'Вечный',
+    1: '1 час',
+    2: '2 часа',
+    3: '3 часа',
+    24: 'Сутки',
+    168: 'Неделя',
+    744: 'Месяц',
+    8760: 'Год'
+  };
+
+  const { error } = await supabaseClient.from('promo_codes').insert({
+    code,
+    duration_hours: duration,
+    description: descriptions[duration],
+    created_by: currentUser.id,
+  });
+
+  if (error) {
+    promoResult.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
+  } else {
+    promoResult.innerHTML = `
+      <div class="promo-code-display">
+        <strong>Промокод создан:</strong>
+        <code class="promo-code">${code}</code>
+        <span>${descriptions[duration]}</span>
+      </div>
+    `;
+  }
+});
+
+async function loadPromoCodes() {
+  if (!supabaseClient || userRole !== 'admin') return;
+
+  const { data, error } = await supabaseClient
+    .from('promo_codes')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    promoList.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
+    return;
+  }
+
+  promoList.innerHTML = data.map(p => `
+    <div class="promo-item ${p.is_used ? 'used' : ''}">
+      <code>${p.code}</code>
+      <span>${p.description}</span>
+      <span>${p.is_used ? '✅ Использован' : '○ Активен'}</span>
+    </div>
+  `).join('');
+}
+
+async function loadUsers() {
+  if (!supabaseClient || userRole !== 'admin') return;
+
+  const { data, error } = await supabaseClient
+    .from('profiles')
+    .select('id, email, role, created_at')
+    .order('created_at', { ascending: false })
+    .limit(20);
+
+  if (error) {
+    usersList.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
+    return;
+  }
+
+  usersList.innerHTML = data.map(u => `
+    <div class="user-item">
+      <span>${u.email}</span>
+      <span class="role-badge ${u.role}">${u.role}</span>
+    </div>
+  `).join('');
+}
+
+async function loadVIP() {
+  if (!supabaseClient || userRole !== 'admin') return;
+
+  const { data, error } = await supabaseClient
+    .from('vip_subscriptions')
+    .select('*, profiles(email)')
+    .eq('is_active', true)
+    .gte('end_time', new Date().toISOString())
+    .limit(20);
+
+  if (error) {
+    vipList.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
+    return;
+  }
+
+  vipList.innerHTML = data.map(v => `
+    <div class="vip-item">
+      <span>${v.profiles?.email || 'Unknown'}</span>
+      <span>До: ${new Date(v.end_time).toLocaleDateString()}</span>
+    </div>
+  `).join('');
+}
+
+// === INITIALIZE ===
+initSupabase();
