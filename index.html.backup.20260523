@@ -210,22 +210,13 @@
       <p class="admin-warning">Вход и регистрация через email и пароль.</p>
 
       <div class="auth-box">
-        <input id="auth-email" class="auth-input" type="email" placeholder="Email (например, user@example.com)" autocomplete="email" />
-        <input id="auth-password" class="auth-input" type="password" placeholder="Пароль (минимум 8 символов)" autocomplete="current-password" />
-        <p class="note">Минимум 8 символов в пароле</p>
+        <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="auth-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
       </div>
-      
-      <div class="auth-mode-toggle">
-        <button id="auth-login-mode-btn" class="auth-mode-btn active" type="button">Вход</button>
-        <button id="auth-signup-mode-btn" class="auth-mode-btn" type="button">Регистрация</button>
-      </div>
-      
       <div class="actions">
         <button id="auth-login-btn" class="btn primary" type="button">Войти</button>
-        <button id="auth-signup-btn" class="btn ghost" type="button">Зарегистрироваться</button>
+        <button id="auth-signup-btn" class="btn ghost" type="button">Регистрация</button>
       </div>
-      
-      <p id="auth-mode-hint" class="auth-mode-hint">Уже есть аккаунт? Войдите</p>
       <div class="actions">
         <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="google">Google</button>
         <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="discord">Discord</button>

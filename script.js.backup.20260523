@@ -363,46 +363,17 @@ if (authModal) {
     }
     setAuthBusy(true);
     setAuthStatus('регистрация...');
-    
-    const { data, error } = await supabaseClient.auth.signUp({
+    const { error } = await supabaseClient.auth.signUp({
       email,
       password,
-      options: { 
-        emailRedirectTo: getBaseRedirectUrl()
-      }
+      options: { emailRedirectTo: getBaseRedirectUrl() }
     });
-    
     setAuthBusy(false);
-    
     if (error) {
       setAuthStatus(error.message, true);
-      console.error('[Auth] Registration error:', error);
       return;
     }
-    
-    // Проверяем, есть ли пользователь в ответе
-    if (data?.user) {
-      // Если пользователь создан, но требует подтверждения email
-      setAuthStatus('Регистрация успешна! Проверьте почту для подтверждения. Если подтверждение не требуется, вы можете войти.');
-      
-      // Пробуем автоматически войти после регистрации
-      setTimeout(async () => {
-        const { error: loginError } = await supabaseClient.auth.signInWithPassword({ 
-          email, 
-          password 
-        });
-        
-        if (!loginError) {
-          setAuthStatus(`Регистрация и вход успешны! Добро пожаловать, ${email}`);
-          closeAuthModal();
-          await applySession((await supabaseClient.auth.getSession()).data?.session || null);
-        } else {
-          console.log('[Auth] Auto-login failed (expected if email confirmation required)');
-        }
-      }, 1000);
-    } else {
-      setAuthStatus('Регистрация успешна! Теперь вы можете войти.');
-    }
+    setAuthStatus('регистрация отправлена. Подтвердите email, если включено подтверждение.');
   }
 
   async function loginWithOAuth(provider) {
