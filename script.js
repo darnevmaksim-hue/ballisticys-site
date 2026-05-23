@@ -376,19 +376,20 @@ async function handleSignup() {
     signupStatus.textContent = error.message;
     signupStatus.style.color = '#ff7b72';
   } else {
-    signupStatus.textContent = 'Успешно! Проверьте почту или войдите.';
-    signupStatus.style.color = '#4ade80';
-    
-    // Try auto-login
-    setTimeout(async () => {
-      const { error: loginError } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (!loginError) {
+    if (data.user?.identities?.length === 0) {
+      signupStatus.textContent = 'Такой email уже зарегистрирован. Войдите!';
+      signupStatus.style.color = '#fbbf24';
+    } else {
+      signupStatus.textContent = '✅ Успешно! Теперь войдите с этим паролем.';
+      signupStatus.style.color = '#4ade80';
+      setTimeout(() => {
         closeModal(authSignupModal);
-      }
-    }, 2000);
+        openModal(authLoginModal);
+        loginEmail.value = email;
+        loginPassword.value = '';
+        loginEmail.focus();
+      }, 2000);
+    }
   }
 }
 
