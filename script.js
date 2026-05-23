@@ -1,62 +1,11 @@
-// === FILTERT BUTTONS ===
-const filterButtons = document.querySelectorAll('.filter');
-const cards = document.querySelectorAll('.mod-card');
-
-filterButtons.forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const filter = btn.dataset.filter;
-    filterButtons.forEach((b) => b.classList.remove('active'));
-    btn.classList.add('active');
-    cards.forEach((card) => {
-      const core = card.dataset.core;
-      const visible = filter === 'all' || filter === core;
-      card.classList.toggle('hidden', !visible);
-    });
-  });
-});
-
-// === REVEAL ANIMATION ===
-const revealNodes = document.querySelectorAll('.reveal');
-const revealObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('show');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.12 }
-);
-revealNodes.forEach((node) => revealObserver.observe(node));
-
-// === COUNTER ANIMATION ===
-function animateCounters() {
-  const counters = document.querySelectorAll('.metric-value[data-count]');
-  counters.forEach((counter) => {
-    const target = Number(counter.dataset.count || 0);
-    const isMs = counter.textContent.includes('ms') || target > 100;
-    const duration = 1200;
-    const start = performance.now();
-    const step = (now) => {
-      const progress = Math.min((now - start) / duration, 1);
-      const value = Math.round(target * progress);
-      counter.textContent = isMs ? `${value}ms` : `${value}%`;
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  });
-}
-animateCounters();
-
-// === AUTH SYSTEM ===
-const RUNTIME_AUTH_KEY = 'ballisticys_auth_runtime_cfg';
+// === AUTH SYSTEM (LOCALSTORAGE) ===
+const USERS_KEY = 'ballisticys_users_v1';
+const SESSION_KEY = 'ballisticys_session';
 
 // Modal elements
 const authChoiceModal = document.getElementById('auth-choice-modal');
 const authLoginModal = document.getElementById('auth-login-modal');
 const authSignupModal = document.getElementById('auth-signup-modal');
-const authSetupModal = document.getElementById('auth-setup-modal');
 const adminModal = document.getElementById('admin-modal');
 
 // Open auth button
@@ -68,6 +17,7 @@ const profileEmail = document.getElementById('profile-email');
 const profileRole = document.getElementById('profile-role');
 const profileInitial = document.getElementById('profile-initial');
 const adminPanelLink = document.getElementById('admin-panel-link');
+const profileLogoutBtn = document.getElementById('profile-logout-menu-btn');
 
 // Choice modal
 const closeAuthChoice = document.getElementById('close-auth-choice');
@@ -94,14 +44,6 @@ const signupSubmitBtn = document.getElementById('signup-submit-btn');
 const switchToLogin = document.getElementById('switch-to-login');
 const signupStatus = document.getElementById('signup-status');
 
-// Setup modal
-const closeAuthSetup = document.getElementById('close-auth-setup');
-const authSetupBackdrop = document.getElementById('auth-setup-backdrop');
-const setupUrl = document.getElementById('setup-url');
-const setupKey = document.getElementById('setup-key');
-const setupSaveBtn = document.getElementById('setup-save-btn');
-const setupStatus = document.getElementById('setup-status');
-
 // Admin modal
 const closeAdmin = document.getElementById('close-admin');
 const adminBackdrop = document.getElementById('admin-backdrop');
@@ -115,7 +57,7 @@ const usersList = document.getElementById('users-list');
 const vipList = document.getElementById('vip-list');
 const adminStatus = document.getElementById('admin-status');
 
-let supabaseClient = null;
+// Current user
 let currentUser = null;
 let userRole = 'user';
 
@@ -128,6 +70,55 @@ function openModal(modal) {
 function closeModal(modal) {
   modal.classList.add('hidden');
   document.body.classList.remove('modal-open');
+}
+
+// === USER STORAGE ===
+function getUsers() {
+  return JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+}
+
+function saveUser(email, password, role = 'user') {
+  const users = getUsers();
+  users[email] = { email, password, role, created_at: Date.now() };
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+}
+
+function getUser(email) {
+  const users = getUsers();
+  return users[email] || null;
+}
+
+function getAllUsers() {
+  return Object.values(getUsers());
+}
+
+// === SESSION ===
+function setSession(email) {
+  const user = getUser(email);
+  if (user) {
+    currentUser = user;
+    userRole = user.role;
+    localStorage.setItem(SESSION_KEY, JSON.stringify({ email, role: user.role }));
+  }
+}
+
+function clearSession() {
+  currentUser = null;
+  userRole = 'user';
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function checkSession() {
+  const session = JSON.parse(localStorage.getItem(SESSION_KEY) || '{}');
+  if (session.email) {
+    const user = getUser(session.email);
+    if (user) {
+      currentUser = user;
+      userRole = user.role;
+      return true;
+    }
+  }
+  return false;
 }
 
 // === AUTH CHOICE ===
@@ -182,12 +173,13 @@ if (signupSubmitBtn) {
   signupSubmitBtn.addEventListener('click', handleSignup);
 }
 
-// === SETUP MODAL ===
-if (closeAuthSetup) closeAuthSetup.addEventListener('click', () => closeModal(authSetupModal));
-if (authSetupBackdrop) authSetupBackdrop.addEventListener('click', () => closeModal(authSetupModal));
-
-if (setupSaveBtn) {
-  setupSaveBtn.addEventListener('click', saveSetup);
+// === LOGOUT ===
+if (profileLogoutBtn) {
+  profileLogoutBtn.addEventListener('click', () => {
+    clearSession();
+    updateUI();
+    closeModal(authLoginModal);
+  });
 }
 
 // === ADMIN MODAL ===
@@ -224,63 +216,7 @@ if (profileMenu) {
   });
 }
 
-// === SUPABASE INIT ===
-function initSupabase() {
-  const runtimeCfg = JSON.parse(localStorage.getItem(RUNTIME_AUTH_KEY) || '{}');
-  const fileCfg = window.AUTH_CONFIG || {};
-  const url = runtimeCfg.url || fileCfg.url;
-  const key = runtimeCfg.key || fileCfg.anonKey;
-
-  if (!url || !key) {
-    setupStatus.textContent = 'Не настроено. Откройте настройки.';
-    setupStatus.style.color = '#ff7b72';
-    return;
-  }
-
-  supabaseClient = window.supabase.createClient(url, key);
-  setupStatus.textContent = 'Готово';
-  setupStatus.style.color = '#4ade80';
-
-  // Listen auth state
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    console.log('Auth state:', event, session?.user?.email);
-    if (event === 'SIGNED_IN' && session) {
-      currentUser = session.user;
-      updateUserProfile();
-      closeModal(authLoginModal);
-      closeModal(authSignupModal);
-    } else if (event === 'SIGNED_OUT') {
-      currentUser = null;
-      userRole = 'user';
-      updateUI();
-    }
-  });
-
-  // Check existing session
-  supabaseClient.auth.getSession().then(({ data }) => {
-    if (data.session) {
-      currentUser = data.session.user;
-      updateUserProfile();
-    }
-  });
-}
-
-async function updateUserProfile() {
-  if (!currentUser || !supabaseClient) return;
-
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('role')
-    .eq('id', currentUser.id)
-    .single();
-
-  if (data) {
-    userRole = data.role;
-  }
-
-  updateUI();
-}
-
+// === UPDATE UI ===
 function updateUI() {
   const isLoggedIn = !!currentUser;
 
@@ -307,7 +243,7 @@ function updateUI() {
 }
 
 // === LOGIN ===
-async function handleLogin() {
+function handleLogin() {
   const email = loginEmail.value.trim();
   const password = loginPassword.value;
 
@@ -321,24 +257,29 @@ async function handleLogin() {
   loginStatus.textContent = 'Вход...';
   loginStatus.style.color = '#fbbf24';
 
-  const { data, error } = await supabaseClient.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  loginSubmitBtn.disabled = false;
-
-  if (error) {
-    loginStatus.textContent = error.message;
-    loginStatus.style.color = '#ff7b72';
-  } else {
-    loginStatus.textContent = 'Успешно!';
-    loginStatus.style.color = '#4ade80';
-  }
+  setTimeout(() => {
+    const user = getUser(email);
+    
+    if (!user) {
+      loginStatus.textContent = 'Неверный email или пароль';
+      loginStatus.style.color = '#ff7b72';
+    } else if (user.password !== password) {
+      loginStatus.textContent = 'Неверный email или пароль';
+      loginStatus.style.color = '#ff7b72';
+    } else {
+      setSession(email);
+      loginStatus.textContent = 'Успешно!';
+      loginStatus.style.color = '#4ade80';
+      closeModal(authLoginModal);
+      updateUI();
+    }
+    
+    loginSubmitBtn.disabled = false;
+  }, 300);
 }
 
 // === SIGNUP ===
-async function handleSignup() {
+function handleSignup() {
   const email = signupEmail.value.trim();
   const password = signupPassword.value;
   const passwordConfirm = signupPasswordConfirm.value;
@@ -365,23 +306,21 @@ async function handleSignup() {
   signupStatus.textContent = 'Регистрация...';
   signupStatus.style.color = '#fbbf24';
 
-  const { data, error } = await supabaseClient.auth.signUp({
-    email,
-    password,
-  });
-
-  signupSubmitBtn.disabled = false;
-
-  if (error) {
-    signupStatus.textContent = error.message;
-    signupStatus.style.color = '#ff7b72';
-  } else {
-    if (data.user?.identities?.length === 0) {
+  setTimeout(() => {
+    const existingUser = getUser(email);
+    
+    if (existingUser) {
       signupStatus.textContent = 'Такой email уже зарегистрирован. Войдите!';
       signupStatus.style.color = '#fbbf24';
     } else {
+      // Если это первый пользователь - делаем его админом
+      const allUsers = getAllUsers();
+      const role = allUsers.length === 0 ? 'admin' : 'user';
+      
+      saveUser(email, password, role);
       signupStatus.textContent = '✅ Успешно! Теперь войдите с этим паролем.';
       signupStatus.style.color = '#4ade80';
+      
       setTimeout(() => {
         closeModal(authSignupModal);
         openModal(authLoginModal);
@@ -390,110 +329,51 @@ async function handleSignup() {
         loginEmail.focus();
       }, 2000);
     }
-  }
-}
-
-// === SETUP ===
-function saveSetup() {
-  const url = setupUrl.value.trim();
-  const key = setupKey.value.trim();
-
-  if (!url.startsWith('https://') || !url.includes('.supabase.co')) {
-    setupStatus.textContent = 'Неверный URL';
-    setupStatus.style.color = '#ff7b72';
-    return;
-  }
-
-  if (key.length < 20) {
-    setupStatus.textContent = 'Неверный ключ';
-    setupStatus.style.color = '#ff7b72';
-    return;
-  }
-
-  localStorage.setItem(RUNTIME_AUTH_KEY, JSON.stringify({ url, key }));
-  setupStatus.textContent = 'Сохранено! Перезагрузка...';
-  setupStatus.style.color = '#4ade80';
-  setTimeout(() => location.reload(), 1500);
+    
+    signupSubmitBtn.disabled = false;
+  }, 300);
 }
 
 // === ADMIN: GENERATE PROMO ===
-promoGenerateBtn.addEventListener('click', async () => {
-  if (!supabaseClient || userRole !== 'admin') {
-    promoResult.textContent = 'Доступ запрещён';
-    return;
-  }
+if (promoGenerateBtn) {
+  promoGenerateBtn.addEventListener('click', () => {
+    if (userRole !== 'admin') {
+      promoResult.textContent = 'Доступ запрещён';
+      return;
+    }
 
-  const duration = parseInt(promoDuration.value);
-  const code = 'PVO' + Math.random().toString(36).substring(2, 10).toUpperCase();
-  const descriptions = {
-    0: 'Вечный',
-    1: '1 час',
-    2: '2 часа',
-    3: '3 часа',
-    24: 'Сутки',
-    168: 'Неделя',
-    744: 'Месяц',
-    8760: 'Год'
-  };
+    const duration = parseInt(promoDuration.value);
+    const code = 'PVO' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    const descriptions = {
+      0: 'Вечный',
+      1: '1 час',
+      2: '2 часа',
+      3: '3 часа',
+      24: 'Сутки',
+      168: 'Неделя',
+      744: 'Месяц',
+      8760: 'Год'
+    };
 
-  const { error } = await supabaseClient.from('promo_codes').insert({
-    code,
-    duration_hours: duration,
-    description: descriptions[duration],
-    created_by: currentUser.id,
-  });
-
-  if (error) {
-    promoResult.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
-  } else {
     promoResult.innerHTML = `
       <div class="promo-code-display">
         <strong>Промокод создан:</strong>
         <code class="promo-code">${code}</code>
-        <span>${descriptions[duration]}</span>
+        <span>${descriptions[duration] || duration + ' ч'}</span>
       </div>
     `;
-  }
-});
-
-async function loadPromoCodes() {
-  if (!supabaseClient || userRole !== 'admin') return;
-
-  const { data, error } = await supabaseClient
-    .from('promo_codes')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(20);
-
-  if (error) {
-    promoList.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
-    return;
-  }
-
-  promoList.innerHTML = data.map(p => `
-    <div class="promo-item ${p.is_used ? 'used' : ''}">
-      <code>${p.code}</code>
-      <span>${p.description}</span>
-      <span>${p.is_used ? '✅ Использован' : '○ Активен'}</span>
-    </div>
-  `).join('');
+  });
 }
 
-async function loadUsers() {
-  if (!supabaseClient || userRole !== 'admin') return;
+function loadPromoCodes() {
+  promoList.innerHTML = '<p class="empty-row">Промокоды хранятся локально</p>';
+}
 
-  const { data, error } = await supabaseClient
-    .from('profiles')
-    .select('id, email, role, created_at')
-    .order('created_at', { ascending: false })
-    .limit(20);
+function loadUsers() {
+  if (userRole !== 'admin') return;
 
-  if (error) {
-    usersList.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
-    return;
-  }
-
-  usersList.innerHTML = data.map(u => `
+  const users = getAllUsers();
+  usersList.innerHTML = users.map(u => `
     <div class="user-item">
       <span>${u.email}</span>
       <span class="role-badge ${u.role}">${u.role}</span>
@@ -501,28 +381,10 @@ async function loadUsers() {
   `).join('');
 }
 
-async function loadVIP() {
-  if (!supabaseClient || userRole !== 'admin') return;
-
-  const { data, error } = await supabaseClient
-    .from('vip_subscriptions')
-    .select('*, profiles(email)')
-    .eq('is_active', true)
-    .gte('end_time', new Date().toISOString())
-    .limit(20);
-
-  if (error) {
-    vipList.innerHTML = `<p style="color:#ff7b72">Ошибка: ${error.message}</p>`;
-    return;
-  }
-
-  vipList.innerHTML = data.map(v => `
-    <div class="vip-item">
-      <span>${v.profiles?.email || 'Unknown'}</span>
-      <span>До: ${new Date(v.end_time).toLocaleDateString()}</span>
-    </div>
-  `).join('');
+function loadVIP() {
+  vipList.innerHTML = '<p class="empty-row">VIP подписки хранятся локально</p>';
 }
 
 // === INITIALIZE ===
-initSupabase();
+checkSession();
+updateUI();
