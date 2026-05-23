@@ -207,7 +207,7 @@
     <section class="modal-card">
       <button id="close-auth-modal" class="modal-close" type="button" aria-label="Закрыть">×</button>
       <h2 id="auth-modal-title">Аккаунт</h2>
-      <p class="admin-warning">Вход и регистрация для сайта через email/пароль или соцсети.</p>
+      <p class="admin-warning">Вход и регистрация через email и пароль.</p>
 
       <div class="auth-box">
         <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
@@ -218,9 +218,9 @@
         <button id="auth-signup-btn" class="btn ghost" type="button">Регистрация</button>
       </div>
       <div class="actions">
-        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="google">Google</button>
-        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="discord">Discord</button>
-        <button class="btn ghost oauth-btn" type="button" data-oauth-provider="vk">VK</button>
+        <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="google">Google</button>
+        <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="discord">Discord</button>
+        <button class="btn ghost oauth-btn hidden" type="button" data-oauth-provider="vk">VK</button>
       </div>
 
       <div id="auth-setup-box" class="auth-setup hidden">

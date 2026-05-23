@@ -98,32 +98,23 @@ if (authModal) {
 
   function getMergedConfig() {
     const runtime = readRuntimeConfig();
-    // Всегда используем OAuth из fileConfig по умолчанию
-    const defaultOAuth = fileConfig.oauthProviders || ['google', 'discord'];
+    // OAuth отключён — только email/пароль
     return {
       ...fileConfig,
       ...runtime,
-      oauthProviders: Array.isArray(runtime.oauthProviders) && runtime.oauthProviders.length > 0 
-        ? runtime.oauthProviders 
-        : defaultOAuth
+      oauthProviders: [] // Пустой массив — OAuth не показываем
     };
   }
 
   function getAllowedProviders(config) {
-    return Array.isArray(config.oauthProviders)
-      ? config.oauthProviders.map((p) => String(p).toLowerCase())
-      : ['google', 'discord'];
+    // OAuth отключён — всегда возвращаем пустой массив
+    return [];
   }
 
   function updateProviderButtons(config) {
-    const allowed = getAllowedProviders(config);
-    console.log('[Auth] updateProviderButtons called with allowed:', allowed);
-    oauthButtons.forEach((btn) => {
-      const provider = String(btn.dataset.oauthProvider || '').toLowerCase();
-      const shouldHide = !allowed.includes(provider);
-      btn.classList.toggle('hidden', shouldHide);
-      console.log(`[Auth] ${provider} button: ${shouldHide ? 'hidden' : 'shown'}`);
-    });
+    // Всегда скрывать все OAuth-кнопки
+    oauthButtons.forEach((btn) => btn.classList.add('hidden'));
+    console.log('[Auth] Все OAuth-кнопки скрыты');
   }
 
   function openAuthModal() {
@@ -272,7 +263,14 @@ if (authModal) {
       return;
     }
 
-    supabaseClient = supabaseFactory.createClient(effectiveConfig.url, effectiveConfig.anonKey);
+    // Явно включаем сохранение сессии
+    supabaseClient = supabaseFactory.createClient(effectiveConfig.url, effectiveConfig.anonKey, {
+      auth: {
+        persistSession: true,      // Сохранять сессию в localStorage
+        autoRefreshToken: true,    // Автообновление токена
+        detectSessionInUrl: true   // Детектировать сессию в URL после OAuth (на всякий)
+      }
+    });
     if (setupBox) setupBox.classList.add('hidden');
     setAuthStatus('готово к входу.');
   }
@@ -280,11 +278,21 @@ if (authModal) {
   function bindSessionHandlers() {
     if (!supabaseClient || authBound) return;
     authBound = true;
+    
+    // Подписка на изменения сессии
     supabaseClient.auth.onAuthStateChange(async (_event, session) => {
+      console.log('[Auth] onAuthStateChange:', _event, session?.user?.email || null);
       await applySession(session);
     });
-    supabaseClient.auth.getSession().then(async ({ data }) => {
-      await applySession(data?.session || null);
+    
+    // Восстановление сессии при загрузке страницы
+    supabaseClient.auth.getSession().then(({ data }) => {
+      if (data?.session) {
+        console.log('[Auth] Сессия восстановлена:', data.session.user.email);
+        applySession(data.session);
+      } else {
+        console.log('[Auth] Сессия не найдена');
+      }
     });
   }
 
@@ -369,20 +377,9 @@ if (authModal) {
   }
 
   async function loginWithOAuth(provider) {
-    if (!supabaseClient) {
-      setAuthStatus('auth не настроен. Заполни Supabase URL и Anon Key.', true);
-      return;
-    }
-    setAuthBusy(true);
-    setAuthStatus(`перенаправление в ${provider}...`);
-    const { error } = await supabaseClient.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: getBaseRedirectUrl() }
-    });
-    setAuthBusy(false);
-    if (error) {
-      setAuthStatus(error.message, true);
-    }
+    // OAuth отключён
+    setAuthStatus('OAuth отключён. Используйте email и пароль.', true);
+    console.log('[Auth] OAuth отключён');
   }
 
   async function logoutUser() {
