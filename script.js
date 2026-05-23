@@ -257,25 +257,23 @@ function handleLogin() {
   loginStatus.textContent = 'Вход...';
   loginStatus.style.color = '#fbbf24';
 
-  setTimeout(() => {
-    const user = getUser(email);
-    
-    if (!user) {
-      loginStatus.textContent = 'Неверный email или пароль';
-      loginStatus.style.color = '#ff7b72';
-    } else if (user.password !== password) {
-      loginStatus.textContent = 'Неверный email или пароль';
-      loginStatus.style.color = '#ff7b72';
-    } else {
-      setSession(email);
-      loginStatus.textContent = 'Успешно!';
-      loginStatus.style.color = '#4ade80';
-      closeModal(authLoginModal);
-      updateUI();
-    }
-    
-    loginSubmitBtn.disabled = false;
-  }, 300);
+  const user = getUser(email);
+  
+  if (!user) {
+    loginStatus.textContent = 'Неверный email или пароль';
+    loginStatus.style.color = '#ff7b72';
+  } else if (user.password !== password) {
+    loginStatus.textContent = 'Неверный email или пароль';
+    loginStatus.style.color = '#ff7b72';
+  } else {
+    setSession(email);
+    loginStatus.textContent = 'Успешно!';
+    loginStatus.style.color = '#4ade80';
+    closeModal(authLoginModal);
+    updateUI();
+  }
+  
+  loginSubmitBtn.disabled = false;
 }
 
 // === SIGNUP ===
@@ -306,32 +304,28 @@ function handleSignup() {
   signupStatus.textContent = 'Регистрация...';
   signupStatus.style.color = '#fbbf24';
 
-  setTimeout(() => {
-    const existingUser = getUser(email);
+  const existingUser = getUser(email);
+  
+  if (existingUser) {
+    signupStatus.textContent = 'Такой email уже зарегистрирован. Войдите!';
+    signupStatus.style.color = '#fbbf24';
+  } else {
+    // Если это первый пользователь - делаем его админом
+    const allUsers = getAllUsers();
+    const role = allUsers.length === 0 ? 'admin' : 'user';
     
-    if (existingUser) {
-      signupStatus.textContent = 'Такой email уже зарегистрирован. Войдите!';
-      signupStatus.style.color = '#fbbf24';
-    } else {
-      // Если это первый пользователь - делаем его админом
-      const allUsers = getAllUsers();
-      const role = allUsers.length === 0 ? 'admin' : 'user';
-      
-      saveUser(email, password, role);
-      signupStatus.textContent = '✅ Успешно! Теперь войдите с этим паролем.';
-      signupStatus.style.color = '#4ade80';
-      
-      setTimeout(() => {
-        closeModal(authSignupModal);
-        openModal(authLoginModal);
-        loginEmail.value = email;
-        loginPassword.value = '';
-        loginEmail.focus();
-      }, 2000);
-    }
+    saveUser(email, password, role);
+    signupStatus.textContent = '✅ Успешно! Теперь войдите с этим паролем.';
+    signupStatus.style.color = '#4ade80';
     
-    signupSubmitBtn.disabled = false;
-  }, 300);
+    closeModal(authSignupModal);
+    openModal(authLoginModal);
+    loginEmail.value = email;
+    loginPassword.value = '';
+    loginEmail.focus();
+  }
+  
+  signupSubmitBtn.disabled = false;
 }
 
 // === ADMIN: GENERATE PROMO ===
