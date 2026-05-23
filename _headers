@@ -1,3 +1,0 @@
-*
-Content-Security-Policy: default-src * data: blob: about:
-Script-Security: unsafe-eval
