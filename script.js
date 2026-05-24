@@ -40,6 +40,13 @@ document.getElementById('close-auth-login')?.addEventListener('click', closeAuth
 document.getElementById('close-auth-signup')?.addEventListener('click', closeAuth);
 document.getElementById('close-admin')?.addEventListener('click', closeAdmin);
 
+document.getElementById('close-profile')?.addEventListener('click', () => {
+  document.getElementById('profile-modal')?.classList.add('hidden');
+});
+document.getElementById('profile-backdrop')?.addEventListener('click', () => {
+  document.getElementById('profile-modal')?.classList.add('hidden');
+});
+
 document.getElementById('go-to-login-btn')?.addEventListener('click', () => {
   authChoiceModal?.classList.add('hidden');
   authLoginModal?.classList.remove('hidden');
@@ -199,6 +206,21 @@ document.getElementById('profile-manage-btn')?.addEventListener('click', () => {
   if (currentUser?.role === 'admin') {
     adminModal?.classList.remove('hidden');
     loadAdminData();
+  } else {
+    document.getElementById('profile-info-email').textContent = currentUser?.email || '—';
+    const roleEl = document.getElementById('profile-info-role');
+    roleEl.textContent = currentUser?.role || '—';
+    roleEl.className = 'role-badge ' + (currentUser?.role || 'user');
+    const vipEl = document.getElementById('profile-info-vip');
+    if (currentUser?.vipUntil && Date.now() < currentUser.vipUntil) {
+      const d = Math.floor((currentUser.vipUntil - Date.now()) / (1000 * 60 * 60 * 24));
+      vipEl.textContent = d + ' дн.';
+    } else {
+      vipEl.textContent = '—';
+    }
+    document.getElementById('profile-status').textContent = 'Статус: готово.';
+    document.getElementById('profile-status').style.color = '';
+    document.getElementById('profile-modal')?.classList.remove('hidden');
   }
 });
 
@@ -398,6 +420,24 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     body.classList.toggle('vip-theme');
     localStorage.setItem(VIP_THEME_KEY, body.classList.contains('vip-theme') ? '1' : '0');
   };
+
+  document.getElementById('profile-change-pass-btn')?.addEventListener('click', () => {
+    const pass = document.getElementById('profile-new-pass').value;
+    const confirm = document.getElementById('profile-confirm-pass').value;
+    const status = document.getElementById('profile-status');
+    if (!currentUser) { status.textContent = 'Ошибка: не авторизован'; status.style.color = '#ff7b72'; return; }
+    if (pass.length < 8) { status.textContent = 'Минимум 8 символов'; status.style.color = '#ff7b72'; return; }
+    if (pass !== confirm) { status.textContent = 'Пароли не совпадают'; status.style.color = '#ff7b72'; return; }
+    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    if (!users[currentUser.email]) { status.textContent = 'Ошибка: пользователь не найден'; status.style.color = '#ff7b72'; return; }
+    users[currentUser.email].password = pass;
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    currentUser.password = pass;
+    status.textContent = 'Пароль изменён!';
+    status.style.color = '#4ade80';
+    document.getElementById('profile-new-pass').value = '';
+    document.getElementById('profile-confirm-pass').value = '';
+  });
 
   if (isVipActive) {
     var btn = document.createElement('button');

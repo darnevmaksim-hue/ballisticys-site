@@ -388,6 +388,34 @@
     </section>
   </div>
 
+  <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
+  <div id="profile-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="profile-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-profile" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Управление аккаунтом</h2>
+      
+      <div class="profile-info">
+        <p><strong>Email:</strong> <span id="profile-info-email">—</span></p>
+        <p><strong>Роль:</strong> <span id="profile-info-role" class="role-badge user">—</span></p>
+        <p><strong>VIP до:</strong> <span id="profile-info-vip">—</span></p>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Сменить пароль</h3>
+      <div class="auth-box">
+        <input id="profile-new-pass" class="auth-input" type="password" placeholder="Новый пароль (мин. 8 символов)" autocomplete="new-password" />
+        <input id="profile-confirm-pass" class="auth-input" type="password" placeholder="Повторите пароль" autocomplete="new-password" />
+      </div>
+      <div class="actions">
+        <button id="profile-change-pass-btn" class="btn primary" type="button">Сохранить пароль</button>
+      </div>
+
+      <p id="profile-status" class="auth-status">Статус: готово.</p>
+    </section>
+  </div>
+
   <script src="script.js?v=6"></script>
 </body>
 </html>
