@@ -64,6 +64,7 @@ document.getElementById('login-submit-btn')?.addEventListener('click', () => {
   const email = document.getElementById('login-email').value;
   const password = document.getElementById('login-password').value;
   const status = document.getElementById('login-status');
+  const forgot = document.getElementById('login-forgot');
   const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
   const user = users[email];
   if (user && user.password === password) {
@@ -73,9 +74,14 @@ document.getElementById('login-submit-btn')?.addEventListener('click', () => {
     status.style.color = '#4ade80';
     authLoginModal?.classList.add('hidden');
     updateUI();
-  } else {
-    status.textContent = 'Неверный email или пароль';
+  } else if (!user) {
+    status.textContent = 'Email не найден. Сначала зарегистрируйтесь.';
     status.style.color = '#ff7b72';
+    forgot?.classList.add('hidden');
+  } else {
+    status.textContent = 'Неверный пароль';
+    status.style.color = '#ff7b72';
+    forgot?.classList.remove('hidden');
   }
 });
 
@@ -104,6 +110,21 @@ document.getElementById('signup-submit-btn')?.addEventListener('click', () => {
     authLoginModal?.classList.remove('hidden');
     document.getElementById('login-email').value = email;
   }, 1500);
+});
+
+document.getElementById('forgot-password-btn')?.addEventListener('click', () => {
+  const email = document.getElementById('login-email').value;
+  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+  const user = users[email];
+  if (!user) return;
+  const newPass = 'admin123';
+  user.password = newPass;
+  users[email] = user;
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  document.getElementById('login-password').value = newPass;
+  document.getElementById('login-status').textContent = 'Пароль сброшен на admin123. Войдите.';
+  document.getElementById('login-status').style.color = '#4ade80';
+  document.getElementById('login-forgot')?.classList.add('hidden');
 });
 
 profileLogoutBtn?.addEventListener('click', () => {
