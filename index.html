@@ -31,7 +31,7 @@
   <header class="hero">
     <div class="hero-copy">
       <p class="top-note">system ready</p>
-      <p class="eyebrow">Minecraft 1.21.1 • Client Mods • Fabric / Forge / NeoForge</p>
+      <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
       <h1>Ballisticys Fire-Control Hub</h1>
       <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
       <div class="hero-actions">
@@ -74,7 +74,7 @@
         <article class="stage-card">
           <span class="num">01</span>
           <h3>Выбери сборку</h3>
-          <p>Fabric, Forge, NeoForge или инжектор для PolitCraft.</p>
+          <p>Fabric Port для Fabric-клиента, Forge-версию для Forge-сборки, или инжектор для PolitCraft.</p>
         </article>
         <article class="stage-card">
           <span class="num">02</span>
@@ -107,17 +107,71 @@
 
     <section class="panel reveal" id="downloads">
       <h2>Скачать файлы</h2>
+      <p class="vip-hint">Новые версии доступны только для VIP и Админов</p>
+
       <div class="filter-row">
         <button class="filter active" data-filter="all">Все</button>
         <button class="filter" data-filter="fabric">Fabric</button>
         <button class="filter" data-filter="forge">Forge</button>
-        <button class="filter" data-filter="neoforge">NeoForge</button>
         <button class="filter" data-filter="injector">Инжектор</button>
       </div>
 
       <div class="mod-grid">
+
+        <!-- Публичные карточки (старые версии) -->
         <article class="mod-card" data-core="fabric">
           <p class="tag fabric">Fabric</p>
+          <h3>Ballistics Fabric Port</h3>
+          <p>Порт клиентского Ballistics/PVO мода на Fabric. Подходит для быстрой установки через Fabric Loader.</p>
+          <ul>
+            <li>Minecraft: <strong>1.20.1</strong></li>
+            <li>Ядро: <strong>Fabric Loader >= 0.15.0</strong></li>
+            <li>API: <strong>Fabric API</strong></li>
+            <li>Версия мода: <strong>2.0pre4-fabric-port</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download>Скачать Fabric jar</a>
+          </div>
+        </article>
+
+        <article class="mod-card" data-core="forge">
+          <p class="tag forge">Forge</p>
+          <h3>Blur Ballistics (Forge)</h3>
+          <p>Forge-сборка с баллистическим калькулятором и клиентскими элементами управления/индикации.</p>
+          <ul>
+            <li>Minecraft: <strong>1.20.1</strong></li>
+            <li>Ядро: <strong>Forge 47+</strong></li>
+            <li>Версия мода: <strong>1.0.0</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/blur-mod-1.0.0-forge.jar" download>Скачать Forge jar</a>
+          </div>
+        </article>
+
+        <article class="mod-card" data-core="injector">
+          <p class="tag injector">Injector</p>
+          <h3>Ballisticys Injector Toolkit</h3>
+          <p>
+            Автоинжектор для PolitCraft: копирует mod/agent в <code>libraries/custom</code>,
+            патчит <code>profileInfo.json</code> и добавляет аргументы запуска с <code>-javaagent</code>.
+          </p>
+          <ul>
+            <li>Цель: <strong>PolitCraft offline-mode профиль</strong></li>
+            <li>Agent: <strong>ballisticys-fabric-agent-1.0.0</strong></li>
+            <li>Внутри zip: <strong>PS1 + PY + payload</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary" href="downloads/ballisticys-injector-toolkit.zip" download>Скачать Injector ZIP</a>
+            <a class="btn ghost" href="downloads/ballisticys-fabric-agent-1.0.0.jar" download>Скачать Agent jar</a>
+          </div>
+        </article>
+
+        <!-- VIP/Admin карточки (новые версии) -->
+        <article class="mod-card vip-card hidden" data-core="fabric" data-vip="true">
+          <p class="tag fabric">Fabric <span class="vip-badge">VIP</span></p>
           <h3>Ballistics Calculator (Fabric)</h3>
           <p>Порт клиентского мода на Fabric. Баллистический калькулятор, PVO, HUD и больше.</p>
           <ul>
@@ -132,8 +186,8 @@
           </div>
         </article>
 
-        <article class="mod-card" data-core="forge">
-          <p class="tag forge">Forge</p>
+        <article class="mod-card vip-card hidden" data-core="forge" data-vip="true">
+          <p class="tag forge">Forge <span class="vip-badge">VIP</span></p>
           <h3>Ballistics Calculator (Forge)</h3>
           <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
           <ul>
@@ -147,23 +201,8 @@
           </div>
         </article>
 
-        <article class="mod-card" data-core="neoforge">
-          <p class="tag neoforge">NeoForge</p>
-          <h3>Ballistics Calculator (NeoForge)</h3>
-          <p>NeoForge версия с полным набором функций.</p>
-          <ul>
-            <li>Minecraft: <strong>1.21.1</strong></li>
-            <li>NeoForge: <strong>21.1.0+</strong></li>
-            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
-            <li>Java: <strong>21+</strong></li>
-          </ul>
-          <div class="card-actions">
-            <a class="btn primary" href="downloads/ballistic-calculator-2.0.0-1.21.1-neoforge.jar" download>Скачать NeoForge</a>
-          </div>
-        </article>
-
-        <article class="mod-card" data-core="injector">
-          <p class="tag injector">Injector</p>
+        <article class="mod-card vip-card hidden" data-core="injector" data-vip="true">
+          <p class="tag injector">Injector <span class="vip-badge">VIP</span></p>
           <h3>Ballisticys Injector</h3>
           <p>Автоинжектор для PolitCraft с поддержкой промокодов.</p>
           <ul>
@@ -175,36 +214,36 @@
             <a class="btn primary" href="downloads/ballisticys-injector-1.21.1.zip" download>Скачать Injector</a>
           </div>
         </article>
+
       </div>
     </section>
 
     <section class="panel reveal" id="guide">
       <h2>Быстрый гайд</h2>
-      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip, это нормально.</p>
+      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip внутри, это нормально. Его не нужно распаковывать.</p>
       <div class="guide-grid">
         <article>
           <h3>Fabric установка</h3>
           <ol>
-            <li>Установи Fabric Loader 0.16.9+ для 1.21.1</li>
-            <li>Установи Fabric API 0.106.1+</li>
-            <li>Положи jar в папку <code>mods</code></li>
-            <li>Запусти на Java 21+</li>
+            <li>Установи Fabric Loader для 1.20.1.</li>
+            <li>Положи jar в папку <code>mods</code>.</li>
+            <li>Убедись, что установлен Fabric API.</li>
           </ol>
         </article>
         <article>
           <h3>Forge установка</h3>
           <ol>
-            <li>Установи Forge 52.0.15+ для 1.21.1</li>
-            <li>Положи jar в папку <code>mods</code></li>
-            <li>Запусти на Java 21+</li>
+            <li>Установи Forge 47+ для 1.20.1.</li>
+            <li>Положи Forge jar в папку <code>mods</code>.</li>
+            <li>Запусти клиент на Java 17.</li>
           </ol>
         </article>
         <article>
-          <h3>NeoForge установка</h3>
+          <h3>Injector запуск</h3>
           <ol>
-            <li>Установи NeoForge 21.1.0+ для 1.21.1</li>
-            <li>Положи jar в папку <code>mods</code></li>
-            <li>Запусти на Java 21+</li>
+            <li>Скачай и распакуй toolkit zip.</li>
+            <li>Запусти <code>Start-Ballisticys.ps1</code>.</li>
+            <li>Проверь <code>inject-launch.log</code> после запуска.</li>
           </ol>
         </article>
       </div>

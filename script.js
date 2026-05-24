@@ -124,6 +124,24 @@ document.addEventListener('click', (e) => {
   }
 });
 
+function toggleVipCards(show) {
+  document.querySelectorAll('.vip-card').forEach(card => {
+    card.classList.toggle('hidden', !show);
+  });
+  const hint = document.querySelector('.vip-hint');
+  if (hint) hint.classList.toggle('hidden', !!show);
+}
+
+function applyCurrentFilter() {
+  const active = document.querySelector('.filter.active');
+  if (!active) return;
+  const filter = active.dataset.filter;
+  document.querySelectorAll('.mod-card').forEach(card => {
+    if (card.classList.contains('vip-card') && card.classList.contains('hidden')) return;
+    card.style.display = filter === 'all' || card.dataset.core === filter ? '' : 'none';
+  });
+}
+
 function updateUI() {
   const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
   const sessionEmail = localStorage.getItem('ballisticys_session');
@@ -135,9 +153,12 @@ function updateUI() {
     profileRole.textContent = currentUser.role;
     profileInitial.textContent = currentUser.email[0].toUpperCase();
     adminPanelLink?.classList.toggle('hidden', currentUser.role !== 'admin');
+    toggleVipCards(currentUser.role === 'vip' || currentUser.role === 'admin');
+    applyCurrentFilter();
   } else {
     openAuthBtn?.classList.remove('hidden');
     profileRoot?.classList.add('hidden');
+    toggleVipCards(false);
   }
 }
 
@@ -164,10 +185,7 @@ document.querySelectorAll('.filter').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    const filter = btn.dataset.filter;
-    document.querySelectorAll('.mod-card').forEach(card => {
-      card.style.display = filter === 'all' || card.dataset.core === filter ? '' : 'none';
-    });
+    applyCurrentFilter();
   });
 });
 
