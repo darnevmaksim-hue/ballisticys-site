@@ -790,6 +790,25 @@ body.modal-open {
   margin: 1.5rem 0;
 }
 
+.vip-section {
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  margin-top: 0.5rem;
+  background: rgba(255, 215, 0, 0.03);
+}
+
+.vip-section h3 {
+  color: #ffd700;
+  margin-bottom: 0.5rem;
+}
+
+.vip-section-desc {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 768px) {
   .hero { height: auto; padding: 6rem 1rem; }
   .panel { margin: 1rem; padding: 2rem 1.5rem; }

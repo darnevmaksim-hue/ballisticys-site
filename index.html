@@ -412,6 +412,33 @@
         <button id="profile-change-pass-btn" class="btn primary" type="button">Сохранить пароль</button>
       </div>
 
+      <div id="profile-vip-section" class="vip-section hidden">
+        <hr class="divider">
+        <h3>Генерация VIP-ключа</h3>
+        <p class="vip-section-desc">Создайте ключ, чтобы сделать другого пользователя VIP на 24 часа.</p>
+        <div class="actions">
+          <button id="profile-gen-key-btn" class="btn primary" type="button">Сгенерировать ключ</button>
+        </div>
+        <div id="profile-gen-key-result" class="promo-result hidden">
+          <div class="promo-code-display">
+            <span class="promo-code" id="profile-gen-key-code">—</span>
+            <button class="btn primary" id="profile-copy-key-btn">Копировать</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-redeem-section" class="vip-section hidden">
+        <hr class="divider">
+        <h3>Активировать VIP-ключ</h3>
+        <p class="vip-section-desc">Введите ключ, чтобы получить VIP-статус на 24 часа.</p>
+        <div class="auth-box">
+          <input id="profile-redeem-input" class="auth-input" type="text" placeholder="Введите ключ" />
+        </div>
+        <div class="actions">
+          <button id="profile-redeem-btn" class="btn primary" type="button">Активировать</button>
+        </div>
+      </div>
+
       <p id="profile-status" class="auth-status">Статус: готово.</p>
     </section>
   </div>

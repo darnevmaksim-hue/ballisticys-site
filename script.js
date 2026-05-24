@@ -221,6 +221,14 @@ document.getElementById('profile-manage-btn')?.addEventListener('click', () => {
     document.getElementById('profile-status').textContent = 'Статус: готово.';
     document.getElementById('profile-status').style.color = '';
     document.getElementById('profile-modal')?.classList.remove('hidden');
+    const vipSection = document.getElementById('profile-vip-section');
+    if (vipSection) {
+      vipSection.classList.toggle('hidden', currentUser?.role !== 'vip' && currentUser?.role !== 'admin');
+    }
+    const redeemSection = document.getElementById('profile-redeem-section');
+    if (redeemSection) {
+      redeemSection.classList.toggle('hidden', currentUser?.role === 'vip' || currentUser?.role === 'admin');
+    }
   }
 });
 
@@ -437,6 +445,51 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     status.style.color = '#4ade80';
     document.getElementById('profile-new-pass').value = '';
     document.getElementById('profile-confirm-pass').value = '';
+  });
+
+  document.getElementById('profile-gen-key-btn')?.addEventListener('click', () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
+    codes.push({ code, durationHours: 24, usedBy: null, createdAt: Date.now(), generatedBy: currentUser?.email });
+    localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
+    const result = document.getElementById('profile-gen-key-result');
+    const codeEl = document.getElementById('profile-gen-key-code');
+    if (result && codeEl) {
+      codeEl.textContent = code;
+      result.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('profile-copy-key-btn')?.addEventListener('click', () => {
+    const code = document.getElementById('profile-gen-key-code')?.textContent;
+    if (code && code !== '—') navigator.clipboard.writeText(code);
+  });
+
+  document.getElementById('profile-redeem-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('profile-redeem-input');
+    const status = document.getElementById('profile-status');
+    const key = input?.value?.trim().toUpperCase();
+    if (!key) { status.textContent = 'Введите ключ'; status.style.color = '#ff7b72'; return; }
+    const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
+    const found = codes.find(c => c.code === key && !c.usedBy);
+    if (!found) { status.textContent = 'Ключ не найден или уже использован'; status.style.color = '#ff7b72'; return; }
+    found.usedBy = currentUser?.email;
+    found.usedAt = Date.now();
+    localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
+    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+    if (currentUser && users[currentUser.email]) {
+      users[currentUser.email].role = 'vip';
+      users[currentUser.email].vipUntil = Date.now() + (found.durationHours || 24) * 60 * 60 * 1000;
+      localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      currentUser = users[currentUser.email];
+      localStorage.setItem('ballisticys_session', currentUser.email);
+      status.textContent = 'VIP-статус активирован на ' + (found.durationHours || 24) + ' ч!';
+      status.style.color = '#ffd700';
+      input.value = '';
+      updateUI();
+    }
   });
 
   if (isVipActive) {
