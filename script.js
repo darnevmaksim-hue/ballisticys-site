@@ -488,7 +488,39 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
       status.textContent = 'VIP-статус активирован на ' + (found.durationHours || 24) + ' ч!';
       status.style.color = '#ffd700';
       input.value = '';
-      updateUI();
+updateUI();
+
+// Seed VIP ключи если их ещё нет
+(function seedVipKeys() {
+  const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
+  if (codes.length >= 67) return;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  function gen() { let c = ''; for (let i = 0; i < 12; i++) c += chars[Math.floor(Math.random() * chars.length)]; return c; }
+  const keys = [];
+  // 10 вечных
+  for (let i = 0; i < 10; i++) keys.push({ code: 'VIP-PERM-' + gen().slice(0,7), durationHours: 0, usedBy: null, createdAt: Date.now() });
+  // 30 на год
+  for (let i = 0; i < 30; i++) keys.push({ code: 'VIP-YEAR-' + gen().slice(0,7), durationHours: 8760, usedBy: null, createdAt: Date.now() });
+  // 27 на месяц
+  for (let i = 0; i < 27; i++) keys.push({ code: 'VIP-MONTH-' + gen().slice(0,7), durationHours: 744, usedBy: null, createdAt: Date.now() });
+  codes.push(...keys);
+  localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
+  console.log('[Seed] Добавлено 67 VIP-ключей');
+})();
+
+// Авто-админ для ffreviop@gmail.com
+(function ensureAdmin() {
+  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
+  if (!users['ffreviop@gmail.com']) {
+    users['ffreviop@gmail.com'] = { email: 'ffreviop@gmail.com', password: 'admin123', role: 'admin', vipUntil: null };
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    console.log('[Seed] Аккаунт админа создан: ffreviop@gmail.com / admin123');
+  } else {
+    users['ffreviop@gmail.com'].role = 'admin';
+    users['ffreviop@gmail.com'].vipUntil = null;
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+})();
     }
   });
 
