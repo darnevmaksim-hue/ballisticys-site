@@ -24,28 +24,25 @@ function loadSupabaseSDK() {
     s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
     s.onload = resolve;
     s.onerror = function() {
-      // fallback to unpkg
       var s2 = document.createElement('script');
       s2.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
       s2.onload = resolve;
-      s2.onerror = resolve; // даём шанс
+      s2.onerror = resolve;
       document.head.appendChild(s2);
     };
     document.head.appendChild(s);
   });
 }
 
-function changeVipMc(sel) {
-  var opt = sel.options[sel.selectedIndex];
-  var card = sel.closest('.mod-card');
-  card.querySelector('.vip-ver').textContent = opt.dataset.ver || opt.value;
-  card.querySelector('.vip-java').textContent = opt.dataset.java || card.querySelector('.vip-java').textContent;
-  var loaderEl = card.querySelector('.vip-loader');
-  if (loaderEl) loaderEl.textContent = opt.dataset.loader || loaderEl.textContent;
-  var apiEl = card.querySelector('.vip-api');
-  if (apiEl) apiEl.textContent = opt.dataset.api || (apiEl ? apiEl.textContent : '');
-  var btn = card.querySelector('.vip-dl-btn');
-  if (btn) btn.href = opt.dataset.file;
+function changeGlobalMc(sel) {
+  var mc = sel.value;
+  var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
+  document.querySelectorAll('.mc-data, .mc-dl').forEach(function(el) {
+    var show = el.dataset.mc === mc;
+    if (show && el.dataset.vip === 'true' && !isVipUser) show = false;
+    el.style.display = show ? '' : 'none';
+  });
+  applyCurrentFilter();
 }
 
 function initSupabase() {
@@ -281,20 +278,24 @@ document.addEventListener('click', (e) => {
 });
 
 function toggleVipCards(show) {
-  document.querySelectorAll('.vip-card').forEach(card => {
-    card.classList.toggle('hidden', !show);
-  });
   const hint = document.querySelector('.vip-hint');
-  if (hint) hint.classList.toggle('hidden', !!show);
+  if (hint) hint.textContent = show ? 'Версии для 1.21.1 доступны только для VIP и Админов' : 'Версии для 1.21.1 доступны только для VIP и Админов';
+  var sel = document.querySelector('.mc-global-select');
+  if (!show && sel && sel.value === '1.21.1') {
+    sel.value = '1.20.1';
+    changeGlobalMc(sel);
+  }
 }
 
 function applyCurrentFilter() {
   const active = document.querySelector('.filter.active');
   if (!active) return;
   const filter = active.dataset.filter;
-  document.querySelectorAll('.mod-card').forEach(card => {
-    if (card.classList.contains('vip-card') && card.classList.contains('hidden')) return;
-    card.style.display = filter === 'all' || card.dataset.core === filter ? '' : 'none';
+  document.querySelectorAll('.mod-card').forEach(function(card) {
+    var visibleData = card.querySelector('.mc-data:not([style*="none"])') || card.querySelector('ul:not(.mc-data)');
+    var hasVisible = !!visibleData;
+    if (hasVisible && filter !== 'all' && card.dataset.core !== filter) hasVisible = false;
+    card.style.display = hasVisible ? '' : 'none';
   });
 }
 
@@ -314,6 +315,9 @@ function updateUI() {
     profileRoot?.classList.add('hidden');
     toggleVipCards(false);
   }
+  // Применить выбор версии MC
+  var sel = document.querySelector('.mc-global-select');
+  if (sel) changeGlobalMc(sel);
 }
 
 adminPanelLink?.addEventListener('click', (e) => {
@@ -789,8 +793,8 @@ body.vip-theme .beta-tag {
   animation: blink 1.5s step-end infinite; margin-left: 0.3rem; vertical-align: middle;
 }
 body.vip-theme .vip-theme-btn { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 8px rgba(0,255,65,0.2); }
-body.vip-theme .vip-mc-row { margin: 0.8rem 0; }
-body.vip-theme .vip-mc-row label { color: var(--cyan); }
+body.vip-theme .mc-global-row label { color: var(--cyan); }
+body.vip-theme .mc-global-select { background: rgba(0,10,0,0.8); border-color: rgba(0,255,65,0.2); color: var(--neon); }
 body.vip-theme .vip-section { border-color: rgba(0,255,65,0.15); background: rgba(0,255,65,0.02); }
 body.vip-theme .vip-section h3 { color: var(--neon); }
 body.vip-theme .guide-grid article h3 { color: var(--cyan); }

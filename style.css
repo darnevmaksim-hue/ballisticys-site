@@ -331,6 +331,9 @@ body {
 .mod-card li strong { color: var(--text-main); }
 
 .card-actions { margin-top: auto; display: flex; flex-direction: column; gap: 0.8rem; }
+.mc-global-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1rem; font-size: 0.9rem; }
+.mc-global-row label { color: var(--text-dim); white-space: nowrap; font-weight: 600; }
+.mc-global-select { padding: 0.4rem 0.8rem; background: var(--panel-bg); border: 1px solid var(--panel-border); border-radius: 6px; color: var(--text-main); font-family: var(--font-main); cursor: pointer; font-size: 0.9rem; }
 .vip-mc-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.8rem 0; font-size: 0.85rem; }
 .vip-mc-row label { color: var(--text-dim); white-space: nowrap; }
 
