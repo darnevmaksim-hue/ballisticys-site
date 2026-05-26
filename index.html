@@ -246,6 +246,7 @@
           <div class="card-actions">
             <a class="btn primary mc-dl" data-mc="1.21.1" data-vip="true" href="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar" download style="display:none">Скачать Fabric (1.21.1)</a>
             <a class="btn primary mc-dl" data-mc="1.20.1" href="downloads/bbb-fabric-port-2.0pre4-fabric-port.jar" download>Скачать Fabric (1.20.1)</a>
+            <div class="request-area" data-mod="Ballistics Calculator (Fabric)" data-mc="1.21.1"></div>
           </div>
         </article>
 
@@ -267,6 +268,7 @@
           <div class="card-actions">
             <a class="btn primary mc-dl" data-mc="1.21.1" data-vip="true" href="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar" download style="display:none">Скачать Forge (1.21.1)</a>
             <a class="btn primary mc-dl" data-mc="1.20.1" href="downloads/blur-mod-1.0.0-forge.jar" download>Скачать Forge (1.20.1)</a>
+            <div class="request-area" data-mod="Ballistics Calculator (Forge)" data-mc="1.21.1"></div>
           </div>
         </article>
 
@@ -288,6 +290,8 @@
           <div class="card-actions">
             <a class="btn primary mc-dl" data-mc="1.21.1" data-vip="true" href="downloads/ballistic-calculator-2.0.0-1.21.1-neoforge.jar" download style="display:none">Скачать NeoForge (1.21.1)</a>
             <a class="btn primary mc-dl" data-mc="1.20.1" data-vip="true" href="downloads/ballistic-calculator-1.0.0-1.20.1-neoforge.jar" download style="display:none">Скачать NeoForge (1.20.1)</a>
+            <div class="request-area" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.21.1"></div>
+            <div class="request-area" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.20.1"></div>
           </div>
         </article>
 
@@ -442,6 +446,7 @@
         <button class="admin-tab active" data-tab="promo">Промокоды</button>
         <button class="admin-tab" data-tab="users">Пользователи</button>
         <button class="admin-tab" data-tab="vip">VIP подписки</button>
+        <button class="admin-tab" data-tab="requests">Запросы</button>
       </div>
       
       <!-- Вкладка промокодов -->
@@ -475,6 +480,12 @@
       <div id="admin-vip-tab" class="admin-tab-content hidden">
         <h3>Активные VIP подписки</h3>
         <div id="vip-list" class="vip-list"></div>
+      </div>
+      
+      <!-- Вкладка запросов -->
+      <div id="admin-requests-tab" class="admin-tab-content hidden">
+        <h3>Запросы на скачивание</h3>
+        <div id="requests-list" class="requests-list"></div>
       </div>
       
       <p id="admin-status" class="auth-status">Статус: ожидаем данных.</p>

@@ -145,3 +145,30 @@ create policy "Users view own activity" on public.user_activity for select
   using (auth.uid() = user_id);
 create policy "Users insert activity" on public.user_activity for insert
   with check (auth.uid() = user_id or public.is_admin());
+
+-- Таблица запросов на скачивание
+create table if not exists public.download_requests (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  mod_name text not null,
+  mc_version text not null,
+  status text default 'pending' not null check (status in ('pending', 'approved', 'denied')),
+  reviewed_by uuid references public.profiles(id),
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  reviewed_at timestamp with time zone
+);
+
+create index if not exists idx_download_requests_user on public.download_requests(user_id);
+create index if not exists idx_download_requests_status on public.download_requests(status);
+
+alter table public.download_requests enable row level security;
+
+-- Политики DOWNLOAD_REQUESTS
+create policy "Users view own requests" on public.download_requests for select
+  using (auth.uid() = user_id);
+create policy "Users create requests" on public.download_requests for insert
+  with check (auth.uid() = user_id);
+create policy "Admins view all requests" on public.download_requests for select
+  using (public.is_admin());
+create policy "Admins update requests" on public.download_requests for update
+  using (public.is_admin());

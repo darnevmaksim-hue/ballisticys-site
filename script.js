@@ -43,6 +43,96 @@ function changeGlobalMc(sel) {
     el.style.display = show ? '' : 'none';
   });
   applyCurrentFilter();
+  updateRequestAreas();
+}
+
+let requestCache = null;
+
+async function loadRequestStatus() {
+  if (!sb || !currentUser) { requestCache = null; return; }
+  try {
+    const { data, error } = await withTimeout(
+      sb.from('download_requests').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: false }),
+      15000
+    );
+    if (!error && data) requestCache = data;
+    else requestCache = null;
+  } catch (_) { requestCache = null; }
+}
+
+function updateRequestAreas() {
+  var mc = document.querySelector('.mc-global-select')?.value || '1.20.1';
+  var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
+  document.querySelectorAll('.request-area').forEach(function(area) {
+    if (area.dataset.mc !== mc) { area.style.display = 'none'; return; }
+    if (isVipUser) { area.style.display = 'none'; return; }
+    area.style.display = '';
+    area.innerHTML = '';
+    var modName = area.dataset.mod;
+    if (!currentUser) {
+      var hint = document.createElement('span');
+      hint.style.cssText = 'font-size:0.75rem;color:var(--text-dim);cursor:pointer';
+      hint.textContent = 'Войдите, чтобы скачать';
+      hint.addEventListener('click', function() {
+        var btn = document.getElementById('open-auth-btn');
+        if (btn) btn.click();
+      });
+      area.appendChild(hint);
+      return;
+    }
+    var existing = requestCache ? requestCache.filter(function(r) { return r.mod_name === modName && r.mc_version === mc; }) : [];
+    var req = existing.length ? existing[0] : null;
+    if (!req) {
+      var btn = document.createElement('button');
+      btn.className = 'request-btn';
+      btn.textContent = 'Запросить скачивание';
+      btn.addEventListener('click', function() { requestDownload(modName, mc, btn); });
+      area.appendChild(btn);
+    } else if (req.status === 'pending') {
+      var s = document.createElement('span');
+      s.className = 'request-status pending';
+      s.textContent = '⏳ Ожидает одобрения';
+      area.appendChild(s);
+    } else if (req.status === 'approved') {
+      var link = document.createElement('a');
+      link.className = 'btn primary';
+      link.style.cssText = 'padding:0.5rem 1rem;font-size:0.8rem';
+      var dl = area.parentElement.querySelector('.mc-dl[data-mc="' + mc + '"]');
+      if (dl) {
+        link.href = dl.href;
+        link.download = dl.getAttribute('download') || '';
+      }
+      link.textContent = 'Скачать';
+      area.appendChild(link);
+    } else if (req.status === 'denied') {
+      var s = document.createElement('span');
+      s.className = 'request-status denied';
+      s.textContent = 'Отказано';
+      area.appendChild(s);
+    }
+  });
+}
+
+async function requestDownload(modName, mcVersion, btnEl) {
+  if (!sb || !currentUser) return;
+  btnEl.disabled = true;
+  btnEl.textContent = '⏳ Отправка...';
+  try {
+    var { error } = await sb.from('download_requests').insert({
+      user_id: currentUser.id,
+      mod_name: modName,
+      mc_version: mcVersion,
+      status: 'pending'
+    });
+    if (error) {
+      btnEl.textContent = 'Ошибка: ' + error.message;
+      return;
+    }
+    await loadRequestStatus();
+    updateRequestAreas();
+  } catch (_) {
+    btnEl.textContent = 'Ошибка сети';
+  }
 }
 
 function initSupabase() {
@@ -315,6 +405,7 @@ function updateUI() {
     const isVip = currentUser.role === 'vip' || currentUser.role === 'admin';
     toggleVipCards(isVip);
     applyCurrentFilter();
+    loadRequestStatus().then(updateRequestAreas);
   } else {
     openAuthBtn?.classList.remove('hidden');
     profileRoot?.classList.add('hidden');
@@ -423,7 +514,7 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
 });
 
 async function loadAdminData() {
-  await withTimeout(Promise.all([loadPromoCodes(), loadUsers(), loadVIPList()]), 30000);
+  await withTimeout(Promise.all([loadPromoCodes(), loadUsers(), loadVIPList(), loadRequests()]), 30000);
 }
 
 async function loadPromoCodes() {
@@ -561,6 +652,95 @@ async function loadVIPList() {
     }).join('');
   } catch (_) {
     list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+  }
+}
+
+async function loadRequests() {
+  const list = document.getElementById('requests-list');
+  if (!list || !sb) return;
+  list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
+  try {
+    const { data, error } = await withTimeout(
+      sb.from('download_requests').select('id, user_id, mod_name, mc_version, status, created_at').order('created_at', { ascending: false }).limit(50),
+      15000
+    );
+    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-dim)">Нет запросов</p>';
+      return;
+    }
+    var userIds = [...new Set(data.map(function(r) { return r.user_id; }))];
+    var { data: profiles } = await withTimeout(
+      sb.from('profiles').select('id, email').in('id', userIds), 10000
+    );
+    var emailMap = {};
+    if (profiles) profiles.forEach(function(p) { emailMap[p.id] = p.email || 'unknown'; });
+    list.innerHTML = data.map(function(r) {
+      var email = emailMap[r.user_id] || 'unknown';
+      var statusClass = r.status === 'pending' ? 'pending' : (r.status === 'approved' ? 'approved' : 'denied');
+      var time = new Date(r.created_at).toLocaleString('ru-RU');
+      var actions = '';
+      if (r.status === 'pending') {
+        actions = '<div class="req-actions">' +
+          '<button class="req-btn approve" data-req-id="' + r.id + '" data-action="approve">✅</button>' +
+          '<button class="req-btn deny" data-req-id="' + r.id + '" data-action="deny">❌</button>' +
+          '</div>';
+      } else {
+        actions = '<span class="request-status ' + statusClass + '">' + r.status + '</span>';
+      }
+      return '<div class="request-item">' +
+        '<div class="req-info">' +
+        '<strong>' + escapeHtml(email) + '</strong><br>' +
+        escapeHtml(r.mod_name) + ' (' + r.mc_version + ')<br>' +
+        '<small style="color:var(--text-dim)">' + time + '</small>' +
+        '</div>' +
+        actions +
+        '</div>';
+    }).join('');
+    list.querySelectorAll('.req-btn.approve').forEach(function(btn) {
+      btn.addEventListener('click', function() { approveRequest(btn.dataset.reqId); });
+    });
+    list.querySelectorAll('.req-btn.deny').forEach(function(btn) {
+      btn.addEventListener('click', function() { denyRequest(btn.dataset.reqId); });
+    });
+  } catch (_) {
+    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+  }
+}
+
+function escapeHtml(str) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(str || ''));
+  return d.innerHTML;
+}
+
+async function approveRequest(reqId) {
+  if (!sb) return;
+  try {
+    var { error } = await sb.from('download_requests').update({
+      status: 'approved',
+      reviewed_by: currentUser?.id,
+      reviewed_at: new Date().toISOString()
+    }).eq('id', reqId);
+    if (error) { document.getElementById('admin-status').textContent = 'Ошибка: ' + error.message; return; }
+    loadRequests();
+  } catch (_) {
+    document.getElementById('admin-status').textContent = 'Ошибка сети';
+  }
+}
+
+async function denyRequest(reqId) {
+  if (!sb) return;
+  try {
+    var { error } = await sb.from('download_requests').update({
+      status: 'denied',
+      reviewed_by: currentUser?.id,
+      reviewed_at: new Date().toISOString()
+    }).eq('id', reqId);
+    if (error) { document.getElementById('admin-status').textContent = 'Ошибка: ' + error.message; return; }
+    loadRequests();
+  } catch (_) {
+    document.getElementById('admin-status').textContent = 'Ошибка сети';
   }
 }
 
@@ -1036,6 +1216,7 @@ async function loadSession() {
         .gt('end_time', new Date().toISOString())
         .limit(1), 15000);
       currentUser.vipUntil = subs?.length ? subs[0].end_time : null;
+      await loadRequestStatus().catch(function() {});
     } catch (_) {
       // Если сервер недоступен — используем кеш
       var cached = null;

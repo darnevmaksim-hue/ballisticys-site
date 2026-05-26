@@ -771,6 +771,120 @@ body.modal-open {
   color: var(--text-dim);
 }
 
+.request-area {
+  margin-top: 0.5rem;
+}
+
+.request-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: 1px solid var(--accent-color);
+  background: transparent;
+  color: var(--accent-color);
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.request-btn:hover {
+  background: rgba(88, 166, 255, 0.15);
+}
+
+.request-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.request-status {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+}
+
+.request-status.pending {
+  color: #ffa657;
+  background: rgba(255, 166, 87, 0.1);
+}
+
+.request-status.approved {
+  color: #3fb950;
+  background: rgba(63, 185, 80, 0.1);
+}
+
+.request-status.denied {
+  color: #ff7b72;
+  background: rgba(255, 123, 114, 0.1);
+}
+
+.requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.request-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: var(--panel-bg);
+  border-radius: 4px;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.request-item .req-info {
+  flex: 1;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.request-item .req-info strong {
+  color: var(--text-main);
+}
+
+.request-item .req-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.req-btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.req-btn.approve {
+  background: #3fb950;
+  color: #0d1117;
+}
+
+.req-btn.approve:hover {
+  background: #4ade80;
+}
+
+.req-btn.deny {
+  background: #ff7b72;
+  color: #0d1117;
+}
+
+.req-btn.deny:hover {
+  background: #ffa098;
+}
+
+@media (max-width: 768px) {
+  .request-item { flex-direction: column; align-items: stretch; }
+  .request-item .req-actions { justify-content: flex-end; }
+}
+
 .profile-info {
   display: flex;
   flex-direction: column;
