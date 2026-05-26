@@ -8,17 +8,26 @@ const SS_KEY = 'ballisticys_session';
 let currentUser = null;
 let currentSession = null;
 
+// На старте удаляем старые ключи Supabase, чтобы не было конфликта
+try {
+  const toRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && (key.includes('auth-token') || key.includes('supabase'))) {
+      toRemove.push(key);
+    }
+  }
+  toRemove.forEach(k => localStorage.removeItem(k));
+} catch (_) {}
+
 sb?.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session) {
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
     try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
     currentSession = session;
   } else if (event === 'SIGNED_OUT') {
     try { localStorage.removeItem(SS_KEY); } catch (_) {}
     currentSession = null;
     currentUser = null;
-  } else if (event === 'TOKEN_REFRESHED' && session) {
-    try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
-    currentSession = session;
   }
 });
 
@@ -916,18 +925,33 @@ async function loadSession() {
   if (!sb) return;
 
   // Восстанавливаем сессию из своего localStorage ключа
+  let session = null;
   try {
     const saved = localStorage.getItem(SS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (parsed?.refresh_token) {
-        await sb.auth.setSession({ refresh_token: parsed.refresh_token });
+      if (parsed?.access_token && parsed?.refresh_token) {
+        const { data } = await sb.auth.setSession({
+          access_token: parsed.access_token,
+          refresh_token: parsed.refresh_token
+        });
+        if (data?.session) {
+          session = data.session;
+          try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
+        }
       }
     }
-  } catch (_) {}
+  } catch (e) {
+    // ignore
+  }
 
-  const { data } = await sb.auth.getSession();
-  currentSession = data?.session || null;
+  if (!session) {
+    try { localStorage.removeItem(SS_KEY); } catch (_) {}
+    const { data } = await sb.auth.getSession();
+    session = data?.session || null;
+  }
+
+  currentSession = session;
   if (currentSession) {
     const { data: profile } = await sb.from('profiles')
       .select('*')
