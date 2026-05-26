@@ -14,6 +14,63 @@ function withTimeout(promise, ms) {
   ]);
 }
 
+var EDGE_FN = AUTH_CONFIG.url + '/functions/v1/download';
+
+function getSessionToken() {
+  try {
+    var saved = JSON.parse(localStorage.getItem(SS_KEY));
+    return saved?.access_token || null;
+  } catch(_) { return null; }
+}
+
+async function downloadMod(modName, mcVersion, target) {
+  var token = getSessionToken();
+  if (!token) return;
+  target = target || event?.target;
+  if (target) { target.disabled = true; target.textContent = '⏳ Загрузка...'; }
+  try {
+    var url = EDGE_FN + '?mod=' + encodeURIComponent(modName) + '&mc=' + encodeURIComponent(mcVersion);
+    var resp = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + token, 'apikey': AUTH_CONFIG.anonKey }
+    });
+    if (!resp.ok) {
+      var err = await resp.json().catch(function() { return { error: resp.statusText }; });
+      if (target) { target.disabled = false; target.textContent = 'Ошибка'; }
+      return;
+    }
+    var blob = await resp.blob();
+    var disposition = resp.headers.get('Content-Disposition') || '';
+    var match = disposition.match(/filename="?(.+?)"?$/);
+    var filename = match ? match[1] : (modName + '.jar');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    if (target) { target.disabled = false; target.textContent = 'Скачано'; }
+  } catch(_) {
+    if (target) { target.disabled = false; target.textContent = 'Ошибка сети'; }
+  }
+}
+    var blob = await resp.blob();
+    var disposition = resp.headers.get('Content-Disposition') || '';
+    var match = disposition.match(/filename="?(.+?)"?$/);
+    var filename = match ? match[1] : (modName + '.jar');
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+    if (btn) { btn.disabled = false; btn.textContent = 'Скачано'; }
+  } catch(_) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Ошибка сети'; }
+  }
+}
+
 function loadSupabaseSDK() {
   return new Promise(function(resolve) {
     if (typeof supabase !== 'undefined' && supabase.createClient) {
@@ -94,16 +151,12 @@ function updateRequestAreas() {
       s.textContent = '⏳ Ожидает одобрения';
       area.appendChild(s);
     } else if (req.status === 'approved') {
-      var link = document.createElement('a');
-      link.className = 'btn primary';
-      link.style.cssText = 'padding:0.5rem 1rem;font-size:0.8rem';
-      var dl = area.parentElement.querySelector('.mc-dl[data-mc="' + mc + '"]');
-      if (dl) {
-        link.href = dl.href;
-        link.download = dl.getAttribute('download') || '';
-      }
-      link.textContent = 'Скачать';
-      area.appendChild(link);
+      var btn = document.createElement('button');
+      btn.className = 'btn primary';
+      btn.style.cssText = 'padding:0.5rem 1rem;font-size:0.8rem';
+      btn.textContent = 'Скачать';
+      btn.addEventListener('click', function(e) { downloadMod(modName, mc, e.target); });
+      area.appendChild(btn);
     } else if (req.status === 'denied') {
       var s = document.createElement('span');
       s.className = 'request-status denied';
@@ -1229,3 +1282,12 @@ async function loadSession() {
     currentUser = null;
   }
 }
+
+// Delegated click handler for download buttons
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.mc-dl');
+  if (!btn) return;
+  var mod = btn.dataset.mod;
+  var mc = btn.dataset.mc;
+  if (mod && mc) downloadMod(mod, mc, btn);
+});

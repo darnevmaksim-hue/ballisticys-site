@@ -172,3 +172,24 @@ create policy "Admins view all requests" on public.download_requests for select
   using (public.is_admin());
 create policy "Admins update requests" on public.download_requests for update
   using (public.is_admin());
+
+-- Функция проверки доступа к скачиванию
+create or replace function public.can_download(mod_name text, mc_version text default 'any')
+returns boolean
+language sql
+security definer
+stable
+as $$
+  select
+    public.is_admin()
+    or public.is_vip()
+    or exists (
+      select 1 from public.download_requests
+      where user_id = auth.uid()
+      and status = 'approved'
+      and mod_name = can_download.mod_name
+      and (can_download.mc_version = 'any' or mc_version = can_download.mc_version)
+    );
+$$;
+create policy "Admins update requests" on public.download_requests for update
+  using (public.is_admin());
