@@ -576,7 +576,92 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     body.classList.add('vip-theme');
   }
   var st = document.createElement('style');
-  st.textContent = 'body.vip-theme{--accent-color:#ffd700}body.vip-theme .profile-trigger{background:linear-gradient(135deg,#b8860b,#ffd700);border-color:#ffd700}body.vip-theme .metric-value{color:#ffd700}body.vip-theme .hero-copy h1:after{content:" \\2605 VIP";font-size:0.4em;color:#ffd700;vertical-align:super}body.vip-theme .role-badge.vip{background:rgba(255,215,0,0.3)}';
+  st.textContent = `body.vip-theme {
+  --accent-color: #ffd700;
+  --vip-glow: 0 0 20px rgba(255,215,0,0.3);
+  --vip-bg: linear-gradient(135deg, #1a1500 0%, #0d1117 50%, #1a1500 100%);
+}
+body.vip-theme {
+  background: var(--vip-bg);
+}
+body.vip-theme .background-grid {
+  background-image: 
+    linear-gradient(rgba(255,215,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,215,0,0.05) 1px, transparent 1px);
+}
+body.vip-theme .hero-copy h1 {
+  background: linear-gradient(135deg, #ffd700, #ffec80, #b8860b, #ffd700);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: vipShine 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 15px rgba(255,215,0,0.2));
+}
+body.vip-theme .hero-copy h1:after {
+  content: " ★ VIP";
+  -webkit-text-fill-color: #ffd700;
+  font-size: 0.35em;
+  vertical-align: super;
+  filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+}
+@keyframes vipShine {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+body.vip-theme .panel {
+  border-color: rgba(255,215,0,0.2);
+  box-shadow: var(--vip-glow);
+  background: rgba(22,27,34,0.8);
+}
+body.vip-theme .telemetry-card {
+  border-color: rgba(255,215,0,0.15);
+  background: rgba(255,215,0,0.03);
+}
+body.vip-theme .metric-value {
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+body.vip-theme .sparkline {
+  stroke: #ffd700;
+  filter: drop-shadow(0 0 3px rgba(255,215,0,0.3));
+}
+body.vip-theme .profile-trigger {
+  background: linear-gradient(135deg, #b8860b, #ffd700, #ffec80);
+  background-size: 200% 200%;
+  animation: vipShine 3s ease-in-out infinite;
+  border-color: #ffd700;
+  box-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+body.vip-theme .mod-card {
+  border-color: rgba(255,215,0,0.15);
+}
+body.vip-theme .stage-card .num {
+  color: #ffd700;
+  opacity: 0.6;
+}
+body.vip-theme .tag.fabric { background: linear-gradient(135deg, #f0ad4e, #ffd700); }
+body.vip-theme .chips span {
+  background: rgba(255,215,0,0.08);
+  border-color: rgba(255,215,0,0.25);
+  color: #ffd700;
+}
+body.vip-theme .vip-badge {
+  animation: vipPulse 2s ease-in-out infinite;
+}
+@keyframes vipPulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+body.vip-theme .footer {
+  border-top: 1px solid rgba(255,215,0,0.1);
+  color: rgba(255,215,0,0.5);
+}
+body.vip-theme .role-badge.vip {
+  background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.3));
+  color: #ffd700;
+  box-shadow: 0 0 8px rgba(255,215,0,0.2);
+}`;
   document.head.appendChild(st);
 
   window.toggleVipTheme = function() {
