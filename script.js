@@ -598,7 +598,7 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
   });
 
   var isVipActive = isVip(currentUser);
-  if (isVipActive && localStorage.getItem(VIP_THEME_KEY) === '1') {
+  if (isVipActive && localStorage.getItem(VIP_THEME_KEY) !== '0') {
     body.classList.add('vip-theme');
   }
   var st = document.createElement('style');
