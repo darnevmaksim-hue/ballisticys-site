@@ -175,19 +175,17 @@
           <h3>Ballistics Calculator (Fabric)</h3>
           <p>Порт клиентского мода на Fabric. Баллистический калькулятор, PVO, HUD и больше.</p>
           <ul>
-            <li>Minecraft: <strong class="vip-mc">1.21.1</strong></li>
+            <li>Версия Minecraft:
+              <select class="vip-mc-select" onchange="changeVipMc(this)">
+                <option value="1.21.1" data-ver="2.0.0-1.21.1" data-mc-label="1.21.1" data-loader="Fabric >= 0.16.9" data-api="Fabric API 0.106.1+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar">1.21.1</option>
+                <option value="1.20.1" data-ver="1.0.0-1.20.1" data-mc-label="1.20.1" data-loader="Fabric >= 0.15.0" data-api="Fabric API" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-fabric.jar">1.20.1</option>
+              </select>
+            </li>
             <li>Loader: <strong class="vip-loader">Fabric >= 0.16.9</strong></li>
             <li>API: <strong class="vip-api">Fabric API 0.106.1+</strong></li>
             <li>Версия: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
             <li>Java: <strong class="vip-java">21+</strong></li>
           </ul>
-          <div class="vip-version-row">
-            <label>Версия:</label>
-            <select class="vip-version-select" onchange="changeVipVersion(this)">
-              <option value="2.0.0-1.21.1" data-mc="1.21.1" data-loader="Fabric >= 0.16.9" data-api="Fabric API 0.106.1+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar">2.0.0 (BETA)</option>
-              <option value="1.0.0-1.20.1" data-mc="1.20.1" data-loader="Fabric >= 0.15.0" data-api="Fabric API" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-fabric.jar">1.0.0 (stable)</option>
-            </select>
-          </div>
           <div class="card-actions">
             <a class="btn primary vip-dl-btn" href="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar" download>Скачать Fabric</a>
           </div>
@@ -198,18 +196,16 @@
           <h3>Ballistics Calculator (Forge)</h3>
           <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
           <ul>
-            <li>Minecraft: <strong class="vip-mc">1.21.1</strong></li>
+            <li>Версия Minecraft:
+              <select class="vip-mc-select" onchange="changeVipMc(this)">
+                <option value="1.21.1" data-ver="2.0.0-1.21.1" data-loader="Forge 52.0.15+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar">1.21.1</option>
+                <option value="1.20.1" data-ver="1.0.0-1.20.1" data-loader="Forge 47+" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-forge.jar">1.20.1</option>
+              </select>
+            </li>
             <li>Forge: <strong class="vip-loader">52.0.15+</strong></li>
             <li>Версия: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
             <li>Java: <strong class="vip-java">21+</strong></li>
           </ul>
-          <div class="vip-version-row">
-            <label>Версия:</label>
-            <select class="vip-version-select" onchange="changeVipVersion(this)">
-              <option value="2.0.0-1.21.1" data-mc="1.21.1" data-loader="Forge 52.0.15+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar">2.0.0 (BETA)</option>
-              <option value="1.0.0-1.20.1" data-mc="1.20.1" data-loader="Forge 47+" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-forge.jar">1.0.0 (stable)</option>
-            </select>
-          </div>
           <div class="card-actions">
             <a class="btn primary vip-dl-btn" href="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar" download>Скачать Forge</a>
           </div>
@@ -460,11 +456,10 @@
   <script src="auth-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script>
-    function changeVipVersion(sel) {
+    function changeVipMc(sel) {
       var opt = sel.options[sel.selectedIndex];
       var card = sel.closest('.mod-card');
-      card.querySelector('.vip-mc').textContent = opt.dataset.mc || card.querySelector('.vip-mc').textContent;
-      card.querySelector('.vip-ver').textContent = opt.value;
+      card.querySelector('.vip-ver').textContent = opt.dataset.ver || opt.value;
       card.querySelector('.vip-java').textContent = opt.dataset.java || card.querySelector('.vip-java').textContent;
       var loaderEl = card.querySelector('.vip-loader');
       if (loaderEl) loaderEl.textContent = opt.dataset.loader || loaderEl.textContent;
@@ -474,6 +469,6 @@
       if (btn) btn.href = opt.dataset.file;
     }
   </script>
-  <script src="script.js?v=8"></script>
+  <script src="script.js?v=9"></script>
 </body>
 </html>
