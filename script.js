@@ -1,11 +1,26 @@
 const AUTH_CONFIG = window.AUTH_CONFIG || {};
 let sb = null;
 if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
-  sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey);
+  sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      storage: window.localStorage
+    }
+  });
 }
 
 let currentUser = null;
 let currentSession = null;
+
+sb?.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+    currentSession = session;
+  } else if (event === 'SIGNED_OUT') {
+    currentSession = null;
+    currentUser = null;
+  }
+});
 
 const openAuthBtn = document.getElementById('open-auth-modal');
 const profileRoot = document.getElementById('profile-root');
@@ -687,6 +702,23 @@ body.vip-theme .role-badge.vip {
 
 async function loadSession() {
   if (!sb) return;
+
+  // Вручную ищем Supabase сессию в localStorage
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('auth-token')) {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+        const parsed = JSON.parse(raw);
+        if (parsed?.refresh_token) {
+          await sb.auth.setSession({ refresh_token: parsed.refresh_token });
+        }
+        break;
+      }
+    }
+  } catch (_) {}
+
   const { data } = await sb.auth.getSession();
   currentSession = data?.session || null;
   if (currentSession) {
