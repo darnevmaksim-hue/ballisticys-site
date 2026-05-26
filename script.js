@@ -291,7 +291,12 @@ function applyCurrentFilter() {
   const active = document.querySelector('.filter.active');
   if (!active) return;
   const filter = active.dataset.filter;
+  var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
   document.querySelectorAll('.mod-card').forEach(function(card) {
+    if (card.dataset.vip === 'true' && !isVipUser) {
+      card.style.display = 'none';
+      return;
+    }
     var visibleData = card.querySelector('.mc-data:not([style*="none"])') || card.querySelector('ul:not(.mc-data)');
     var hasVisible = !!visibleData;
     if (hasVisible && filter !== 'all' && card.dataset.core !== filter) hasVisible = false;
