@@ -816,8 +816,33 @@ body.modal-open {
 }
 
 @media (max-width: 768px) {
-  .hero { height: auto; padding: 6rem 1rem; }
-  .panel { margin: 1rem; padding: 2rem 1.5rem; }
+  .hero { height: auto; padding: 5rem 1rem 2rem; }
+  .hero-copy h1 { font-size: clamp(1.8rem, 7vw, 2.5rem); }
+  .hero-sub { font-size: 0.9rem; max-width: 100%; }
+  .panel { margin: 0.8rem; padding: 1.5rem 1rem; }
+  .panel h2 { font-size: 1.3rem; margin-bottom: 1.2rem; }
   .admin-form { flex-direction: column; align-items: stretch; }
   .promo-code-display { flex-direction: column; align-items: stretch; }
+  .mod-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .mod-card { padding: 1.2rem; }
+  .telemetry-grid { grid-template-columns: 1fr; gap: 1rem; }
+  .stage-grid { grid-template-columns: 1fr; gap: 1.2rem; }
+  .chips { gap: 0.4rem; }
+  .chips span { font-size: 0.7rem; padding: 0.2rem 0.6rem; }
+  .filter { padding: 0.4rem 0.8rem; font-size: 0.75rem; }
+  .metric-value { font-size: 1.5rem; }
+  .sparkline { height: 40px; }
+  .account-dock { top: 0.5rem; right: 0.5rem; }
+  .profile-menu { width: 220px; right: 0; }
+  .mc-global-row { flex-direction: column; align-items: stretch; }
+  .mc-global-select { width: 100%; }
+  .user-item { flex-direction: column; gap: 0.4rem; }
+  .vip-item { flex-direction: column; gap: 0.3rem; }
+  .clock-time { font-size: 2rem !important; }
+  .dash-grid { grid-template-columns: 1fr !important; }
+  .auth-modal-content { width: 90%; margin: 2rem auto; padding: 1.5rem; }
+  .admin-tabs { overflow-x: auto; gap: 0.5rem; }
+  body.vip-theme .hero::after { display: none; }
+  .stage-card .num { font-size: 1.8rem; }
+  .btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }
