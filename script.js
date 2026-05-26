@@ -390,9 +390,17 @@ async function loadUsers() {
       : u.role === 'vip'
         ? '<span class="role-badge vip">vip</span>'
         : '<span class="role-badge user">user</span>';
+    const durOpts = [
+      [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
+      [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
+    ];
+    const durHtml = durOpts.map(function(d) {
+      return '<option value="' + d[0] + '">' + d[1] + '</option>';
+    }).join('');
     return '<div class="user-item">' +
       '<span>' + (u.email || u.id) + '</span> ' + roleHtml + ' ' +
-      '<select onchange="changeUserRole(\'' + u.id + '\', this.value)" class="role-select">' +
+      '<select class="duration-select">' + durHtml + '</select>' +
+      '<select onchange="changeUserRole(\'' + u.id + '\', this.value, this.previousElementSibling.value)" class="role-select">' +
       '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
       '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
       '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
@@ -400,15 +408,16 @@ async function loadUsers() {
   }).join('');
 }
 
-window.changeUserRole = async function(userId, newRole) {
+window.changeUserRole = async function(userId, newRole, durHours) {
   if (!sb) return;
   const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', userId);
   if (error) { console.error('changeUserRole error:', error); return; }
   if (newRole === 'vip') {
+    const hours = parseInt(durHours) || 720;
     await sb.from('vip_subscriptions').insert({
       user_id: userId,
       start_time: new Date().toISOString(),
-      end_time: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      end_time: hours > 0 ? new Date(Date.now() + hours * 60 * 60 * 1000).toISOString() : '2999-12-31T23:59:59Z',
       is_active: true
     });
   } else if (newRole !== 'vip') {
@@ -449,7 +458,7 @@ async function loadVIPList() {
 
 (function() {
   var s = document.createElement('style');
-  s.textContent = '.role-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer}';
+  s.textContent = '.role-select,.duration-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer}.duration-select{width:auto;min-width:55px}';
   document.head.appendChild(s);
 })();
 
