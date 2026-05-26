@@ -1,5 +1,11 @@
-const USERS_KEY = 'ballisticys_users';
+const AUTH_CONFIG = window.AUTH_CONFIG || {};
+let sb = null;
+if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
+  sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey);
+}
+
 let currentUser = null;
+let currentSession = null;
 
 const openAuthBtn = document.getElementById('open-auth-modal');
 const profileRoot = document.getElementById('profile-root');
@@ -67,76 +73,111 @@ document.getElementById('switch-to-login')?.addEventListener('click', () => {
   authLoginModal?.classList.remove('hidden');
 });
 
-document.getElementById('login-submit-btn')?.addEventListener('click', () => {
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  const status = document.getElementById('login-status');
-  const forgot = document.getElementById('login-forgot');
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  const user = users[email];
-  if (user && user.password === password) {
-    currentUser = user;
-    localStorage.setItem('ballisticys_session', email);
-    status.textContent = 'Успешно!';
-    status.style.color = '#4ade80';
-    authLoginModal?.classList.add('hidden');
-    updateUI();
-  } else if (!user) {
-    status.textContent = 'Email не найден. Сначала зарегистрируйтесь.';
-    status.style.color = '#ff7b72';
-    forgot?.classList.add('hidden');
-  } else {
-    status.textContent = 'Неверный пароль';
-    status.style.color = '#ff7b72';
-    forgot?.classList.remove('hidden');
-  }
-});
-
-document.getElementById('signup-submit-btn')?.addEventListener('click', () => {
-  const email = document.getElementById('signup-email').value;
+document.getElementById('signup-submit-btn')?.addEventListener('click', async () => {
+  const email = document.getElementById('signup-email').value.trim();
   const password = document.getElementById('signup-password').value;
   const confirm = document.getElementById('signup-password-confirm').value;
   const status = document.getElementById('signup-status');
+
   if (password !== confirm) {
     status.textContent = 'Пароли не совпадают'; status.style.color = '#ff7b72'; return;
   }
   if (password.length < 8) {
     status.textContent = 'Минимум 8 символов'; status.style.color = '#ff7b72'; return;
   }
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  if (users[email]) {
+  if (!sb) {
+    status.textContent = 'Ошибка: Supabase не настроен'; status.style.color = '#ff7b72'; return;
+  }
+
+  status.textContent = 'Регистрация...'; status.style.color = 'var(--text-dim)';
+
+  const { data, error } = await sb.auth.signUp({
+    email,
+    password,
+    options: { data: { role: 'user' } }
+  });
+
+  if (error) {
+    status.textContent = 'Ошибка: ' + error.message; status.style.color = '#ff7b72'; return;
+  }
+
+  if (data?.user?.identities?.length === 0) {
     status.textContent = 'Email уже занят'; status.style.color = '#ff7b72'; return;
   }
-  const role = Object.keys(users).length === 0 ? 'admin' : 'user';
-  users[email] = { email, password, role, vipUntil: null };
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  status.textContent = 'Успешно! Теперь войдите.';
-  status.style.color = '#4ade80';
-  setTimeout(() => {
+
+  if (data?.session) {
+    status.textContent = 'Успешно!';
+    status.style.color = '#4ade80';
     authSignupModal?.classList.add('hidden');
-    authLoginModal?.classList.remove('hidden');
-    document.getElementById('login-email').value = email;
-  }, 1500);
+    await loadSession();
+    updateUI();
+  } else {
+    status.textContent = 'Успешно! Проверьте почту для подтверждения.';
+    status.style.color = '#4ade80';
+    setTimeout(() => {
+      authSignupModal?.classList.add('hidden');
+      authLoginModal?.classList.remove('hidden');
+      document.getElementById('login-email').value = email;
+    }, 2000);
+  }
 });
 
-document.getElementById('forgot-password-btn')?.addEventListener('click', () => {
-  const email = document.getElementById('login-email').value;
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  const user = users[email];
-  if (!user) return;
-  const newPass = 'admin123';
-  user.password = newPass;
-  users[email] = user;
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  document.getElementById('login-password').value = newPass;
-  document.getElementById('login-status').textContent = 'Пароль сброшен на admin123. Войдите.';
-  document.getElementById('login-status').style.color = '#4ade80';
+document.getElementById('login-submit-btn')?.addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const status = document.getElementById('login-status');
+  const forgot = document.getElementById('login-forgot');
+
+  if (!sb) {
+    status.textContent = 'Ошибка: Supabase не настроен'; status.style.color = '#ff7b72'; return;
+  }
+
+  status.textContent = 'Вход...'; status.style.color = 'var(--text-dim)';
+
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    if (error.message.includes('Email not confirmed')) {
+      status.textContent = 'Подтвердите email в письме'; status.style.color = '#ff7b72'; return;
+    }
+    if (error.message.includes('Invalid login credentials')) {
+      status.textContent = 'Неверный email или пароль'; status.style.color = '#ff7b72';
+      forgot?.classList.remove('hidden');
+      return;
+    }
+    status.textContent = 'Ошибка: ' + error.message; status.style.color = '#ff7b72'; return;
+  }
+
+  status.textContent = 'Успешно!'; status.style.color = '#4ade80';
+  authLoginModal?.classList.add('hidden');
+  await loadSession();
+  updateUI();
+});
+
+document.getElementById('forgot-password-btn')?.addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const status = document.getElementById('login-status');
+
+  if (!email) {
+    status.textContent = 'Введите email'; status.style.color = '#ff7b72'; return;
+  }
+  if (!sb) {
+    status.textContent = 'Ошибка: Supabase не настроен'; status.style.color = '#ff7b72'; return;
+  }
+
+  status.textContent = 'Отправка...'; status.style.color = 'var(--text-dim)';
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if (error) {
+    status.textContent = 'Ошибка: ' + error.message; status.style.color = '#ff7b72'; return;
+  }
+  status.textContent = 'Письмо для сброса отправлено на ' + email; status.style.color = '#4ade80';
   document.getElementById('login-forgot')?.classList.add('hidden');
 });
 
-profileLogoutBtn?.addEventListener('click', () => {
+profileLogoutBtn?.addEventListener('click', async () => {
+  await sb?.auth.signOut();
   currentUser = null;
-  localStorage.removeItem('ballisticys_session');
+  currentSession = null;
   updateUI();
   profileMenu?.classList.add('hidden');
 });
@@ -171,17 +212,15 @@ function applyCurrentFilter() {
 }
 
 function updateUI() {
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  const sessionEmail = localStorage.getItem('ballisticys_session');
-  currentUser = users[sessionEmail] || null;
   if (currentUser) {
     openAuthBtn?.classList.add('hidden');
     profileRoot?.classList.remove('hidden');
     profileEmail.textContent = currentUser.email;
-    profileRole.textContent = currentUser.role;
+    profileRole.textContent = currentUser.role || 'user';
     profileInitial.textContent = currentUser.email[0].toUpperCase();
     adminPanelLink?.classList.toggle('hidden', currentUser.role !== 'admin');
-    toggleVipCards(currentUser.role === 'vip' || currentUser.role === 'admin');
+    const isVip = currentUser.role === 'vip' || currentUser.role === 'admin';
+    toggleVipCards(isVip);
     applyCurrentFilter();
   } else {
     openAuthBtn?.classList.remove('hidden');
@@ -189,8 +228,6 @@ function updateUI() {
     toggleVipCards(false);
   }
 }
-
-updateUI();
 
 adminPanelLink?.addEventListener('click', (e) => {
   e.preventDefault();
@@ -212,8 +249,8 @@ document.getElementById('profile-manage-btn')?.addEventListener('click', () => {
     roleEl.textContent = currentUser?.role || '—';
     roleEl.className = 'role-badge ' + (currentUser?.role || 'user');
     const vipEl = document.getElementById('profile-info-vip');
-    if (currentUser?.vipUntil && Date.now() < currentUser.vipUntil) {
-      const d = Math.floor((currentUser.vipUntil - Date.now()) / (1000 * 60 * 60 * 24));
+    if (currentUser?.vipUntil && Date.parse(currentUser.vipUntil) > Date.now()) {
+      const d = Math.floor((Date.parse(currentUser.vipUntil) - Date.now()) / (1000 * 60 * 60 * 24));
       vipEl.textContent = d + ' дн.';
     } else {
       vipEl.textContent = '—';
@@ -289,37 +326,44 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
   });
 });
 
-function loadAdminData() {
-  loadPromoCodes();
-  loadUsers();
-  loadVIPList();
+async function loadAdminData() {
+  await Promise.all([loadPromoCodes(), loadUsers(), loadVIPList()]);
 }
 
-function loadPromoCodes() {
+async function loadPromoCodes() {
   const list = document.getElementById('promo-list');
-  if (!list) return;
-  const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
-  if (codes.length === 0) {
+  if (!list || !sb) return;
+  list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
+  const { data, error } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+  if (!data || data.length === 0) {
     list.innerHTML = '<p style="color:var(--text-dim)">Нет промокодов</p>';
     return;
   }
-  list.innerHTML = codes.map(c => {
-    const used = c.usedBy ? '(использован: ' + c.usedBy + ')' : '';
-    return '<div class="promo-item ' + (c.usedBy ? 'used' : '') + '">' +
+  list.innerHTML = data.map(c => {
+    const used = c.used_by ? '(использован)' : '';
+    return '<div class="promo-item ' + (c.is_used ? 'used' : '') + '">' +
       '<code>' + c.code + '</code>' +
-      '<span>' + c.durationHours + 'ч ' + used + '</span>' +
+      '<span>' + (c.duration_hours || 0) + 'ч ' + used + '</span>' +
       '</div>';
   }).join('');
 }
 
-document.getElementById('promo-generate-btn')?.addEventListener('click', () => {
+document.getElementById('promo-generate-btn')?.addEventListener('click', async () => {
   const duration = parseInt(document.getElementById('promo-duration')?.value || '0');
+  if (!sb) return;
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let code = '';
   for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
-  codes.push({ code: code, durationHours: duration, usedBy: null, createdAt: Date.now() });
-  localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
+  const { error } = await sb.from('promo_codes').insert({
+    code,
+    duration_hours: duration,
+    created_by: currentSession?.user?.id || null
+  });
+  if (error) {
+    document.getElementById('promo-result').innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>';
+    return;
+  }
   const result = document.getElementById('promo-result');
   if (result) {
     result.innerHTML = '<div class="promo-code-display">' +
@@ -330,25 +374,25 @@ document.getElementById('promo-generate-btn')?.addEventListener('click', () => {
   loadPromoCodes();
 });
 
-function loadUsers() {
+async function loadUsers() {
   const list = document.getElementById('users-list');
-  if (!list) return;
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  const entries = Object.entries(users);
-  if (entries.length === 0) {
+  if (!list || !sb) return;
+  list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
+  const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+  if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+  if (!data || data.length === 0) {
     list.innerHTML = '<p style="color:var(--text-dim)">Нет пользователей</p>';
     return;
   }
-  list.innerHTML = entries.map(function(e) {
-    var email = e[0], u = e[1];
-    var roleHtml = u.role === 'admin'
+  list.innerHTML = data.map(function(u) {
+    const roleHtml = u.role === 'admin'
       ? '<span class="role-badge admin">admin</span>'
-      : (u.vipUntil && Date.now() < u.vipUntil) || u.role === 'vip'
+      : u.role === 'vip'
         ? '<span class="role-badge vip">vip</span>'
         : '<span class="role-badge user">user</span>';
     return '<div class="user-item">' +
-      '<span>' + email + '</span> ' + roleHtml + ' ' +
-      '<select onchange="changeUserRole(\'' + email.replace(/'/g, "\\'") + '\', this.value)" class="role-select">' +
+      '<span>' + (u.email || u.id) + '</span> ' + roleHtml + ' ' +
+      '<select onchange="changeUserRole(\'' + u.id + '\', this.value)" class="role-select">' +
       '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
       '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
       '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
@@ -356,42 +400,49 @@ function loadUsers() {
   }).join('');
 }
 
-window.changeUserRole = function(email, newRole) {
-  var users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  if (!users[email]) return;
-  users[email].role = newRole;
-  if (newRole === 'vip' && !users[email].vipUntil) {
-    users[email].vipUntil = Date.now() + 30 * 24 * 60 * 60 * 1000;
+window.changeUserRole = async function(userId, newRole) {
+  if (!sb) return;
+  const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', userId);
+  if (error) { console.error('changeUserRole error:', error); return; }
+  if (newRole === 'vip') {
+    await sb.from('vip_subscriptions').insert({
+      user_id: userId,
+      start_time: new Date().toISOString(),
+      end_time: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      is_active: true
+    });
+  } else if (newRole !== 'vip') {
+    await sb.from('vip_subscriptions').update({ is_active: false }).eq('user_id', userId).eq('is_active', true);
   }
-  if (newRole !== 'vip') {
-    users[email].vipUntil = null;
-  }
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
   loadUsers();
-  updateUI();
+  if (currentSession?.user?.id === userId) {
+    await loadSession();
+    updateUI();
+  }
 };
 
-function loadVIPList() {
-  var list = document.getElementById('vip-list');
-  if (!list) return;
-  var users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  var vips = Object.entries(users).filter(function(e) {
-    var u = e[1];
-    return u.role === 'vip' || u.role === 'admin' || (u.vipUntil && Date.now() < u.vipUntil);
-  });
-  if (vips.length === 0) {
+async function loadVIPList() {
+  const list = document.getElementById('vip-list');
+  if (!list || !sb) return;
+  list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
+  const { data, error } = await sb.from('profiles').select('id, email, role').or('role.eq.admin,role.eq.vip');
+  if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+  if (!data || data.length === 0) {
     list.innerHTML = '<p style="color:var(--text-dim)">Нет активных VIP</p>';
     return;
   }
-  list.innerHTML = vips.map(function(e) {
-    var email = e[0], u = e[1];
-    var remaining = u.vipUntil
-      ? Math.max(0, Math.floor((u.vipUntil - Date.now()) / (1000 * 60 * 60 * 24))) + '\u0434'
-      : '\u221E';
+  const subscriptions = await sb.from('vip_subscriptions').select('*').eq('is_active', true);
+  const subMap = {};
+  if (subscriptions.data) {
+    subscriptions.data.forEach(s => { subMap[s.user_id] = s; });
+  }
+  list.innerHTML = data.map(function(u) {
+    const sub = subMap[u.id];
+    const remaining = sub ? Math.max(0, Math.floor((Date.parse(sub.end_time) - Date.now()) / (1000 * 60 * 60 * 24))) + 'д' : '∞';
     return '<div class="vip-item">' +
-      '<span>' + email + '</span>' +
+      '<span>' + u.email + '</span>' +
       '<span>' + u.role + '</span>' +
-      '<span>\u041E\u0441\u0442\u0430\u043B\u043E\u0441\u044C: ' + remaining + '</span>' +
+      '<span>Осталось: ' + remaining + '</span>' +
       '</div>';
   }).join('');
 }
@@ -404,56 +455,52 @@ function loadVIPList() {
 
 function isVip(user) {
   if (!user) return false;
-  if (user.role === 'vip' || user.role === 'admin') {
-    if (user.vipUntil) return Date.now() < user.vipUntil;
-    return user.role === 'vip';
+  if (user.role === 'admin') return true;
+  if (user.role === 'vip') {
+    if (user.vipUntil) return Date.parse(user.vipUntil) > Date.now();
+    // Fallback: check via subscription
+    return true;
   }
   return false;
 }
 
 var VIP_THEME_KEY = 'ballisticys_vip_theme';
 
-(function() {
+(async function() {
   var body = document.body;
-  var isVipActive = isVip(currentUser);
-  if (isVipActive && localStorage.getItem(VIP_THEME_KEY) === '1') {
-    body.classList.add('vip-theme');
-  }
-  var st = document.createElement('style');
-  st.textContent = 'body.vip-theme{--accent-color:#ffd700}body.vip-theme .profile-trigger{background:linear-gradient(135deg,#b8860b,#ffd700);border-color:#ffd700}body.vip-theme .metric-value{color:#ffd700}body.vip-theme .hero-copy h1:after{content:" \\2605 VIP";font-size:0.4em;color:#ffd700;vertical-align:super}body.vip-theme .role-badge.vip{background:rgba(255,215,0,0.3)}';
-  document.head.appendChild(st);
+  await loadSession();
+  updateUI();
 
-  window.toggleVipTheme = function() {
-    if (!isVip(currentUser)) return;
-    body.classList.toggle('vip-theme');
-    localStorage.setItem(VIP_THEME_KEY, body.classList.contains('vip-theme') ? '1' : '0');
-  };
-
-  document.getElementById('profile-change-pass-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-change-pass-btn')?.addEventListener('click', async () => {
     const pass = document.getElementById('profile-new-pass').value;
     const confirm = document.getElementById('profile-confirm-pass').value;
     const status = document.getElementById('profile-status');
     if (!currentUser) { status.textContent = 'Ошибка: не авторизован'; status.style.color = '#ff7b72'; return; }
     if (pass.length < 8) { status.textContent = 'Минимум 8 символов'; status.style.color = '#ff7b72'; return; }
     if (pass !== confirm) { status.textContent = 'Пароли не совпадают'; status.style.color = '#ff7b72'; return; }
-    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-    if (!users[currentUser.email]) { status.textContent = 'Ошибка: пользователь не найден'; status.style.color = '#ff7b72'; return; }
-    users[currentUser.email].password = pass;
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    currentUser.password = pass;
-    status.textContent = 'Пароль изменён!';
-    status.style.color = '#4ade80';
+    if (!sb) { status.textContent = 'Ошибка: Supabase не настроен'; status.style.color = '#ff7b72'; return; }
+    const { error } = await sb.auth.updateUser({ password: pass });
+    if (error) { status.textContent = 'Ошибка: ' + error.message; status.style.color = '#ff7b72'; return; }
+    status.textContent = 'Пароль изменён!'; status.style.color = '#4ade80';
     document.getElementById('profile-new-pass').value = '';
     document.getElementById('profile-confirm-pass').value = '';
   });
 
-  document.getElementById('profile-gen-key-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-gen-key-btn')?.addEventListener('click', async () => {
+    if (!sb) return;
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
     for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
-    codes.push({ code, durationHours: 24, usedBy: null, createdAt: Date.now(), generatedBy: currentUser?.email });
-    localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
+    const { error } = await sb.from('promo_codes').insert({
+      code,
+      duration_hours: 24,
+      created_by: currentSession?.user?.id || null
+    });
+    if (error) {
+      document.getElementById('profile-status').textContent = 'Ошибка: ' + error.message;
+      document.getElementById('profile-status').style.color = '#ff7b72';
+      return;
+    }
     const result = document.getElementById('profile-gen-key-result');
     const codeEl = document.getElementById('profile-gen-key-code');
     if (result && codeEl) {
@@ -467,62 +514,67 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     if (code && code !== '—') navigator.clipboard.writeText(code);
   });
 
-  document.getElementById('profile-redeem-btn')?.addEventListener('click', () => {
+  document.getElementById('profile-redeem-btn')?.addEventListener('click', async () => {
     const input = document.getElementById('profile-redeem-input');
     const status = document.getElementById('profile-status');
     const key = input?.value?.trim().toUpperCase();
     if (!key) { status.textContent = 'Введите ключ'; status.style.color = '#ff7b72'; return; }
-    const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
-    const found = codes.find(c => c.code === key && !c.usedBy);
-    if (!found) { status.textContent = 'Ключ не найден или уже использован'; status.style.color = '#ff7b72'; return; }
-    found.usedBy = currentUser?.email;
-    found.usedAt = Date.now();
-    localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
-    const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-    if (currentUser && users[currentUser.email]) {
-      users[currentUser.email].role = 'vip';
-      users[currentUser.email].vipUntil = Date.now() + (found.durationHours || 24) * 60 * 60 * 1000;
-      localStorage.setItem(USERS_KEY, JSON.stringify(users));
-      currentUser = users[currentUser.email];
-      localStorage.setItem('ballisticys_session', currentUser.email);
-      status.textContent = 'VIP-статус активирован на ' + (found.durationHours || 24) + ' ч!';
-      status.style.color = '#ffd700';
-      input.value = '';
-updateUI();
+    if (!sb || !currentSession) { status.textContent = 'Ошибка: не авторизован'; status.style.color = '#ff7b72'; return; }
 
-// Seed VIP ключи если их ещё нет
-(function seedVipKeys() {
-  const codes = JSON.parse(localStorage.getItem('ballisticys_promocodes') || '[]');
-  if (codes.length >= 67) return;
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  function gen() { let c = ''; for (let i = 0; i < 12; i++) c += chars[Math.floor(Math.random() * chars.length)]; return c; }
-  const keys = [];
-  // 10 вечных
-  for (let i = 0; i < 10; i++) keys.push({ code: 'VIP-PERM-' + gen().slice(0,7), durationHours: 0, usedBy: null, createdAt: Date.now() });
-  // 30 на год
-  for (let i = 0; i < 30; i++) keys.push({ code: 'VIP-YEAR-' + gen().slice(0,7), durationHours: 8760, usedBy: null, createdAt: Date.now() });
-  // 27 на месяц
-  for (let i = 0; i < 27; i++) keys.push({ code: 'VIP-MONTH-' + gen().slice(0,7), durationHours: 744, usedBy: null, createdAt: Date.now() });
-  codes.push(...keys);
-  localStorage.setItem('ballisticys_promocodes', JSON.stringify(codes));
-  console.log('[Seed] Добавлено 67 VIP-ключей');
-})();
+    status.textContent = 'Проверка ключа...'; status.style.color = 'var(--text-dim)';
 
-// Авто-админ для ffreviop@gmail.com
-(function ensureAdmin() {
-  const users = JSON.parse(localStorage.getItem(USERS_KEY) || '{}');
-  if (!users['ffreviop@gmail.com']) {
-    users['ffreviop@gmail.com'] = { email: 'ffreviop@gmail.com', password: 'admin123', role: 'admin', vipUntil: null };
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-    console.log('[Seed] Аккаунт админа создан: ffreviop@gmail.com / admin123');
-  } else {
-    users['ffreviop@gmail.com'].role = 'admin';
-    users['ffreviop@gmail.com'].vipUntil = null;
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  }
-})();
+    const { data: codes, error: findError } = await sb.from('promo_codes')
+      .select('*')
+      .eq('code', key)
+      .eq('is_used', false)
+      .limit(1);
+
+    if (findError) { status.textContent = 'Ошибка: ' + findError.message; status.style.color = '#ff7b72'; return; }
+    if (!codes || codes.length === 0) {
+      status.textContent = 'Ключ не найден или уже использован'; status.style.color = '#ff7b72'; return;
     }
+
+    const promo = codes[0];
+    const { error: useError } = await sb.from('promo_codes')
+      .update({ is_used: true, used_by: currentSession.user.id, used_at: new Date().toISOString() })
+      .eq('id', promo.id);
+
+    if (useError) { status.textContent = 'Ошибка: ' + useError.message; status.style.color = '#ff7b72'; return; }
+
+    await sb.from('vip_subscriptions').insert({
+      user_id: currentSession.user.id,
+      start_time: new Date().toISOString(),
+      end_time: new Date(Date.now() + (promo.duration_hours || 24) * 60 * 60 * 1000).toISOString(),
+      is_active: true
+    });
+
+    const { error: roleError } = await sb.from('profiles')
+      .update({ role: 'vip' })
+      .eq('id', currentSession.user.id);
+
+    if (roleError) { status.textContent = 'Ошибка: ' + roleError.message; status.style.color = '#ff7b72'; return; }
+
+    status.textContent = 'VIP-статус активирован на ' + (promo.duration_hours || 24) + ' ч!';
+    status.style.color = '#ffd700';
+    input.value = '';
+
+    await loadSession();
+    updateUI();
   });
+
+  var isVipActive = isVip(currentUser);
+  if (isVipActive && localStorage.getItem(VIP_THEME_KEY) === '1') {
+    body.classList.add('vip-theme');
+  }
+  var st = document.createElement('style');
+  st.textContent = 'body.vip-theme{--accent-color:#ffd700}body.vip-theme .profile-trigger{background:linear-gradient(135deg,#b8860b,#ffd700);border-color:#ffd700}body.vip-theme .metric-value{color:#ffd700}body.vip-theme .hero-copy h1:after{content:" \\2605 VIP";font-size:0.4em;color:#ffd700;vertical-align:super}body.vip-theme .role-badge.vip{background:rgba(255,215,0,0.3)}';
+  document.head.appendChild(st);
+
+  window.toggleVipTheme = function() {
+    if (!isVip(currentUser)) return;
+    body.classList.toggle('vip-theme');
+    localStorage.setItem(VIP_THEME_KEY, body.classList.contains('vip-theme') ? '1' : '0');
+  };
 
   if (isVipActive) {
     var btn = document.createElement('button');
@@ -538,3 +590,29 @@ updateUI();
     document.body.appendChild(btn);
   }
 })();
+
+async function loadSession() {
+  if (!sb) return;
+  const { data } = await sb.auth.getSession();
+  currentSession = data?.session || null;
+  if (currentSession) {
+    const { data: profile } = await sb.from('profiles')
+      .select('*')
+      .eq('id', currentSession.user.id)
+      .single();
+    if (profile) {
+      currentUser = { ...currentSession.user, ...profile };
+    } else {
+      currentUser = { ...currentSession.user, email: currentSession.user.email, role: 'user' };
+    }
+    const { data: subs } = await sb.from('vip_subscriptions')
+      .select('end_time')
+      .eq('user_id', currentSession.user.id)
+      .eq('is_active', true)
+      .gt('end_time', new Date().toISOString())
+      .limit(1);
+    currentUser.vipUntil = subs?.length ? subs[0].end_time : null;
+  } else {
+    currentUser = null;
+  }
+}
