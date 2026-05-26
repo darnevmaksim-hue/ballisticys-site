@@ -5,8 +5,18 @@ if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
 }
 
 const SS_KEY = 'ballisticys_session';
+const USER_KEY = 'ballisticys_user';
 let currentUser = null;
 let currentSession = null;
+
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise(function(_, reject) {
+      setTimeout(function() { reject(new Error('Timeout')); }, ms);
+    })
+  ]);
+}
 
 // На старте удаляем старые ключи Supabase, чтобы не было конфликта
 try {
@@ -152,14 +162,29 @@ document.getElementById('login-submit-btn')?.addEventListener('click', async () 
   const password = document.getElementById('login-password').value;
   const status = document.getElementById('login-status');
   const forgot = document.getElementById('login-forgot');
+  const btn = document.getElementById('login-submit-btn');
 
   if (!sb) {
     status.textContent = 'Ошибка: Supabase не настроен'; status.style.color = '#ff7b72'; return;
   }
 
-  status.textContent = 'Вход...'; status.style.color = 'var(--text-dim)';
+  btn.disabled = true;
+  btn.textContent = '⏳ Подключение...';
+  status.textContent = 'Подключение к серверу...'; status.style.color = 'var(--text-dim)';
 
-  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  let data, error;
+  try {
+    var result = await withTimeout(sb.auth.signInWithPassword({ email, password }), 60000);
+    data = result.data;
+    error = result.error;
+  } catch (e) {
+    btn.disabled = false;
+    btn.textContent = 'Войти';
+    status.textContent = 'Таймаут — сервер недоступен. Попробуйте позже.'; status.style.color = '#ff7b72'; return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Войти';
 
   if (error) {
     if (error.message.includes('Email not confirmed')) {
@@ -503,8 +528,14 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
 
 (async function() {
   var body = document.body;
+  var loader = document.getElementById('page-loader');
   await loadSession();
   updateUI();
+
+  // Прячем лоадер с задержкой, чтобы не было flash
+  setTimeout(function() {
+    if (loader) loader.classList.add('hidden');
+  }, 300);
 
   document.getElementById('profile-change-pass-btn')?.addEventListener('click', async () => {
     const pass = document.getElementById('profile-new-pass').value;
@@ -1162,17 +1193,17 @@ body.vip-theme .vip-dashboard { display: block; }
 async function loadSession() {
   if (!sb) return;
 
-  // Восстанавливаем сессию из своего localStorage ключа
+  // Пытаемся восстановить сессию (с таймаутом 20 сек)
   let session = null;
   try {
     const saved = localStorage.getItem(SS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
       if (parsed?.access_token && parsed?.refresh_token) {
-        const { data } = await sb.auth.setSession({
+        const { data } = await withTimeout(sb.auth.setSession({
           access_token: parsed.access_token,
           refresh_token: parsed.refresh_token
-        });
+        }), 20000);
         if (data?.session) {
           session = data.session;
           try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
@@ -1184,29 +1215,41 @@ async function loadSession() {
   }
 
   if (!session) {
-    try { localStorage.removeItem(SS_KEY); } catch (_) {}
-    const { data } = await sb.auth.getSession();
-    session = data?.session || null;
+    try { localStorage.removeItem(SS_KEY); localStorage.removeItem(USER_KEY); } catch (_) {}
+    try {
+      const { data } = await withTimeout(sb.auth.getSession(), 15000);
+      session = data?.session || null;
+    } catch (_) {}
   }
 
   currentSession = session;
   if (currentSession) {
-    const { data: profile } = await sb.from('profiles')
-      .select('*')
-      .eq('id', currentSession.user.id)
-      .single();
-    if (profile) {
-      currentUser = { ...currentSession.user, ...profile };
-    } else {
-      currentUser = { ...currentSession.user, email: currentSession.user.email, role: 'user' };
+    // Сначала пробуем полный профиль с сервера
+    try {
+      const { data: profile } = await withTimeout(sb.from('profiles')
+        .select('*')
+        .eq('id', currentSession.user.id)
+        .single(), 15000);
+      if (profile) {
+        currentUser = { ...currentSession.user, ...profile };
+      } else {
+        currentUser = { ...currentSession.user, email: currentSession.user.email, role: 'user' };
+      }
+      const { data: subs } = await withTimeout(sb.from('vip_subscriptions')
+        .select('end_time')
+        .eq('user_id', currentSession.user.id)
+        .eq('is_active', true)
+        .gt('end_time', new Date().toISOString())
+        .limit(1), 15000);
+      currentUser.vipUntil = subs?.length ? subs[0].end_time : null;
+    } catch (_) {
+      // Если сервер недоступен — используем кеш
+      var cached = null;
+      try { cached = JSON.parse(localStorage.getItem(USER_KEY)); } catch(_) {}
+      if (cached) { currentUser = cached; }
     }
-    const { data: subs } = await sb.from('vip_subscriptions')
-      .select('end_time')
-      .eq('user_id', currentSession.user.id)
-      .eq('is_active', true)
-      .gt('end_time', new Date().toISOString())
-      .limit(1);
-    currentUser.vipUntil = subs?.length ? subs[0].end_time : null;
+    // Сохраняем кеш
+    try { localStorage.setItem(USER_KEY, JSON.stringify(currentUser)); } catch(_) {}
   } else {
     currentUser = null;
   }

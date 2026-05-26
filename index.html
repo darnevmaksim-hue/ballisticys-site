@@ -8,8 +8,38 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #050805;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem;
+      transition: opacity 0.5s ease;
+    }
+    .page-loader.hidden { opacity: 0; pointer-events: none; }
+    .loader-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(0,255,65,0.1);
+      border-top-color: #00ff41;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #00ff41;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 10px rgba(0,255,65,0.3);
+    }
+  </style>
 </head>
 <body>
+  <div id="page-loader" class="page-loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Установка защищённого соединения...</div>
+  </div>
   <div class="background-grid"></div>
   <div class="account-dock">
     <button class="btn ghost" id="open-auth-modal" type="button">Вход</button>
@@ -537,6 +567,6 @@
       if (btn) btn.href = opt.dataset.file;
     }
   </script>
-  <script src="script.js?v=10"></script>
+  <script src="script.js?v=11"></script>
 </body>
 </html>
