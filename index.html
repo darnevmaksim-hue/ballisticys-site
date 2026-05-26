@@ -212,6 +212,7 @@
         <button class="filter active" data-filter="all">Все</button>
         <button class="filter" data-filter="fabric">Fabric</button>
         <button class="filter" data-filter="forge">Forge</button>
+        <button class="filter" data-filter="neoforge">NeoForge</button>
         <button class="filter" data-filter="injector">Инжектор</button>
       </div>
 
@@ -273,16 +274,17 @@
           <p class="tag fabric">Fabric <span class="vip-badge">VIP</span> <span class="beta-tag">BETA</span></p>
           <h3>Ballistics Calculator (Fabric)</h3>
           <p>Порт клиентского мода на Fabric. Баллистический калькулятор, PVO, HUD и больше.</p>
+          <div class="vip-mc-row">
+            <label>Версия Minecraft:</label>
+            <select class="vip-mc-select" onchange="changeVipMc(this)">
+              <option value="1.21.1" data-ver="2.0.0-1.21.1" data-loader="Fabric >= 0.16.9" data-api="Fabric API 0.106.1+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar">1.21.1</option>
+              <option value="1.20.1" data-ver="1.0.0-1.20.1" data-loader="Fabric >= 0.15.0" data-api="Fabric API" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-fabric.jar">1.20.1</option>
+            </select>
+          </div>
           <ul>
-            <li>Версия Minecraft:
-              <select class="vip-mc-select" onchange="changeVipMc(this)">
-                <option value="1.21.1" data-ver="2.0.0-1.21.1" data-mc-label="1.21.1" data-loader="Fabric >= 0.16.9" data-api="Fabric API 0.106.1+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar">1.21.1</option>
-                <option value="1.20.1" data-ver="1.0.0-1.20.1" data-mc-label="1.20.1" data-loader="Fabric >= 0.15.0" data-api="Fabric API" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-fabric.jar">1.20.1</option>
-              </select>
-            </li>
             <li>Loader: <strong class="vip-loader">Fabric >= 0.16.9</strong></li>
             <li>API: <strong class="vip-api">Fabric API 0.106.1+</strong></li>
-            <li>Версия: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
+            <li>Версия мода: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
             <li>Java: <strong class="vip-java">21+</strong></li>
           </ul>
           <div class="card-actions">
@@ -294,19 +296,41 @@
           <p class="tag forge">Forge <span class="vip-badge">VIP</span> <span class="beta-tag">BETA</span></p>
           <h3>Ballistics Calculator (Forge)</h3>
           <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
+          <div class="vip-mc-row">
+            <label>Версия Minecraft:</label>
+            <select class="vip-mc-select" onchange="changeVipMc(this)">
+              <option value="1.21.1" data-ver="2.0.0-1.21.1" data-loader="Forge 52.0.15+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar">1.21.1</option>
+              <option value="1.20.1" data-ver="1.0.0-1.20.1" data-loader="Forge 47+" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-forge.jar">1.20.1</option>
+            </select>
+          </div>
           <ul>
-            <li>Версия Minecraft:
-              <select class="vip-mc-select" onchange="changeVipMc(this)">
-                <option value="1.21.1" data-ver="2.0.0-1.21.1" data-loader="Forge 52.0.15+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar">1.21.1</option>
-                <option value="1.20.1" data-ver="1.0.0-1.20.1" data-loader="Forge 47+" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-forge.jar">1.20.1</option>
-              </select>
-            </li>
             <li>Forge: <strong class="vip-loader">52.0.15+</strong></li>
-            <li>Версия: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
+            <li>Версия мода: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
             <li>Java: <strong class="vip-java">21+</strong></li>
           </ul>
           <div class="card-actions">
             <a class="btn primary vip-dl-btn" href="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar" download>Скачать Forge</a>
+          </div>
+        </article>
+
+        <article class="mod-card vip-card hidden" data-core="neoforge" data-vip="true">
+          <p class="tag neoforge">NeoForge <span class="vip-badge">VIP</span> <span class="beta-tag">BETA</span></p>
+          <h3>Ballistics Calculator (NeoForge)</h3>
+          <p>Современная NeoForge-сборка для новейших версий Minecraft.</p>
+          <div class="vip-mc-row">
+            <label>Версия Minecraft:</label>
+            <select class="vip-mc-select" onchange="changeVipMc(this)">
+              <option value="1.21.1" data-ver="2.0.0-1.21.1" data-loader="NeoForge 21.1+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-neoforge.jar">1.21.1</option>
+              <option value="1.20.1" data-ver="1.0.0-1.20.1" data-loader="NeoForge 20.1+" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-neoforge.jar">1.20.1</option>
+            </select>
+          </div>
+          <ul>
+            <li>NeoForge: <strong class="vip-loader">NeoForge 21.1+</strong></li>
+            <li>Версия мода: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
+            <li>Java: <strong class="vip-java">21+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <a class="btn primary vip-dl-btn" href="downloads/ballistic-calculator-2.0.0-1.21.1-neoforge.jar" download>Скачать NeoForge</a>
           </div>
         </article>
 

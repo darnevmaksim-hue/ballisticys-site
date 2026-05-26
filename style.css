@@ -320,6 +320,7 @@ body {
 }
 
 .tag.fabric { background-color: #f0ad4e; color: #000; }
+.tag.neoforge { background-color: #8257e5; color: #fff; }
 .tag.forge { background-color: #3273dc; color: #fff; }
 .tag.injector { background-color: #8b949e; color: #fff; }
 
@@ -330,6 +331,8 @@ body {
 .mod-card li strong { color: var(--text-main); }
 
 .card-actions { margin-top: auto; display: flex; flex-direction: column; gap: 0.8rem; }
+.vip-mc-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.8rem 0; font-size: 0.85rem; }
+.vip-mc-row label { color: var(--text-dim); white-space: nowrap; }
 
 .guide-grid {
   display: grid;
