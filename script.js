@@ -1,9 +1,5 @@
 const AUTH_CONFIG = window.AUTH_CONFIG || {};
 let sb = null;
-if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
-  sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey);
-}
-
 const SS_KEY = 'ballisticys_session';
 const USER_KEY = 'ballisticys_user';
 let currentUser = null;
@@ -16,6 +12,46 @@ function withTimeout(promise, ms) {
       setTimeout(function() { reject(new Error('Timeout')); }, ms);
     })
   ]);
+}
+
+function loadSupabaseSDK() {
+  return new Promise(function(resolve) {
+    if (typeof supabase !== 'undefined' && supabase.createClient) {
+      resolve();
+      return;
+    }
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    s.onload = resolve;
+    s.onerror = function() {
+      // fallback to unpkg
+      var s2 = document.createElement('script');
+      s2.src = 'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+      s2.onload = resolve;
+      s2.onerror = resolve; // даём шанс
+      document.head.appendChild(s2);
+    };
+    document.head.appendChild(s);
+  });
+}
+
+function changeVipMc(sel) {
+  var opt = sel.options[sel.selectedIndex];
+  var card = sel.closest('.mod-card');
+  card.querySelector('.vip-ver').textContent = opt.dataset.ver || opt.value;
+  card.querySelector('.vip-java').textContent = opt.dataset.java || card.querySelector('.vip-java').textContent;
+  var loaderEl = card.querySelector('.vip-loader');
+  if (loaderEl) loaderEl.textContent = opt.dataset.loader || loaderEl.textContent;
+  var apiEl = card.querySelector('.vip-api');
+  if (apiEl) apiEl.textContent = opt.dataset.api || (apiEl ? apiEl.textContent : '');
+  var btn = card.querySelector('.vip-dl-btn');
+  if (btn) btn.href = opt.dataset.file;
+}
+
+function initSupabase() {
+  if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
+    sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey);
+  }
 }
 
 // На старте удаляем старые ключи Supabase, чтобы не было конфликта
@@ -529,10 +565,19 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
 (async function() {
   var body = document.body;
   var loader = document.getElementById('page-loader');
+
+  // Загружаем Supabase SDK динамически (таймаут 10 сек)
+  try {
+    await withTimeout(loadSupabaseSDK(), 10000);
+  } catch (_) {}
+  if (typeof supabase !== 'undefined') {
+    initSupabase();
+  }
+
   await loadSession();
   updateUI();
 
-  // Прячем лоадер с задержкой, чтобы не было flash
+  // Прячем лоадер
   setTimeout(function() {
     if (loader) loader.classList.add('hidden');
   }, 300);
@@ -929,169 +974,10 @@ body.vip-theme .beta-tag {
   margin-left: 0.3rem;
   vertical-align: middle;
 }
-/* ─── VIP Dashboard ─── */
-body.vip-theme .vip-dashboard { display: block; }
-.vip-dashboard { display: none; }
-.dash-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-.dash-widget {
-  background: rgba(0,10,0,0.7);
-  border: 1px solid var(--neon-green);
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 0 15px rgba(0,255,65,0.08), inset 0 0 30px rgba(0,255,65,0.03);
-}
-.dash-widget-head {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.6rem;
-  background: rgba(0,255,65,0.06);
-  border-bottom: 1px solid rgba(0,255,65,0.15);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
+body.vip-theme .vip-theme-btn {
+  border-color: var(--neon-green);
   color: var(--neon-green);
-}
-.dash-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
-}
-.dash-dot.red { background: #ff5f56; }
-.dash-dot.yellow { background: #ffbd2e; }
-.dash-dot.green { background: #27c93f; }
-.dash-title { flex: 1; text-align: center; }
-.dash-widget-body { padding: 0.8rem; }
-/* Terminal */
-.term-line {
-  font-size: 0.75rem;
-  line-height: 1.6;
-  font-family: 'JetBrains Mono', monospace;
-}
-.term-prompt { color: var(--neon-green); }
-.term-cmd { color: var(--text-main); }
-.term-output { color: var(--vip-text); }
-.term-output:last-child::after {
-  content: '▊';
-  animation: blink 1s step-end infinite;
-  color: var(--neon-green);
-}
-/* Clock */
-.clock-body { text-align: center; padding: 1.5rem 0.8rem; }
-.clock-time {
-  font-size: 3rem;
-  font-weight: 600;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--neon-green);
-  text-shadow: 0 0 20px rgba(0,255,65,0.4);
-  line-height: 1;
-  letter-spacing: 0.05em;
-}
-.clock-date {
-  font-size: 1rem;
-  color: var(--vip-text);
-  font-family: 'JetBrains Mono', monospace;
-  margin-top: 0.3rem;
-  opacity: 0.8;
-}
-.clock-uptime {
-  font-size: 0.75rem;
-  color: var(--neon-cyan);
-  font-family: 'JetBrains Mono', monospace;
-  margin-top: 0.6rem;
-}
-.clock-tz {
-  font-size: 0.6rem;
-  color: var(--text-dim);
-  margin-top: 0.3rem;
-  opacity: 0.5;
-}
-/* Network */
-.net-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.75rem;
-  font-family: 'JetBrains Mono', monospace;
-}
-.net-label {
-  width: 2.5rem;
-  color: var(--neon-cyan);
-  font-weight: 600;
-}
-.net-bar-wrap {
-  flex: 1;
-  height: 12px;
-  background: rgba(0,255,65,0.06);
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid rgba(0,255,65,0.1);
-}
-.net-bar {
-  height: 100%;
-  border-radius: 6px;
-  transition: width 0.6s ease;
-  display: block;
-}
-.net-in { background: linear-gradient(90deg, var(--neon-green), #00cc33); }
-.net-out { background: linear-gradient(90deg, var(--neon-cyan), #0099cc); }
-.net-pps { background: linear-gradient(90deg, var(--neon-pink), #9900cc); }
-.net-val { width: 5rem; text-align: right; color: var(--vip-text); }
-.net-detail {
-  font-size: 0.65rem;
-  font-family: 'JetBrains Mono', monospace;
-  color: var(--text-dim);
-  margin-top: 0.35rem;
-  opacity: 0.7;
-}
-.net-detail-label { color: var(--neon-cyan); margin-right: 0.5rem; }
-/* Security */
-.sec-body { text-align: center; padding: 1.2rem; }
-.sec-lock {
-  font-size: 2.5rem;
-  margin-bottom: 0.3rem;
-  filter: drop-shadow(0 0 8px var(--neon-green));
-}
-.sec-status {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--neon-green);
-  letter-spacing: 0.15em;
-  text-shadow: 0 0 10px rgba(0,255,65,0.3);
-  margin-bottom: 0.8rem;
-}
-.sec-detail-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.7rem;
-  font-family: 'JetBrains Mono', monospace;
-  padding: 0.2rem 0;
-  border-bottom: 1px solid rgba(0,255,65,0.05);
-}
-.sec-detail-label { color: var(--text-dim); }
-.sec-detail-val { color: var(--vip-text); }
-.sec-ok { color: var(--neon-green); }
-.sec-badge {
-  display: inline-block;
-  font-size: 0.6rem;
-  padding: 0.2rem 0.8rem;
-  border: 1px solid var(--neon-green);
-  border-radius: 10px;
-  color: var(--neon-green);
-  margin-top: 0.6rem;
-  letter-spacing: 0.15em;
-}
-@media (max-width: 700px) {
-  .dash-grid { grid-template-columns: 1fr; }
-  .clock-time { font-size: 2rem; }
-  .net-val { width: 3rem; font-size: 0.65rem; }
+  box-shadow: 0 0 8px rgba(0,255,65,0.2);
 }`;
   document.head.appendChild(st);
 
@@ -1176,17 +1062,11 @@ body.vip-theme .vip-dashboard { display: block; }
   };
 
   if (isVipActive) {
-    var btn = document.createElement('button');
-    btn.className = 'btn ghost';
-    btn.textContent = 'VIP тема';
-    btn.style.position = 'fixed';
-    btn.style.bottom = '1rem';
-    btn.style.left = '1rem';
-    btn.style.zIndex = '100';
-    btn.style.fontSize = '0.75rem';
-    btn.style.padding = '0.4rem 1rem';
-    btn.onclick = window.toggleVipTheme;
-    document.body.appendChild(btn);
+    var themeBtn = document.getElementById('vip-theme-btn');
+    if (themeBtn) {
+      themeBtn.classList.remove('hidden');
+      themeBtn.onclick = window.toggleVipTheme;
+    }
   }
 })();
 

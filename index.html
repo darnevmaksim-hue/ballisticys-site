@@ -56,6 +56,7 @@
         <button id="profile-logout-menu-btn" class="profile-menu-btn danger" type="button">Выйти</button>
       </div>
     </div>
+    <button class="btn ghost vip-theme-btn hidden" id="vip-theme-btn" type="button">🎮 Тема</button>
   </div>
 
   <header class="hero">
@@ -552,21 +553,6 @@
   </div>
 
   <script src="auth-config.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-  <script>
-    function changeVipMc(sel) {
-      var opt = sel.options[sel.selectedIndex];
-      var card = sel.closest('.mod-card');
-      card.querySelector('.vip-ver').textContent = opt.dataset.ver || opt.value;
-      card.querySelector('.vip-java').textContent = opt.dataset.java || card.querySelector('.vip-java').textContent;
-      var loaderEl = card.querySelector('.vip-loader');
-      if (loaderEl) loaderEl.textContent = opt.dataset.loader || loaderEl.textContent;
-      var apiEl = card.querySelector('.vip-api');
-      if (apiEl) apiEl.textContent = opt.dataset.api || (apiEl ? apiEl.textContent : '');
-      var btn = card.querySelector('.vip-dl-btn');
-      if (btn) btn.href = opt.dataset.file;
-    }
-  </script>
-  <script src="script.js?v=11"></script>
+  <script src="script.js?v=12"></script>
 </body>
 </html>
