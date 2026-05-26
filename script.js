@@ -897,8 +897,246 @@ body.vip-theme .beta-tag {
   animation: blink 1.5s step-end infinite;
   margin-left: 0.3rem;
   vertical-align: middle;
+}
+/* ─── VIP Dashboard ─── */
+body.vip-theme .vip-dashboard { display: block; }
+.vip-dashboard { display: none; }
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.dash-widget {
+  background: rgba(0,10,0,0.7);
+  border: 1px solid var(--neon-green);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0,255,65,0.08), inset 0 0 30px rgba(0,255,65,0.03);
+}
+.dash-widget-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: rgba(0,255,65,0.06);
+  border-bottom: 1px solid rgba(0,255,65,0.15);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--neon-green);
+}
+.dash-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dash-dot.red { background: #ff5f56; }
+.dash-dot.yellow { background: #ffbd2e; }
+.dash-dot.green { background: #27c93f; }
+.dash-title { flex: 1; text-align: center; }
+.dash-widget-body { padding: 0.8rem; }
+/* Terminal */
+.term-line {
+  font-size: 0.75rem;
+  line-height: 1.6;
+  font-family: 'JetBrains Mono', monospace;
+}
+.term-prompt { color: var(--neon-green); }
+.term-cmd { color: var(--text-main); }
+.term-output { color: var(--vip-text); }
+.term-output:last-child::after {
+  content: '▊';
+  animation: blink 1s step-end infinite;
+  color: var(--neon-green);
+}
+/* Clock */
+.clock-body { text-align: center; padding: 1.5rem 0.8rem; }
+.clock-time {
+  font-size: 3rem;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--neon-green);
+  text-shadow: 0 0 20px rgba(0,255,65,0.4);
+  line-height: 1;
+  letter-spacing: 0.05em;
+}
+.clock-date {
+  font-size: 1rem;
+  color: var(--vip-text);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 0.3rem;
+  opacity: 0.8;
+}
+.clock-uptime {
+  font-size: 0.75rem;
+  color: var(--neon-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  margin-top: 0.6rem;
+}
+.clock-tz {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+  opacity: 0.5;
+}
+/* Network */
+.net-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'JetBrains Mono', monospace;
+}
+.net-label {
+  width: 2.5rem;
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+.net-bar-wrap {
+  flex: 1;
+  height: 12px;
+  background: rgba(0,255,65,0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(0,255,65,0.1);
+}
+.net-bar {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.6s ease;
+  display: block;
+}
+.net-in { background: linear-gradient(90deg, var(--neon-green), #00cc33); }
+.net-out { background: linear-gradient(90deg, var(--neon-cyan), #0099cc); }
+.net-pps { background: linear-gradient(90deg, var(--neon-pink), #9900cc); }
+.net-val { width: 5rem; text-align: right; color: var(--vip-text); }
+.net-detail {
+  font-size: 0.65rem;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-dim);
+  margin-top: 0.35rem;
+  opacity: 0.7;
+}
+.net-detail-label { color: var(--neon-cyan); margin-right: 0.5rem; }
+/* Security */
+.sec-body { text-align: center; padding: 1.2rem; }
+.sec-lock {
+  font-size: 2.5rem;
+  margin-bottom: 0.3rem;
+  filter: drop-shadow(0 0 8px var(--neon-green));
+}
+.sec-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--neon-green);
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 10px rgba(0,255,65,0.3);
+  margin-bottom: 0.8rem;
+}
+.sec-detail-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid rgba(0,255,65,0.05);
+}
+.sec-detail-label { color: var(--text-dim); }
+.sec-detail-val { color: var(--vip-text); }
+.sec-ok { color: var(--neon-green); }
+.sec-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.8rem;
+  border: 1px solid var(--neon-green);
+  border-radius: 10px;
+  color: var(--neon-green);
+  margin-top: 0.6rem;
+  letter-spacing: 0.15em;
+}
+@media (max-width: 700px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .clock-time { font-size: 2rem; }
+  .net-val { width: 3rem; font-size: 0.65rem; }
 }`;
   document.head.appendChild(st);
+
+  // ─── Dashboard Widget Logic ───
+  (function initDashboard() {
+    if (!isVipActive) return;
+
+    // Clock
+    function updateClock() {
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2,'0');
+      var m = String(now.getMinutes()).padStart(2,'0');
+      var s = String(now.getSeconds()).padStart(2,'0');
+      var el = document.getElementById('clock-time');
+      if (el) el.textContent = h+':'+m+':'+s;
+      var d = document.getElementById('clock-date');
+      if (d) d.textContent = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Uptime (from page load)
+    var pageStart = Date.now();
+    function updateUptime() {
+      var diff = Date.now() - pageStart;
+      var h = Math.floor(diff / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      var el = document.getElementById('clock-uptime');
+      if (el) el.textContent = String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+    }
+    updateUptime();
+    setInterval(updateUptime, 1000);
+
+    // Terminal — rotating messages
+    var termMsgs = [
+      '[+] Scanning network nodes...',
+      '[+] 4 hosts discovered — filtering...',
+      '[+] Target acquired: 192.168.137.1:443',
+      '[+] Handshake: SHA-256 fingerprint OK',
+      '[+] Encrypted tunnel: ESTABLISHED',
+      '[+] Ballistic engine: CALIBRATED',
+      '[+] PVO module: SYNCHRONIZED',
+      '[+] Telemetry feed: ACTIVE',
+      '[+] All systems nominal. Awaiting input.'
+    ];
+    var termIdx = 0;
+    var termTail = document.getElementById('term-tail');
+    if (termTail) {
+      setInterval(function() {
+        termTail.textContent = termMsgs[termIdx % termMsgs.length];
+        termTail.style.opacity = '0';
+        setTimeout(function() { termTail.style.opacity = '1'; }, 50);
+        termIdx++;
+      }, 3000);
+    }
+
+    // Network monitor — fake traffic
+    function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function netUpdate() {
+      var inEl = document.getElementById('net-in');
+      var outEl = document.getElementById('net-out');
+      var ppsEl = document.getElementById('net-pps');
+      var inVal = document.getElementById('net-in-val');
+      var outVal = document.getElementById('net-out-val');
+      var ppsVal = document.getElementById('net-pps-val');
+      if (inEl) { var iw = rand(20,85); inEl.style.width = iw+'%'; }
+      if (outEl) { var ow = rand(10,60); outEl.style.width = ow+'%'; }
+      if (ppsEl) { var pw = rand(30,90); ppsEl.style.width = pw+'%'; }
+      if (inVal) inVal.textContent = (Math.random() * 4 + 0.5).toFixed(1)+' MB/s';
+      if (outVal) outVal.textContent = (Math.random() * 2 + 0.2).toFixed(1)+' MB/s';
+      if (ppsVal) ppsVal.textContent = rand(100,600)+' pkts/s';
+    }
+    netUpdate();
+    setInterval(netUpdate, 2500);
+  })();
 
   window.toggleVipTheme = function() {
     if (!isVip(currentUser)) return;

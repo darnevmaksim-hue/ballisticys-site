@@ -68,6 +68,74 @@
       </div>
     </section>
 
+    <section class="panel reveal vip-dashboard hidden" id="vip-dashboard">
+      <h2>HUD-панель оператора</h2>
+      <div class="dash-grid">
+        <div class="dash-widget dash-terminal">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">terminal — ballisticys@hub</span>
+          </div>
+          <div class="dash-widget-body" id="terminal-body">
+            <div class="term-line"><span class="term-prompt">root@hub:~$</span> <span class="term-cmd">init --secure --mode combat</span></div>
+            <div class="term-line"><span class="term-output">[*] Loading ballistic modules...</span></div>
+            <div class="term-line"><span class="term-output">[+] Trajectory engine: ONLINE</span></div>
+            <div class="term-line"><span class="term-output">[+] PVO scanner: ACTIVE</span></div>
+            <div class="term-line"><span class="term-output">[+] Encrypted channel: ESTABLISHED</span></div>
+            <div class="term-line"><span class="term-output" id="term-tail"></span></div>
+          </div>
+        </div>
+        <div class="dash-widget dash-clock">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">sysclock.uptime</span>
+          </div>
+          <div class="dash-widget-body clock-body">
+            <div class="clock-time" id="clock-time">00:00:00</div>
+            <div class="clock-date" id="clock-date">0000-00-00</div>
+            <div class="clock-uptime">UPTIME: <span id="clock-uptime">00:00:00</span></div>
+            <div class="clock-tz">TZ: UTC+3 • MSK</div>
+          </div>
+        </div>
+        <div class="dash-widget dash-net">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">net.monitor</span>
+          </div>
+          <div class="dash-widget-body net-body">
+            <div class="net-row"><span class="net-label">IN</span><span class="net-bar-wrap"><span class="net-bar net-in" id="net-in" style="width:45%"></span></span><span class="net-val" id="net-in-val">2.4 MB/s</span></div>
+            <div class="net-row"><span class="net-label">OUT</span><span class="net-bar-wrap"><span class="net-bar net-out" id="net-out" style="width:28%"></span></span><span class="net-val" id="net-out-val">1.1 MB/s</span></div>
+            <div class="net-row"><span class="net-label">PPS</span><span class="net-bar-wrap"><span class="net-bar net-pps" id="net-pps" style="width:62%"></span></span><span class="net-val" id="net-pps-val">342 pkts/s</span></div>
+            <div class="net-detail"><span class="net-detail-label">GATEWAY</span> 192.168.137.1:443</div>
+            <div class="net-detail"><span class="net-detail-label">NODE</span> ballisticys-hub.internal</div>
+          </div>
+        </div>
+        <div class="dash-widget dash-sec">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">sec.status</span>
+          </div>
+          <div class="dash-widget-body sec-body">
+            <div class="sec-lock">🔒</div>
+            <div class="sec-status">SECURE CONNECTION</div>
+            <div class="sec-detail-row"><span class="sec-detail-label">PROTOCOL</span><span class="sec-detail-val">TLS 1.3</span></div>
+            <div class="sec-detail-row"><span class="sec-detail-label">CIPHER</span><span class="sec-detail-val">AES-256-GCM</span></div>
+            <div class="sec-detail-row"><span class="sec-detail-label">HANDSHAKE</span><span class="sec-detail-val sec-ok">VERIFIED</span></div>
+            <div class="sec-detail-row"><span class="sec-detail-label">FIREWALL</span><span class="sec-detail-val sec-ok">ACTIVE</span></div>
+            <div class="sec-badge pulse">LIVE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="panel reveal" id="stages">
       <h2>Этапы установки</h2>
       <div class="stage-grid">
@@ -469,6 +537,6 @@
       if (btn) btn.href = opt.dataset.file;
     }
   </script>
-  <script src="script.js?v=9"></script>
+  <script src="script.js?v=10"></script>
 </body>
 </html>
