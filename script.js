@@ -423,26 +423,30 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
 });
 
 async function loadAdminData() {
-  await Promise.all([loadPromoCodes(), loadUsers(), loadVIPList()]);
+  await withTimeout(Promise.all([loadPromoCodes(), loadUsers(), loadVIPList()]), 30000);
 }
 
 async function loadPromoCodes() {
   const list = document.getElementById('promo-list');
   if (!list || !sb) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
-  const { data, error } = await sb.from('promo_codes').select('*').order('created_at', { ascending: false });
-  if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
-  if (!data || data.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-dim)">Нет промокодов</p>';
-    return;
+  try {
+    const { data, error } = await withTimeout(sb.from('promo_codes').select('*').order('created_at', { ascending: false }), 15000);
+    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-dim)">Нет промокодов</p>';
+      return;
+    }
+    list.innerHTML = data.map(c => {
+      const used = c.used_by ? '(использован)' : '';
+      return '<div class="promo-item ' + (c.is_used ? 'used' : '') + '">' +
+        '<code>' + c.code + '</code>' +
+        '<span>' + (c.duration_hours || 0) + 'ч ' + used + '</span>' +
+        '</div>';
+    }).join('');
+  } catch (_) {
+    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
   }
-  list.innerHTML = data.map(c => {
-    const used = c.used_by ? '(использован)' : '';
-    return '<div class="promo-item ' + (c.is_used ? 'used' : '') + '">' +
-      '<code>' + c.code + '</code>' +
-      '<span>' + (c.duration_hours || 0) + 'ч ' + used + '</span>' +
-      '</div>';
-  }).join('');
 }
 
 document.getElementById('promo-generate-btn')?.addEventListener('click', async () => {
@@ -474,34 +478,38 @@ async function loadUsers() {
   const list = document.getElementById('users-list');
   if (!list || !sb) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
-  const { data, error } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-  if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
-  if (!data || data.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-dim)">Нет пользователей</p>';
-    return;
-  }
-  list.innerHTML = data.map(function(u) {
-    const roleHtml = u.role === 'admin'
-      ? '<span class="role-badge admin">admin</span>'
-      : u.role === 'vip'
-        ? '<span class="role-badge vip">vip</span>'
-        : '<span class="role-badge user">user</span>';
-    const durOpts = [
-      [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
-      [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
-    ];
-    const durHtml = durOpts.map(function(d) {
-      return '<option value="' + d[0] + '">' + d[1] + '</option>';
+  try {
+    const { data, error } = await withTimeout(sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(50), 15000);
+    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-dim)">Нет пользователей</p>';
+      return;
+    }
+    list.innerHTML = data.map(function(u) {
+      const roleHtml = u.role === 'admin'
+        ? '<span class="role-badge admin">admin</span>'
+        : u.role === 'vip'
+          ? '<span class="role-badge vip">vip</span>'
+          : '<span class="role-badge user">user</span>';
+      const durOpts = [
+        [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
+        [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
+      ];
+      const durHtml = durOpts.map(function(d) {
+        return '<option value="' + d[0] + '">' + d[1] + '</option>';
+      }).join('');
+      return '<div class="user-item">' +
+        '<span>' + (u.email || u.id) + '</span> ' + roleHtml + ' ' +
+        '<select class="duration-select">' + durHtml + '</select>' +
+        '<select onchange="changeUserRole(\'' + u.id + '\', this.value, this.previousElementSibling.value)" class="role-select">' +
+        '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
+        '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
+        '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
+        '</select></div>';
     }).join('');
-    return '<div class="user-item">' +
-      '<span>' + (u.email || u.id) + '</span> ' + roleHtml + ' ' +
-      '<select class="duration-select">' + durHtml + '</select>' +
-      '<select onchange="changeUserRole(\'' + u.id + '\', this.value, this.previousElementSibling.value)" class="role-select">' +
-      '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
-      '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
-      '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
-      '</select></div>';
-  }).join('');
+  } catch (_) {
+    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+  }
 }
 
 window.changeUserRole = async function(userId, newRole, durHours) {
@@ -530,26 +538,30 @@ async function loadVIPList() {
   const list = document.getElementById('vip-list');
   if (!list || !sb) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
-  const { data, error } = await sb.from('profiles').select('id, email, role').or('role.eq.admin,role.eq.vip');
-  if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
-  if (!data || data.length === 0) {
-    list.innerHTML = '<p style="color:var(--text-dim)">Нет активных VIP</p>';
-    return;
+  try {
+    const { data, error } = await withTimeout(sb.from('profiles').select('id, email, role').or('role.eq.admin,role.eq.vip').limit(50), 15000);
+    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p style="color:var(--text-dim)">Нет активных VIP</p>';
+      return;
+    }
+    const { data: subs } = await withTimeout(sb.from('vip_subscriptions').select('*').eq('is_active', true), 15000);
+    const subMap = {};
+    if (subs) {
+      subs.forEach(s => { subMap[s.user_id] = s; });
+    }
+    list.innerHTML = data.map(function(u) {
+      const sub = subMap[u.id];
+      const remaining = sub ? Math.max(0, Math.floor((Date.parse(sub.end_time) - Date.now()) / (1000 * 60 * 60 * 24))) + 'д' : '∞';
+      return '<div class="vip-item">' +
+        '<span>' + u.email + '</span>' +
+        '<span>' + u.role + '</span>' +
+        '<span>Осталось: ' + remaining + '</span>' +
+        '</div>';
+    }).join('');
+  } catch (_) {
+    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
   }
-  const subscriptions = await sb.from('vip_subscriptions').select('*').eq('is_active', true);
-  const subMap = {};
-  if (subscriptions.data) {
-    subscriptions.data.forEach(s => { subMap[s.user_id] = s; });
-  }
-  list.innerHTML = data.map(function(u) {
-    const sub = subMap[u.id];
-    const remaining = sub ? Math.max(0, Math.floor((Date.parse(sub.end_time) - Date.now()) / (1000 * 60 * 60 * 24))) + 'д' : '∞';
-    return '<div class="vip-item">' +
-      '<span>' + u.email + '</span>' +
-      '<span>' + u.role + '</span>' +
-      '<span>Осталось: ' + remaining + '</span>' +
-      '</div>';
-  }).join('');
 }
 
 (function() {
