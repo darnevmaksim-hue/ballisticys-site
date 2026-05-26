@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ballisticys Mods</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .page-loader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #050805;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1rem;
+      transition: opacity 0.5s ease;
+    }
+    .page-loader.hidden { opacity: 0; pointer-events: none; }
+    .loader-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(0,255,65,0.1);
+      border-top-color: #00ff41;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #00ff41;
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 10px rgba(0,255,65,0.3);
+    }
+  </style>
+</head>
+<body>
+  <div id="page-loader" class="page-loader">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Установка защищённого соединения...</div>
+  </div>
+  <div class="background-grid"></div>
+  <div class="account-dock">
+    <button class="btn ghost" id="open-auth-modal" type="button">Вход</button>
+    <div id="profile-root" class="profile-root hidden">
+      <button id="profile-trigger" class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
+        <span id="profile-initial">U</span>
+      </button>
+      <div id="profile-menu" class="profile-menu hidden" role="menu">
+        <p id="profile-email" class="profile-email">—</p>
+        <p id="profile-role" class="profile-role">user</p>
+        <button id="profile-manage-btn" class="profile-menu-btn" type="button">Управление аккаунтом</button>
+        <a class="profile-menu-link" href="#downloads">К загрузкам</a>
+        <a class="profile-menu-link hidden" id="admin-panel-link" href="#admin">Админ панель</a>
+        <button id="profile-logout-menu-btn" class="profile-menu-btn danger" type="button">Выйти</button>
+      </div>
+    </div>
+    <button class="btn ghost vip-theme-btn hidden" id="vip-theme-btn" type="button">🎮 Тема</button>
+  </div>
+
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="top-note">system ready</p>
+      <p class="eyebrow">Minecraft 1.20.1 • Client Mods • Fabric / Forge</p>
+      <h1>Ballisticys Fire-Control Hub</h1>
+      <p class="hero-sub">Интерфейс в стиле Big Cannons: телеметрия, управление, траектории и готовые сборки для запуска.</p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#downloads">Скачать</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel reveal telemetry" id="telemetry">
+      <h2>Сводка системы</h2>
+      <div class="telemetry-grid">
+        <article class="telemetry-card">
+          <p class="metric-title">Стабильность траектории</p>
+          <p class="metric-value" data-count="98">0%</p>
+          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
+            <polyline points="0,48 25,44 50,40 75,42 100,32 125,34 150,25 175,20 200,18 220,12"></polyline>
+          </svg>
+        </article>
+        <article class="telemetry-card">
+          <p class="metric-title">Точность PVO</p>
+          <p class="metric-value" data-count="94">0%</p>
+          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
+            <polyline points="0,55 25,52 50,47 75,44 100,46 125,35 150,34 175,26 200,19 220,16"></polyline>
+          </svg>
+        </article>
+        <article class="telemetry-card">
+          <p class="metric-title">Скорость захвата цели</p>
+          <p class="metric-value" data-count="112">0ms</p>
+          <svg viewBox="0 0 220 60" class="sparkline" aria-hidden="true">
+            <polyline points="0,20 25,22 50,18 75,24 100,20 125,25 150,28 175,23 200,26 220,21"></polyline>
+          </svg>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel reveal vip-dashboard hidden" id="vip-dashboard">
+      <h2>HUD-панель оператора</h2>
+      <div class="dash-grid">
+        <div class="dash-widget dash-terminal">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">terminal — ballisticys@hub</span>
+          </div>
+          <div class="dash-widget-body" id="terminal-body">
+            <div class="term-line"><span class="term-prompt">root@hub:~$</span> <span class="term-cmd">init --secure --mode combat</span></div>
+            <div class="term-line"><span class="term-output">[*] Loading ballistic modules...</span></div>
+            <div class="term-line"><span class="term-output">[+] Trajectory engine: ONLINE</span></div>
+            <div class="term-line"><span class="term-output">[+] PVO scanner: ACTIVE</span></div>
+            <div class="term-line"><span class="term-output">[+] Encrypted channel: ESTABLISHED</span></div>
+            <div class="term-line"><span class="term-output" id="term-tail"></span></div>
+          </div>
+        </div>
+        <div class="dash-widget dash-clock">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">sysclock.uptime</span>
+          </div>
+          <div class="dash-widget-body clock-body">
+            <div class="clock-time" id="clock-time">00:00:00</div>
+            <div class="clock-date" id="clock-date">0000-00-00</div>
+            <div class="clock-uptime">UPTIME: <span id="clock-uptime">00:00:00</span></div>
+            <div class="clock-tz">TZ: UTC+3 • MSK</div>
+          </div>
+        </div>
+        <div class="dash-widget dash-net">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">net.monitor</span>
+          </div>
+          <div class="dash-widget-body net-body">
+            <div class="net-row"><span class="net-label">IN</span><span class="net-bar-wrap"><span class="net-bar net-in" id="net-in" style="width:45%"></span></span><span class="net-val" id="net-in-val">2.4 MB/s</span></div>
+            <div class="net-row"><span class="net-label">OUT</span><span class="net-bar-wrap"><span class="net-bar net-out" id="net-out" style="width:28%"></span></span><span class="net-val" id="net-out-val">1.1 MB/s</span></div>
+            <div class="net-row"><span class="net-label">PPS</span><span class="net-bar-wrap"><span class="net-bar net-pps" id="net-pps" style="width:62%"></span></span><span class="net-val" id="net-pps-val">342 pkts/s</span></div>
+            <div class="net-detail"><span class="net-detail-label">GATEWAY</span> 192.168.137.1:443</div>
+            <div class="net-detail"><span class="net-detail-label">NODE</span> ballisticys-hub.internal</div>
+          </div>
+        </div>
+        <div class="dash-widget dash-sec">
+          <div class="dash-widget-head">
+            <span class="dash-dot red"></span>
+            <span class="dash-dot yellow"></span>
+            <span class="dash-dot green"></span>
+            <span class="dash-title">sec.status</span>
+          </div>
+          <div class="dash-widget-body sec-body">
+            <div class="sec-lock">🔒</div>
+            <div class="sec-status">SECURE CONNECTION</div>
+            <div class="sec-detail-row"><span class="sec-detail-label">PROTOCOL</span><span class="sec-detail-val">TLS 1.3</span></div>
+            <div class="sec-detail-row"><span class="sec-detail-label">CIPHER</span><span class="sec-detail-val">AES-256-GCM</span></div>
+            <div class="sec-detail-row"><span class="sec-detail-label">HANDSHAKE</span><span class="sec-detail-val sec-ok">VERIFIED</span></div>
+            <div class="sec-detail-row"><span class="sec-detail-label">FIREWALL</span><span class="sec-detail-val sec-ok">ACTIVE</span></div>
+            <div class="sec-badge pulse">LIVE</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="stages">
+      <h2>Этапы установки</h2>
+      <div class="stage-grid">
+        <article class="stage-card">
+          <span class="num">01</span>
+          <h3>Выбери сборку</h3>
+          <p>Fabric Port для Fabric-клиента, Forge-версию для Forge-сборки, или инжектор для PolitCraft.</p>
+        </article>
+        <article class="stage-card">
+          <span class="num">02</span>
+          <h3>Скачай файл</h3>
+          <p>Файлы лежат в <code>downloads/</code>. Моды скачиваются как <code>.jar</code>, инжектор как <code>.zip</code>.</p>
+        </article>
+        <article class="stage-card">
+          <span class="num">03</span>
+          <h3>Установи и запусти</h3>
+          <p>Положи jar в <code>mods</code> или запусти инжектор через <code>Start-Ballisticys.ps1</code>.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="about">
+      <h2>Что делает мод и зачем он нужен</h2>
+      <p>
+        Ballisticys моды добавляют клиентские инструменты для точной стрельбы и контроля целей: баллистический калькулятор,
+        мини-HUD, экран истории, PVO-интерфейс, захват/сброс цели и команды управления. Это снижает ошибки в расчётах и
+        ускоряет прицеливание в сценариях с артиллерией и автопушками.
+      </p>
+      <div class="chips">
+        <span>Баллистический расчёт</span>
+        <span>Мини HUD</span>
+        <span>PVO и трекинг целей</span>
+        <span>История расчётов</span>
+        <span>Client-side</span>
+      </div>
+    </section>
+
+    <section class="panel reveal" id="downloads">
+      <h2>Скачать файлы</h2>
+      <p class="vip-hint">Версии для 1.21.1 доступны только для VIP и Админов</p>
+
+      <div class="mc-global-row">
+        <label>Версия Minecraft:</label>
+        <select class="mc-global-select" onchange="changeGlobalMc(this)">
+          <option value="1.21.1">1.21.1 (VIP)</option>
+          <option value="1.20.1" selected>1.20.1</option>
+        </select>
+      </div>
+
+      <div class="filter-row">
+        <button class="filter active" data-filter="all">Все</button>
+        <button class="filter" data-filter="fabric">Fabric</button>
+        <button class="filter" data-filter="forge">Forge</button>
+        <button class="filter" data-filter="neoforge">NeoForge</button>
+        <button class="filter" data-filter="injector">Инжектор</button>
+      </div>
+
+      <div class="mod-grid">
+
+        <!-- Fabric -->
+        <article class="mod-card" data-core="fabric">
+          <p class="tag fabric">Fabric</p>
+          <h3>Ballistics Calculator (Fabric)</h3>
+          <p>Баллистический калькулятор, PVO, HUD и больше для Fabric.</p>
+          <ul class="mc-data" data-mc="1.21.1" data-vip="true" style="display:none">
+            <li>Ядро: <strong>Fabric >= 0.16.9</strong></li>
+            <li>API: <strong>Fabric API 0.106.1+</strong></li>
+            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
+            <li>Java: <strong>21+</strong></li>
+          </ul>
+          <ul class="mc-data" data-mc="1.20.1">
+            <li>Ядро: <strong>Fabric Loader >= 0.15.0</strong></li>
+            <li>API: <strong>Fabric API</strong></li>
+            <li>Версия: <strong>2.0pre4</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Fabric)" data-mc="1.21.1" data-vip="true" style="display:none">Скачать Fabric (1.21.1)</button>
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Fabric)" data-mc="1.20.1">Скачать Fabric (1.20.1)</button>
+            <div class="request-area" data-mod="Ballistics Calculator (Fabric)" data-mc="1.21.1"></div>
+          </div>
+        </article>
+
+        <!-- Forge -->
+        <article class="mod-card" data-core="forge">
+          <p class="tag forge">Forge</p>
+          <h3>Ballistics Calculator (Forge)</h3>
+          <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
+          <ul class="mc-data" data-mc="1.21.1" data-vip="true" style="display:none">
+            <li>Ядро: <strong>Forge 52.0.15+</strong></li>
+            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
+            <li>Java: <strong>21+</strong></li>
+          </ul>
+          <ul class="mc-data" data-mc="1.20.1">
+            <li>Ядро: <strong>Forge 47+</strong></li>
+            <li>Версия: <strong>1.0.0</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Forge)" data-mc="1.21.1" data-vip="true" style="display:none">Скачать Forge (1.21.1)</button>
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Forge)" data-mc="1.20.1">Скачать Forge (1.20.1)</button>
+            <div class="request-area" data-mod="Ballistics Calculator (Forge)" data-mc="1.21.1"></div>
+          </div>
+        </article>
+
+        <!-- NeoForge -->
+        <article class="mod-card" data-core="neoforge" data-vip="true">
+          <p class="tag neoforge">NeoForge</p>
+          <h3>Ballistics Calculator (NeoForge)</h3>
+          <p>Современная NeoForge-сборка для новейших версий Minecraft.</p>
+          <ul class="mc-data" data-mc="1.21.1" data-vip="true" style="display:none">
+            <li>Ядро: <strong>NeoForge 21.1+</strong></li>
+            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
+            <li>Java: <strong>21+</strong></li>
+          </ul>
+          <ul class="mc-data" data-mc="1.20.1" data-vip="true" style="display:none">
+            <li>Ядро: <strong>NeoForge 20.1+</strong></li>
+            <li>Версия: <strong>1.0.0-1.20.1</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.21.1" data-vip="true" style="display:none">Скачать NeoForge (1.21.1)</button>
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.20.1" data-vip="true" style="display:none">Скачать NeoForge (1.20.1)</button>
+            <div class="request-area" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.21.1"></div>
+            <div class="request-area" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.20.1"></div>
+          </div>
+        </article>
+
+        <!-- Injector -->
+        <article class="mod-card" data-core="injector">
+          <p class="tag injector">Injector</p>
+          <h3>Ballisticys Injector Toolkit</h3>
+          <p>Автоинжектор для PolitCraft: патчит профиль и добавляет javaagent.</p>
+          <ul>
+            <li>Цель: <strong>PolitCraft offline-mode профиль</strong></li>
+            <li>Agent: <strong>ballisticys-fabric-agent-1.0.0</strong></li>
+            <li>Внутри zip: <strong>PS1 + PY + payload</strong></li>
+            <li>Java: <strong>17+</strong></li>
+          </ul>
+          <div class="card-actions">
+            <button class="btn primary mc-dl" data-mod="Ballisticys Injector Toolkit" data-mc="any">Скачать Injector ZIP</button>
+            <button class="btn ghost mc-dl" data-mod="Ballisticys Injector Toolkit" data-mc="any">Скачать Agent jar</button>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="panel reveal" id="guide">
+      <h2>Быстрый гайд</h2>
+      <p><strong>Важно:</strong> файл мода <code>.jar</code> может открываться архиватором как zip внутри, это нормально. Его не нужно распаковывать.</p>
+      <div class="guide-grid">
+        <article>
+          <h3>Fabric установка</h3>
+          <ol>
+            <li>Установи Fabric Loader для 1.20.1.</li>
+            <li>Положи jar в папку <code>mods</code>.</li>
+            <li>Убедись, что установлен Fabric API.</li>
+          </ol>
+        </article>
+        <article>
+          <h3>Forge установка</h3>
+          <ol>
+            <li>Установи Forge 47+ для 1.20.1.</li>
+            <li>Положи Forge jar в папку <code>mods</code>.</li>
+            <li>Запусти клиент на Java 17.</li>
+          </ol>
+        </article>
+        <article>
+          <h3>Injector запуск</h3>
+          <ol>
+            <li>Скачай и распакуй toolkit zip.</li>
+            <li>Запусти <code>Start-Ballisticys.ps1</code>.</li>
+            <li>Проверь <code>inject-launch.log</code> после запуска.</li>
+          </ol>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer reveal">
+    <p>Ballisticys Project • Persistent Web Build</p>
+  </footer>
+
+  <!-- СТРАНИЦА ВЫБОРА: Вход или Регистрация -->
+  <div id="auth-choice-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-choice-backdrop"></div>
+    <section class="modal-card auth-choice-card">
+      <button id="close-auth-choice" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Добро пожаловать</h2>
+      <p class="auth-choice-title">У вас уже есть аккаунт?</p>
+      <div class="auth-choice-buttons">
+        <button id="go-to-login-btn" class="btn primary large" type="button">Да, войти</button>
+        <button id="go-to-signup-btn" class="btn ghost large" type="button">Нет, зарегистрироваться</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- СТРАНИЦА ВХОДА -->
+  <div id="auth-login-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-login-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-login" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Вход в аккаунт</h2>
+      
+      <div class="auth-box">
+        <input id="login-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="login-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
+      </div>
+      
+      <div class="actions">
+        <button id="login-submit-btn" class="btn primary" type="button">Войти</button>
+      </div>
+      
+      <p class="auth-switch">Нет аккаунта? <button id="switch-to-signup" class="link-btn" type="button">Зарегистрироваться</button></p>
+      
+      <p id="login-forgot" class="auth-switch hidden"><button id="forgot-password-btn" class="link-btn" type="button">Забыли пароль?</button></p>
+      
+      <p id="login-status" class="auth-status">Статус: ожидаем входа.</p>
+    </section>
+  </div>
+
+  <!-- СТРАНИЦА РЕГИСТРАЦИИ -->
+  <div id="auth-signup-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-signup-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-signup" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Регистрация аккаунта</h2>
+      
+      <div class="auth-box">
+        <input id="signup-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
+        <input id="signup-password" class="auth-input" type="password" placeholder="Пароль (минимум 8 символов)" autocomplete="new-password" />
+        <input id="signup-password-confirm" class="auth-input" type="password" placeholder="Повторите пароль" autocomplete="new-password" />
+        <p class="note">Минимум 8 символов в пароле</p>
+      </div>
+      
+      <div class="actions">
+        <button id="signup-submit-btn" class="btn primary" type="button">Зарегистрироваться</button>
+      </div>
+      
+      <p class="auth-switch">Уже есть аккаунт? <button id="switch-to-login" class="link-btn" type="button">Войти</button></p>
+      
+      <p id="signup-status" class="auth-status">Статус: ожидаем регистрации.</p>
+    </section>
+  </div>
+
+  <!-- МОДАЛКА НАСТРОЕК -->
+  <div id="auth-setup-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="auth-setup-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-auth-setup" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Настройка Supabase</h2>
+      <p class="admin-warning">Вставьте данные из проекта Supabase (Settings → API)</p>
+      
+      <div class="auth-box">
+        <input id="setup-url" class="auth-input" type="text" placeholder="Supabase URL (https://xxxx.supabase.co)" />
+        <input id="setup-key" class="auth-input" type="text" placeholder="Anon/Public Key" />
+      </div>
+      
+      <div class="actions">
+        <button id="setup-save-btn" class="btn primary" type="button">Сохранить</button>
+      </div>
+      
+      <p id="setup-status" class="auth-status">Статус: не настроено.</p>
+    </section>
+  </div>
+
+  <!-- АДМИН ПАНЕЛЬ -->
+  <div id="admin-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="admin-backdrop"></div>
+    <section class="modal-card admin-card">
+      <button id="close-admin" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Админ панель</h2>
+      
+      <div class="admin-tabs">
+        <button class="admin-tab active" data-tab="promo">Промокоды</button>
+        <button class="admin-tab" data-tab="users">Пользователи</button>
+        <button class="admin-tab" data-tab="vip">VIP подписки</button>
+        <button class="admin-tab" data-tab="requests">Запросы</button>
+      </div>
+      
+      <!-- Вкладка промокодов -->
+      <div id="admin-promo-tab" class="admin-tab-content">
+        <h3>Создать промокод</h3>
+        <div class="admin-form">
+          <select id="promo-duration">
+            <option value="0">Вечный</option>
+            <option value="1">1 час</option>
+            <option value="2">2 часа</option>
+            <option value="3">3 часа</option>
+            <option value="24">Сутки</option>
+            <option value="168">Неделя</option>
+            <option value="744">Месяц</option>
+            <option value="8760">Год</option>
+          </select>
+          <button id="promo-generate-btn" class="btn primary" type="button">Сгенерировать</button>
+        </div>
+        <div id="promo-result" class="promo-result"></div>
+        <h3>Список промокодов</h3>
+        <div id="promo-list" class="promo-list"></div>
+      </div>
+      
+      <!-- Вкладка пользователей -->
+      <div id="admin-users-tab" class="admin-tab-content hidden">
+        <h3>Пользователи</h3>
+        <div id="users-list" class="users-list"></div>
+      </div>
+      
+      <!-- Вкладка VIP -->
+      <div id="admin-vip-tab" class="admin-tab-content hidden">
+        <h3>Активные VIP подписки</h3>
+        <div id="vip-list" class="vip-list"></div>
+      </div>
+      
+      <!-- Вкладка запросов -->
+      <div id="admin-requests-tab" class="admin-tab-content hidden">
+        <h3>Запросы на скачивание</h3>
+        <div id="requests-list" class="requests-list"></div>
+      </div>
+      
+      <p id="admin-status" class="auth-status">Статус: ожидаем данных.</p>
+    </section>
+  </div>
+
+  <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
+  <div id="profile-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="profile-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-profile" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Управление аккаунтом</h2>
+      
+      <div class="profile-info">
+        <p><strong>Email:</strong> <span id="profile-info-email">—</span></p>
+        <p><strong>Роль:</strong> <span id="profile-info-role" class="role-badge user">—</span></p>
+        <p><strong>VIP до:</strong> <span id="profile-info-vip">—</span></p>
+      </div>
+
+      <hr class="divider">
+
+      <h3>Сменить пароль</h3>
+      <div class="auth-box">
+        <input id="profile-new-pass" class="auth-input" type="password" placeholder="Новый пароль (мин. 8 символов)" autocomplete="new-password" />
+        <input id="profile-confirm-pass" class="auth-input" type="password" placeholder="Повторите пароль" autocomplete="new-password" />
+      </div>
+      <div class="actions">
+        <button id="profile-change-pass-btn" class="btn primary" type="button">Сохранить пароль</button>
+      </div>
+
+      <div id="profile-vip-section" class="vip-section hidden">
+        <hr class="divider">
+        <h3>Генерация VIP-ключа</h3>
+        <p class="vip-section-desc">Создайте ключ, чтобы сделать другого пользователя VIP на 24 часа.</p>
+        <div class="actions">
+          <button id="profile-gen-key-btn" class="btn primary" type="button">Сгенерировать ключ</button>
+        </div>
+        <div id="profile-gen-key-result" class="promo-result hidden">
+          <div class="promo-code-display">
+            <span class="promo-code" id="profile-gen-key-code">—</span>
+            <button class="btn primary" id="profile-copy-key-btn">Копировать</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-redeem-section" class="vip-section hidden">
+        <hr class="divider">
+        <h3>Активировать VIP-ключ</h3>
+        <p class="vip-section-desc">Введите ключ, чтобы получить VIP-статус на 24 часа.</p>
+        <div class="auth-box">
+          <input id="profile-redeem-input" class="auth-input" type="text" placeholder="Введите ключ" />
+        </div>
+        <div class="actions">
+          <button id="profile-redeem-btn" class="btn primary" type="button">Активировать</button>
+        </div>
+      </div>
+
+      <p id="profile-status" class="auth-status">Статус: готово.</p>
+    </section>
+  </div>
+
+  <script src="auth-config.js"></script>
+  <script src="script.js?v=15"></script>
+</body>
+</html>
