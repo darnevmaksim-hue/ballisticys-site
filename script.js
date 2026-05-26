@@ -70,14 +70,14 @@ function updateRequestAreas() {
     area.innerHTML = '';
     var modName = area.dataset.mod;
     if (!currentUser) {
-      var hint = document.createElement('span');
-      hint.style.cssText = 'font-size:0.75rem;color:var(--text-dim);cursor:pointer';
-      hint.textContent = 'Войдите, чтобы скачать';
-      hint.addEventListener('click', function() {
-        var btn = document.getElementById('open-auth-btn');
-        if (btn) btn.click();
+      var btn = document.createElement('button');
+      btn.className = 'request-btn';
+      btn.textContent = 'Запросить скачивание';
+      btn.addEventListener('click', function() {
+        var authBtn = document.getElementById('open-auth-btn');
+        if (authBtn) authBtn.click();
       });
-      area.appendChild(hint);
+      area.appendChild(btn);
       return;
     }
     var existing = requestCache ? requestCache.filter(function(r) { return r.mod_name === modName && r.mc_version === mc; }) : [];
