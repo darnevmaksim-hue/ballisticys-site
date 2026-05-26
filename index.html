@@ -171,43 +171,57 @@
 
         <!-- VIP/Admin карточки (новые версии) -->
         <article class="mod-card vip-card hidden" data-core="fabric" data-vip="true">
-          <p class="tag fabric">Fabric <span class="vip-badge">VIP</span></p>
+          <p class="tag fabric">Fabric <span class="vip-badge">VIP</span> <span class="beta-tag">BETA</span></p>
           <h3>Ballistics Calculator (Fabric)</h3>
           <p>Порт клиентского мода на Fabric. Баллистический калькулятор, PVO, HUD и больше.</p>
           <ul>
-            <li>Minecraft: <strong>1.21.1</strong></li>
-            <li>Loader: <strong>Fabric >= 0.16.9</strong></li>
-            <li>API: <strong>Fabric API 0.106.1+</strong></li>
-            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
-            <li>Java: <strong>21+</strong></li>
+            <li>Minecraft: <strong class="vip-mc">1.21.1</strong></li>
+            <li>Loader: <strong class="vip-loader">Fabric >= 0.16.9</strong></li>
+            <li>API: <strong class="vip-api">Fabric API 0.106.1+</strong></li>
+            <li>Версия: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
+            <li>Java: <strong class="vip-java">21+</strong></li>
           </ul>
+          <div class="vip-version-row">
+            <label>Версия:</label>
+            <select class="vip-version-select" onchange="changeVipVersion(this)">
+              <option value="2.0.0-1.21.1" data-mc="1.21.1" data-loader="Fabric >= 0.16.9" data-api="Fabric API 0.106.1+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar">2.0.0 (BETA)</option>
+              <option value="1.0.0-1.20.1" data-mc="1.20.1" data-loader="Fabric >= 0.15.0" data-api="Fabric API" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-fabric.jar">1.0.0 (stable)</option>
+            </select>
+          </div>
           <div class="card-actions">
-            <a class="btn primary" href="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar" download>Скачать Fabric</a>
+            <a class="btn primary vip-dl-btn" href="downloads/ballistic-calculator-2.0.0-1.21.1-fabric.jar" download>Скачать Fabric</a>
           </div>
         </article>
 
         <article class="mod-card vip-card hidden" data-core="forge" data-vip="true">
-          <p class="tag forge">Forge <span class="vip-badge">VIP</span></p>
+          <p class="tag forge">Forge <span class="vip-badge">VIP</span> <span class="beta-tag">BETA</span></p>
           <h3>Ballistics Calculator (Forge)</h3>
           <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
           <ul>
-            <li>Minecraft: <strong>1.21.1</strong></li>
-            <li>Forge: <strong>52.0.15+</strong></li>
-            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
-            <li>Java: <strong>21+</strong></li>
+            <li>Minecraft: <strong class="vip-mc">1.21.1</strong></li>
+            <li>Forge: <strong class="vip-loader">52.0.15+</strong></li>
+            <li>Версия: <strong class="vip-ver">2.0.0-1.21.1</strong></li>
+            <li>Java: <strong class="vip-java">21+</strong></li>
           </ul>
+          <div class="vip-version-row">
+            <label>Версия:</label>
+            <select class="vip-version-select" onchange="changeVipVersion(this)">
+              <option value="2.0.0-1.21.1" data-mc="1.21.1" data-loader="Forge 52.0.15+" data-java="21+" data-file="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar">2.0.0 (BETA)</option>
+              <option value="1.0.0-1.20.1" data-mc="1.20.1" data-loader="Forge 47+" data-java="17+" data-file="downloads/ballistic-calculator-1.0.0-1.20.1-forge.jar">1.0.0 (stable)</option>
+            </select>
+          </div>
           <div class="card-actions">
-            <a class="btn primary" href="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar" download>Скачать Forge</a>
+            <a class="btn primary vip-dl-btn" href="downloads/ballistic-calculator-2.0.0-1.21.1-forge.jar" download>Скачать Forge</a>
           </div>
         </article>
 
         <article class="mod-card vip-card hidden" data-core="injector" data-vip="true">
-          <p class="tag injector">Injector <span class="vip-badge">VIP</span></p>
+          <p class="tag injector">Injector <span class="vip-badge">VIP</span> <span class="beta-tag">BETA</span></p>
           <h3>Ballisticys Injector</h3>
           <p>Автоинжектор для PolitCraft с поддержкой промокодов.</p>
           <ul>
             <li>Цель: <strong>PolitCraft</strong></li>
-            <li>Версия: <strong>1.21.1</strong></li>
+            <li>Версия: <strong class="vip-ver">1.21.1</strong></li>
             <li>Содержит: <strong>PS1 + PY + payload</strong></li>
           </ul>
           <div class="card-actions">
@@ -445,6 +459,21 @@
 
   <script src="auth-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    function changeVipVersion(sel) {
+      var opt = sel.options[sel.selectedIndex];
+      var card = sel.closest('.mod-card');
+      card.querySelector('.vip-mc').textContent = opt.dataset.mc || card.querySelector('.vip-mc').textContent;
+      card.querySelector('.vip-ver').textContent = opt.value;
+      card.querySelector('.vip-java').textContent = opt.dataset.java || card.querySelector('.vip-java').textContent;
+      var loaderEl = card.querySelector('.vip-loader');
+      if (loaderEl) loaderEl.textContent = opt.dataset.loader || loaderEl.textContent;
+      var apiEl = card.querySelector('.vip-api');
+      if (apiEl) apiEl.textContent = opt.dataset.api || (apiEl ? apiEl.textContent : '');
+      var btn = card.querySelector('.vip-dl-btn');
+      if (btn) btn.href = opt.dataset.file;
+    }
+  </script>
   <script src="script.js?v=7"></script>
 </body>
 </html>

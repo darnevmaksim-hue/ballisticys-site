@@ -473,7 +473,7 @@ async function loadVIPList() {
 
 (function() {
   var s = document.createElement('style');
-  s.textContent = '.role-select,.duration-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer}.duration-select{width:auto;min-width:55px}';
+  s.textContent = '.role-select,.duration-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer}.duration-select{width:auto;min-width:55px}.vip-version-row{display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;font-size:0.85rem}.vip-version-row label{color:var(--text-dim)}.vip-version-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer;flex:1}.beta-tag{display:inline-block;font-size:0.55rem;padding:0.1rem 0.4rem;border-radius:3px;background:rgba(255,107,107,0.2);color:#ff6b6b;border:1px solid rgba(255,107,107,0.3);margin-left:0.3rem;vertical-align:middle}';
   document.head.appendChild(s);
 })();
 
@@ -591,91 +591,301 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     body.classList.add('vip-theme');
   }
   var st = document.createElement('style');
-  st.textContent = `body.vip-theme {
-  --accent-color: #ffd700;
-  --vip-glow: 0 0 20px rgba(255,215,0,0.3);
-  --vip-bg: linear-gradient(135deg, #1a1500 0%, #0d1117 50%, #1a1500 100%);
+  st.textContent = `/* ─── HACKER VIP THEME ─── */
+body.vip-theme {
+  --neon-green: #00ff41;
+  --neon-cyan: #00f0ff;
+  --neon-pink: #ff00aa;
+  --vip-bg: #0a0e0a;
+  --vip-panel: rgba(0,20,0,0.85);
+  --vip-border: rgba(0,255,65,0.25);
+  --vip-text: #c9ffc9;
 }
 body.vip-theme {
   background: var(--vip-bg);
 }
+/* Скан-линии */
+body.vip-theme::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,255,65,0.015) 2px,
+    rgba(0,255,65,0.015) 4px
+  );
+}
+/* Анимированная сетка */
 body.vip-theme .background-grid {
-  background-image: 
-    linear-gradient(rgba(255,215,0,0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,215,0,0.05) 1px, transparent 1px);
+  background-image:
+    linear-gradient(rgba(0,255,65,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,255,65,0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: gridScroll 8s linear infinite;
 }
+@keyframes gridScroll {
+  0% { transform: translate(0,0); }
+  100% { transform: translate(40px,40px); }
+}
+/* Парящие глифы (hex/ascii) */
+body.vip-theme .hero::after {
+  content: "\\{0x7F 0x4E 0x3A 0x91\\}\\n[ACCESS: GRANTED]\\n> USER: VIP\\n> MODE: OVERRIDE";
+  position: absolute;
+  right: 2rem;
+  top: 15%;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(0,255,65,0.12);
+  white-space: pre;
+  text-align: right;
+  line-height: 1.8;
+  pointer-events: none;
+}
+/* Hero секция */
 body.vip-theme .hero-copy h1 {
-  background: linear-gradient(135deg, #ffd700, #ffec80, #b8860b, #ffd700);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: vipShine 4s ease-in-out infinite;
-  filter: drop-shadow(0 0 15px rgba(255,215,0,0.2));
+  font-family: var(--font-header);
+  color: var(--neon-green);
+  text-shadow:
+    0 0 10px rgba(0,255,65,0.5),
+    0 0 40px rgba(0,255,65,0.2),
+    0 0 80px rgba(0,255,65,0.1);
+  position: relative;
+  display: inline-block;
 }
-body.vip-theme .hero-copy h1:after {
-  content: " ★ VIP";
-  -webkit-text-fill-color: #ffd700;
+body.vip-theme .hero-copy h1::before {
+  content: '> ';
+  color: var(--neon-cyan);
+  text-shadow: 0 0 10px rgba(0,240,255,0.5);
+}
+body.vip-theme .hero-copy h1::after {
+  content: '  [BETA]';
   font-size: 0.35em;
+  color: var(--neon-pink);
   vertical-align: super;
-  filter: drop-shadow(0 0 10px rgba(255,215,0,0.5));
+  text-shadow: 0 0 20px rgba(255,0,170,0.6);
+  animation: blink 1.5s step-end infinite;
 }
-@keyframes vipShine {
-  0%,100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
+body.vip-theme .top-note {
+  color: var(--neon-green) !important;
+  text-shadow: 0 0 10px rgba(0,255,65,0.3);
+}
+body.vip-theme .top-note::before { content: '> '; }
+body.vip-theme .top-note::after {
+  content: ' _';
+  animation: blink 1s step-end infinite;
+}
+body.vip-theme .hero-sub {
+  color: rgba(0,255,65,0.6) !important;
+  border-left: 2px solid var(--neon-green);
+  padding-left: 1rem;
+}
+/* Панели — терминальный стиль */
 body.vip-theme .panel {
-  border-color: rgba(255,215,0,0.2);
-  box-shadow: var(--vip-glow);
-  background: rgba(22,27,34,0.8);
+  background: var(--vip-panel);
+  border: 1px solid var(--vip-border);
+  box-shadow: 0 0 15px rgba(0,255,65,0.08), inset 0 0 30px rgba(0,255,65,0.02);
+  backdrop-filter: blur(2px);
 }
+body.vip-theme .panel h2 {
+  color: var(--neon-cyan);
+  text-shadow: 0 0 15px rgba(0,240,255,0.3);
+}
+body.vip-theme .panel h2::before { content: '# '; color: var(--neon-green); }
+/* Telemetry */
 body.vip-theme .telemetry-card {
-  border-color: rgba(255,215,0,0.15);
-  background: rgba(255,215,0,0.03);
+  background: rgba(0,20,0,0.6);
+  border-color: rgba(0,255,65,0.15);
+  box-shadow: inset 0 0 20px rgba(0,255,65,0.03);
 }
+body.vip-theme .metric-title {
+  color: rgba(0,255,65,0.5);
+}
+body.vip-theme .metric-title::before { content: '> '; }
 body.vip-theme .metric-value {
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255,215,0,0.3);
+  color: var(--neon-green);
+  text-shadow: 0 0 20px rgba(0,255,65,0.4);
+}
+body.vip-theme .metric-value::after {
+  content: ' Hz';
+  font-size: 0.4em;
+  color: rgba(0,255,65,0.3);
 }
 body.vip-theme .sparkline {
-  stroke: #ffd700;
-  filter: drop-shadow(0 0 3px rgba(255,215,0,0.3));
+  stroke: var(--neon-green);
+  filter: drop-shadow(0 0 4px rgba(0,255,65,0.3));
 }
-body.vip-theme .profile-trigger {
-  background: linear-gradient(135deg, #b8860b, #ffd700, #ffec80);
-  background-size: 200% 200%;
-  animation: vipShine 3s ease-in-out infinite;
-  border-color: #ffd700;
-  box-shadow: 0 0 10px rgba(255,215,0,0.3);
-}
-body.vip-theme .mod-card {
-  border-color: rgba(255,215,0,0.15);
-}
+/* Этапы */
 body.vip-theme .stage-card .num {
-  color: #ffd700;
-  opacity: 0.6;
+  color: var(--neon-cyan);
+  opacity: 0.5;
+  text-shadow: 0 0 10px rgba(0,240,255,0.2);
 }
-body.vip-theme .tag.fabric { background: linear-gradient(135deg, #f0ad4e, #ffd700); }
+body.vip-theme .stage-card h3 { color: var(--neon-green); }
+/* Мод карточки */
+body.vip-theme .mod-card {
+  background: rgba(0,20,0,0.5);
+  border-color: rgba(0,255,65,0.12);
+}
+body.vip-theme .mod-card:hover {
+  border-color: rgba(0,255,65,0.35);
+  box-shadow: 0 0 20px rgba(0,255,65,0.1);
+}
+body.vip-theme .vip-card {
+  border-color: rgba(0,255,65,0.2) !important;
+  background: rgba(0,30,0,0.5) !important;
+  position: relative;
+  overflow: hidden;
+}
+body.vip-theme .vip-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--neon-green), transparent);
+  animation: scanLine 3s linear infinite;
+}
+@keyframes scanLine {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+body.vip-theme .tag.fabric {
+  background: rgba(0,255,65,0.15);
+  color: var(--neon-green);
+  border: 1px solid rgba(0,255,65,0.3);
+}
+body.vip-theme .tag.forge {
+  background: rgba(0,240,255,0.15);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0,240,255,0.3);
+}
+body.vip-theme .tag.injector {
+  background: rgba(255,0,170,0.15);
+  color: var(--neon-pink);
+  border: 1px solid rgba(255,0,170,0.3);
+}
+/* Кнопки */
+body.vip-theme .btn.primary {
+  background: transparent;
+  border: 1px solid var(--neon-green);
+  color: var(--neon-green);
+  text-shadow: 0 0 5px rgba(0,255,65,0.3);
+  box-shadow: 0 0 10px rgba(0,255,65,0.1);
+}
+body.vip-theme .btn.primary:hover {
+  background: rgba(0,255,65,0.1);
+  box-shadow: 0 0 20px rgba(0,255,65,0.3);
+  transform: translateY(-2px);
+}
+body.vip-theme .btn.ghost {
+  border-color: rgba(0,255,65,0.2);
+  color: rgba(0,255,65,0.6);
+}
+/* Чипсы */
 body.vip-theme .chips span {
-  background: rgba(255,215,0,0.08);
-  border-color: rgba(255,215,0,0.25);
-  color: #ffd700;
+  background: rgba(0,255,65,0.06);
+  border-color: rgba(0,255,65,0.15);
+  color: var(--neon-green);
 }
+body.vip-theme .chips span::before { content: '\\\\ '; font-size: 0.7em; }
+/* Профиль */
+body.vip-theme .profile-trigger {
+  background: linear-gradient(135deg, #003300, #00ff41);
+  border-color: var(--neon-green);
+  box-shadow: 0 0 15px rgba(0,255,65,0.3);
+  animation: none;
+}
+body.vip-theme .profile-menu {
+  background: rgba(0,10,0,0.95);
+  border-color: var(--vip-border);
+  backdrop-filter: blur(10px);
+}
+body.vip-theme .profile-menu-btn:hover {
+  border-color: var(--neon-green);
+  background: rgba(0,255,65,0.05);
+}
+/* VIP badge */
 body.vip-theme .vip-badge {
-  animation: vipPulse 2s ease-in-out infinite;
+  background: rgba(0,255,65,0.15);
+  color: var(--neon-green);
+  border: 1px solid rgba(0,255,65,0.3);
+  animation: pulse 2s ease-in-out infinite;
 }
-@keyframes vipPulse {
-  0%,100% { opacity: 1; }
-  50% { opacity: 0.6; }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 5px rgba(0,255,65,0.2); }
+  50% { box-shadow: 0 0 15px rgba(0,255,65,0.5); }
 }
+/* Чекбоксы/фильтры */
+body.vip-theme .filter.active {
+  background: rgba(0,255,65,0.15);
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+body.vip-theme .filter {
+  border-color: rgba(0,255,65,0.15);
+  color: rgba(0,255,65,0.4);
+}
+/* Гайд */
+body.vip-theme .guide-grid article h3 { color: var(--neon-cyan); }
+body.vip-theme .guide-grid ol li::marker { color: var(--neon-green); }
+/* Футер */
 body.vip-theme .footer {
-  border-top: 1px solid rgba(255,215,0,0.1);
-  color: rgba(255,215,0,0.5);
+  border-top: 1px solid rgba(0,255,65,0.08);
+  color: rgba(0,255,65,0.3);
+}
+body.vip-theme .footer::before { content: '> '; }
+/* Админка */
+body.vip-theme .admin-tab.active {
+  color: var(--neon-green);
+  border-bottom-color: var(--neon-green);
 }
 body.vip-theme .role-badge.vip {
-  background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.3));
-  color: #ffd700;
-  box-shadow: 0 0 8px rgba(255,215,0,0.2);
+  background: rgba(0,255,65,0.15);
+  color: var(--neon-green);
+  border: 1px solid rgba(0,255,65,0.2);
+}
+body.vip-theme .role-badge.admin {
+  background: rgba(255,0,170,0.15);
+  color: var(--neon-pink);
+  border: 1px solid rgba(255,0,170,0.2);
+}
+/* Промокоды */
+body.vip-theme .promo-code {
+  background: rgba(0,255,65,0.08);
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+/* Секция VIP */
+body.vip-theme .vip-section {
+  border-color: rgba(0,255,65,0.2);
+  background: rgba(0,255,65,0.03);
+}
+body.vip-theme .vip-section h3 { color: var(--neon-green); }
+/* ASSESSMENT / DATA */
+body.vip-theme .hero-actions .btn.primary {
+  font-family: var(--font-main);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+/* BETA тег */
+body.vip-theme .beta-tag {
+  display: inline-block;
+  font-size: 0.55rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: rgba(255,0,170,0.2);
+  color: var(--neon-pink);
+  border: 1px solid rgba(255,0,170,0.3);
+  animation: blink 1.5s step-end infinite;
+  margin-left: 0.3rem;
+  vertical-align: middle;
 }`;
   document.head.appendChild(st);
 
