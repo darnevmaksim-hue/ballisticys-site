@@ -1,6 +1,6 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 
-const GITHUB_RAW = "https://raw.githubusercontent.com/darnevmaksim-hue/ballisticys-site/main/downloads";
+const GITHUB_RAW = "https://raw.githubusercontent.com/darnevmaksim-hue/ballisticys-site/mod-files/downloads";
 
 const FILE_MAP: Record<string, string> = {
   "Ballistics Calculator (Fabric)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-fabric.jar",
