@@ -1,24 +1,24 @@
 const AUTH_CONFIG = window.AUTH_CONFIG || {};
 let sb = null;
 if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
-  sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      storage: window.localStorage
-    }
-  });
+  sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey);
 }
 
+const SS_KEY = 'ballisticys_session';
 let currentUser = null;
 let currentSession = null;
 
 sb?.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+  if (event === 'SIGNED_IN' && session) {
+    try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
     currentSession = session;
   } else if (event === 'SIGNED_OUT') {
+    try { localStorage.removeItem(SS_KEY); } catch (_) {}
     currentSession = null;
     currentUser = null;
+  } else if (event === 'TOKEN_REFRESHED' && session) {
+    try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
+    currentSession = session;
   }
 });
 
@@ -124,6 +124,7 @@ document.getElementById('signup-submit-btn')?.addEventListener('click', async ()
     status.textContent = 'Успешно!';
     status.style.color = '#4ade80';
     authSignupModal?.classList.add('hidden');
+    try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: data.session.access_token, refresh_token: data.session.refresh_token, user: data.session.user })); } catch (_) {}
     await loadSession();
     updateUI();
   } else {
@@ -165,6 +166,7 @@ document.getElementById('login-submit-btn')?.addEventListener('click', async () 
 
   status.textContent = 'Успешно!'; status.style.color = '#4ade80';
   authLoginModal?.classList.add('hidden');
+  try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: data.session.access_token, refresh_token: data.session.refresh_token, user: data.session.user })); } catch (_) {}
   await loadSession();
   updateUI();
 });
@@ -913,18 +915,13 @@ body.vip-theme .beta-tag {
 async function loadSession() {
   if (!sb) return;
 
-  // Вручную ищем Supabase сессию в localStorage
+  // Восстанавливаем сессию из своего localStorage ключа
   try {
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.includes('auth-token')) {
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
-        const parsed = JSON.parse(raw);
-        if (parsed?.refresh_token) {
-          await sb.auth.setSession({ refresh_token: parsed.refresh_token });
-        }
-        break;
+    const saved = localStorage.getItem(SS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed?.refresh_token) {
+        await sb.auth.setSession({ refresh_token: parsed.refresh_token });
       }
     }
   } catch (_) {}
