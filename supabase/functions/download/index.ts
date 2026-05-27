@@ -1,4 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const GITHUB_RAW = "https://raw.githubusercontent.com/darnevmaksim-hue/ballisticys-site/mod-files/downloads";
 
@@ -15,11 +16,17 @@ const FALLBACK: Record<string, string> = {
   "Ballisticys Injector Toolkit|any": "ballisticys-injector-toolkit.zip",
 };
 
-function getUserFromJWT(authHeader: string | null): { id: string; email?: string } | null {
+async function getUserFromJWT(authHeader: string | null): Promise<{ id: string; email?: string } | null> {
   if (!authHeader?.startsWith("Bearer ")) return null;
+  const token = authHeader.slice(7);
   try {
-    const payload = JSON.parse(atob(authHeader.slice(7).split(".")[1]));
-    return { id: payload.sub, email: payload.email };
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+    const { data: { user }, error } = await supabase.auth.getUser(token);
+    if (error || !user) return null;
+    return { id: user.id, email: user.email };
   } catch {
     return null;
   }
@@ -46,7 +53,7 @@ Deno.serve(async (req) => {
     });
   }
 
-  const user = getUserFromJWT(req.headers.get("Authorization"));
+  const user = await getUserFromJWT(req.headers.get("Authorization"));
   if (!user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), {
       status: 401,
@@ -54,11 +61,9 @@ Deno.serve(async (req) => {
     });
   }
 
-  // Check permissions via Supabase Admin API
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-  // Check if user is admin/vip
   const profileResp = await fetch(
     `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=role`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
@@ -67,13 +72,11 @@ Deno.serve(async (req) => {
   const role = profiles?.[0]?.role;
 
   if (role === "admin" || role === "vip") {
-    // Authorized — proxy file
     return proxyFile(fileName);
   }
 
-  // Check for approved download request
   const reqResp = await fetch(
-    `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${user.id}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${mcVersion}&status=eq.approved&select=id&limit=1`,
+    `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${user.id}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${encodeURIComponent(mcVersion)}&status=eq.approved&select=id&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   );
   const requests = await reqResp.json();

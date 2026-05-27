@@ -54,22 +54,6 @@ async function downloadMod(modName, mcVersion, target) {
     if (target) { target.disabled = false; target.textContent = 'Ошибка сети'; }
   }
 }
-    var blob = await resp.blob();
-    var disposition = resp.headers.get('Content-Disposition') || '';
-    var match = disposition.match(/filename="?(.+?)"?$/);
-    var filename = match ? match[1] : (modName + '.jar');
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-    if (btn) { btn.disabled = false; btn.textContent = 'Скачано'; }
-  } catch(_) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Ошибка сети'; }
-  }
-}
 
 function loadSupabaseSDK() {
   return new Promise(function(resolve) {
@@ -94,9 +78,11 @@ function loadSupabaseSDK() {
 function changeGlobalMc(sel) {
   var mc = sel.value;
   var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
+  var loggedIn = !!currentUser;
   document.querySelectorAll('.mc-data, .mc-dl').forEach(function(el) {
     var show = el.dataset.mc === mc;
     if (show && el.dataset.vip === 'true' && !isVipUser) show = false;
+    if (show && el.classList.contains('mc-dl') && !loggedIn) show = false;
     el.style.display = show ? '' : 'none';
   });
   applyCurrentFilter();
@@ -206,16 +192,19 @@ try {
   toRemove.forEach(k => localStorage.removeItem(k));
 } catch (_) {}
 
-sb?.auth.onAuthStateChange((event, session) => {
-  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
-    try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
-    currentSession = session;
-  } else if (event === 'SIGNED_OUT') {
-    try { localStorage.removeItem(SS_KEY); } catch (_) {}
-    currentSession = null;
-    currentUser = null;
-  }
-});
+function setupAuthListener() {
+  if (!sb) return;
+  sb.auth.onAuthStateChange((event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
+      try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
+      currentSession = session;
+    } else if (event === 'SIGNED_OUT') {
+      try { localStorage.removeItem(SS_KEY); } catch (_) {}
+      currentSession = null;
+      currentUser = null;
+    }
+  });
+}
 
 const openAuthBtn = document.getElementById('open-auth-modal');
 const profileRoot = document.getElementById('profile-root');
@@ -447,6 +436,25 @@ function applyCurrentFilter() {
   });
 }
 
+function syncDownloadGates() {
+  document.querySelectorAll('.auth-gate-btn').forEach(function(el) { el.remove(); });
+  if (currentUser) return;
+  var seen = new Set();
+  document.querySelectorAll('.card-actions').forEach(function(parent) {
+    if (seen.has(parent)) return;
+    seen.add(parent);
+    if (parent.querySelector('.request-area:not([style*="display: none"])')) return;
+    var gate = document.createElement('button');
+    gate.className = 'auth-gate-btn request-btn';
+    gate.textContent = 'Войдите чтобы скачать';
+    gate.addEventListener('click', function() {
+      var authBtn = document.getElementById('open-auth-modal');
+      if (authBtn) authBtn.click();
+    });
+    parent.appendChild(gate);
+  });
+}
+
 function updateUI() {
   if (currentUser) {
     openAuthBtn?.classList.add('hidden');
@@ -464,7 +472,7 @@ function updateUI() {
     profileRoot?.classList.add('hidden');
     toggleVipCards(false);
   }
-  // Применить выбор версии MC
+  syncDownloadGates();
   var sel = document.querySelector('.mc-global-select');
   if (sel) changeGlobalMc(sel);
 }
@@ -826,6 +834,7 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
   } catch (_) {}
   if (typeof supabase !== 'undefined') {
     initSupabase();
+    setupAuthListener();
   }
 
   await loadSession();
