@@ -120,6 +120,8 @@ create policy "Admins view all promo" on public.promo_codes for select
   using (public.is_admin());
 create policy "Admins create promo" on public.promo_codes for insert
   with check (public.is_admin());
+create policy "VIPs create promo" on public.promo_codes for insert
+  with check (public.is_vip());
 create policy "Users use promo" on public.promo_codes for update
   using (is_used = false)
   with check (is_used = true);
