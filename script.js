@@ -17,6 +17,7 @@ function withTimeout(promise, ms) {
 var EDGE_FN = AUTH_CONFIG.url + '/functions/v1/download';
 
 function getSessionToken() {
+  if (currentSession?.access_token) return currentSession.access_token;
   try {
     var saved = JSON.parse(localStorage.getItem(SS_KEY));
     return saved?.access_token || null;
@@ -205,27 +206,40 @@ async function requestDownload(modName, mcVersion, description, btnEl) {
 
 function initSupabase() {
   if (AUTH_CONFIG.url && AUTH_CONFIG.anonKey) {
-    sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey);
+    // Мигрируем старый формат сессии (без expires_at) в формат Supabase
+    try {
+      const saved = localStorage.getItem(SS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.access_token && !parsed?.expires_at) {
+          try {
+            const payload = JSON.parse(atob(parsed.access_token.split('.')[1]));
+            if (payload?.exp) {
+              parsed.expires_at = payload.exp;
+              parsed.token_type = 'bearer';
+              parsed.expires_in = payload.exp - Math.floor(Date.now() / 1000);
+              localStorage.setItem(SS_KEY, JSON.stringify(parsed));
+            }
+          } catch (_) {}
+        }
+      }
+    } catch (_) {}
+
+    sb = supabase.createClient(AUTH_CONFIG.url, AUTH_CONFIG.anonKey, {
+      auth: {
+        storageKey: SS_KEY,
+        detectSessionInUrl: false,
+        autoRefreshToken: true,
+        persistSession: true,
+      }
+    });
   }
 }
-
-// На старте удаляем старые ключи Supabase, чтобы не было конфликта
-try {
-  const toRemove = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && (key.includes('auth-token') || key.includes('supabase'))) {
-      toRemove.push(key);
-    }
-  }
-  toRemove.forEach(k => localStorage.removeItem(k));
-} catch (_) {}
 
 function setupAuthListener() {
   if (!sb) return;
   sb.auth.onAuthStateChange((event, session) => {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
-      try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
       currentSession = session;
     }
   });
@@ -333,7 +347,6 @@ document.getElementById('signup-submit-btn')?.addEventListener('click', async ()
     status.textContent = 'Успешно!';
     status.style.color = '#4ade80';
     authSignupModal?.classList.add('hidden');
-    try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: data.session.access_token, refresh_token: data.session.refresh_token, user: data.session.user })); } catch (_) {}
     await loadSession();
     updateUI();
   } else {
@@ -390,7 +403,6 @@ document.getElementById('login-submit-btn')?.addEventListener('click', async () 
 
   status.textContent = 'Успешно!'; status.style.color = '#4ade80';
   authLoginModal?.classList.add('hidden');
-  try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: data.session.access_token, refresh_token: data.session.refresh_token, user: data.session.user })); } catch (_) {}
   await loadSession();
   updateUI();
 });
@@ -417,7 +429,6 @@ document.getElementById('forgot-password-btn')?.addEventListener('click', async 
 
 profileLogoutBtn?.addEventListener('click', async () => {
   await sb?.auth.signOut();
-  try { localStorage.removeItem(SS_KEY); localStorage.removeItem(USER_KEY); } catch (_) {}
   currentUser = null;
   currentSession = null;
   updateUI();
@@ -1328,33 +1339,31 @@ body.vip-theme .vip-dashboard { display: block; }
 async function loadSession() {
   if (!sb) return;
 
-  // Пытаемся восстановить сессию (с таймаутом 20 сек)
+  // Supabase сам восстанавливает сессию из storageKey при ините,
+  // ждём getSession()
   let session = null;
   try {
-    const saved = localStorage.getItem(SS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed?.access_token && parsed?.refresh_token) {
-        const { data } = await withTimeout(sb.auth.setSession({
-          access_token: parsed.access_token,
-          refresh_token: parsed.refresh_token
-        }), 20000);
-        if (data?.session) {
-          session = data.session;
-          try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
+    const { data } = await withTimeout(sb.auth.getSession(), 20000);
+    session = data?.session || null;
+  } catch (e) {}
+
+  // Fallback: manual restore через setSession
+  if (!session) {
+    try {
+      const saved = localStorage.getItem(SS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.access_token && parsed?.refresh_token) {
+          const { data } = await withTimeout(sb.auth.setSession({
+            access_token: parsed.access_token,
+            refresh_token: parsed.refresh_token
+          }), 20000);
+          if (data?.session) {
+            session = data.session;
+          }
         }
       }
-    }
-  } catch (e) {
-    // ignore
-  }
-
-  if (!session) {
-    try { localStorage.removeItem(SS_KEY); localStorage.removeItem(USER_KEY); } catch (_) {}
-    try {
-      const { data } = await withTimeout(sb.auth.getSession(), 15000);
-      session = data?.session || null;
-    } catch (_) {}
+    } catch (e) {}
   }
 
   currentSession = session;
