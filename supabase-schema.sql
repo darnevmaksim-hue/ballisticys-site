@@ -155,7 +155,10 @@ create table if not exists public.download_requests (
   status text default 'pending' not null check (status in ('pending', 'approved', 'denied')),
   reviewed_by uuid references public.profiles(id),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  reviewed_at timestamp with time zone
+  reviewed_at timestamp with time zone,
+  description text,
+  approved_promo_code text,
+  approved_promo_duration integer
 );
 
 create index if not exists idx_download_requests_user on public.download_requests(user_id);

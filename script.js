@@ -117,7 +117,7 @@ function updateRequestAreas() {
       btn.className = 'request-btn';
       btn.textContent = 'Запросить скачивание';
       btn.addEventListener('click', function() {
-        var authBtn = document.getElementById('open-auth-btn');
+        var authBtn = document.getElementById('open-auth-modal');
         if (authBtn) authBtn.click();
       });
       area.appendChild(btn);
@@ -126,23 +126,46 @@ function updateRequestAreas() {
     var existing = requestCache ? requestCache.filter(function(r) { return r.mod_name === modName && r.mc_version === mc; }) : [];
     var req = existing.length ? existing[0] : null;
     if (!req) {
-      var btn = document.createElement('button');
-      btn.className = 'request-btn';
-      btn.textContent = 'Запросить скачивание';
-      btn.addEventListener('click', function() { requestDownload(modName, mc, btn); });
-      area.appendChild(btn);
+      var formDiv = document.createElement('div');
+      formDiv.style.cssText = 'display:flex;flex-direction:column;gap:0.5rem';
+      var descInput = document.createElement('textarea');
+      descInput.className = 'auth-input';
+      descInput.placeholder = 'Опишите зачем вам нужен этот мод (обязательно)';
+      descInput.rows = 3;
+      descInput.style.cssText = 'resize:vertical;font-size:0.85rem';
+      var sendBtn = document.createElement('button');
+      sendBtn.className = 'request-btn';
+      sendBtn.textContent = 'Отправить запрос';
+      sendBtn.addEventListener('click', function() {
+        requestDownload(modName, mc, descInput.value, sendBtn);
+      });
+      formDiv.appendChild(descInput);
+      formDiv.appendChild(sendBtn);
+      area.appendChild(formDiv);
     } else if (req.status === 'pending') {
       var s = document.createElement('span');
       s.className = 'request-status pending';
       s.textContent = '⏳ Ожидает одобрения';
       area.appendChild(s);
     } else if (req.status === 'approved') {
+      var wrapper = document.createElement('div');
+      wrapper.style.cssText = 'display:flex;flex-direction:column;gap:0.5rem';
       var btn = document.createElement('button');
       btn.className = 'btn primary';
       btn.style.cssText = 'padding:0.5rem 1rem;font-size:0.8rem';
       btn.textContent = 'Скачать';
       btn.addEventListener('click', function(e) { downloadMod(modName, mc, e.target); });
-      area.appendChild(btn);
+      wrapper.appendChild(btn);
+      if (req.approved_promo_code) {
+        var promoBox = document.createElement('div');
+        promoBox.className = 'promo-code-display';
+        promoBox.style.cssText = 'margin-top:0.3rem';
+        promoBox.innerHTML = '<span style="font-size:0.75rem;color:var(--text-dim)">Ваш промокод:</span>' +
+          '<span class="promo-code" style="font-size:0.9rem;padding:0.3rem 0.7rem">' + escapeHtml(req.approved_promo_code) + '</span>' +
+          '<span style="font-size:0.7rem;color:#4ade80">(' + (req.approved_promo_duration || 24) + 'ч VIP)</span>';
+        wrapper.appendChild(promoBox);
+      }
+      area.appendChild(wrapper);
     } else if (req.status === 'denied') {
       var s = document.createElement('span');
       s.className = 'request-status denied';
@@ -152,8 +175,13 @@ function updateRequestAreas() {
   });
 }
 
-async function requestDownload(modName, mcVersion, btnEl) {
+async function requestDownload(modName, mcVersion, description, btnEl) {
   if (!sb || !currentUser) return;
+  if (!description || description.trim().length < 5) {
+    btnEl.textContent = 'Опишите зачем вам нужен мод (мин. 5 символов)';
+    setTimeout(function() { btnEl.textContent = 'Отправить запрос'; }, 3000);
+    return;
+  }
   btnEl.disabled = true;
   btnEl.textContent = '⏳ Отправка...';
   try {
@@ -161,7 +189,8 @@ async function requestDownload(modName, mcVersion, btnEl) {
       user_id: currentUser.id,
       mod_name: modName,
       mc_version: mcVersion,
-      status: 'pending'
+      status: 'pending',
+      description: description.trim()
     });
     if (error) {
       btnEl.textContent = 'Ошибка: ' + error.message;
@@ -657,7 +686,9 @@ async function loadUsers() {
         '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
         '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
         '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
-        '</select></div>';
+        '</select>' +
+        '<button class="req-btn deny" onclick="deleteUser(\'' + u.id + '\', \'' + escapeHtmlAttr(u.email || '') + '\')" style="font-size:0.7rem;padding:0.3rem 0.6rem">Удалить</button>' +
+        '</div>';
     }).join('');
   } catch (_) {
     list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
@@ -722,7 +753,7 @@ async function loadRequests() {
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
   try {
     const { data, error } = await withTimeout(
-      sb.from('download_requests').select('id, user_id, mod_name, mc_version, status, created_at').order('created_at', { ascending: false }).limit(50),
+      sb.from('download_requests').select('id, user_id, mod_name, mc_version, status, description, approved_promo_code, approved_promo_duration, created_at').order('created_at', { ascending: false }).limit(50),
       15000
     );
     if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
@@ -736,30 +767,52 @@ async function loadRequests() {
     );
     var emailMap = {};
     if (profiles) profiles.forEach(function(p) { emailMap[p.id] = p.email || 'unknown'; });
+    var durOpts = [
+      [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
+      [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
+    ];
+    var durHtml = durOpts.map(function(d) {
+      return '<option value="' + d[0] + '">' + d[1] + '</option>';
+    }).join('');
     list.innerHTML = data.map(function(r) {
       var email = emailMap[r.user_id] || 'unknown';
       var statusClass = r.status === 'pending' ? 'pending' : (r.status === 'approved' ? 'approved' : 'denied');
       var time = new Date(r.created_at).toLocaleString('ru-RU');
+      var descHtml = r.description ? '<br><small style="color:var(--text-dim)">Причина: <em>' + escapeHtml(r.description) + '</em></small>' : '';
+      var promoInfo = '';
+      if (r.status === 'approved' && r.approved_promo_code) {
+        promoInfo = '<br><small style="color:#4ade80">Промокод: <strong>' + escapeHtml(r.approved_promo_code) + '</strong> (' + (r.approved_promo_duration || 24) + 'ч)</small>';
+      }
       var actions = '';
       if (r.status === 'pending') {
-        actions = '<div class="req-actions">' +
+        actions = '<div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end">' +
+          '<select class="promo-dur-select" data-req-id="' + r.id + '" style="padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);font-size:0.75rem">' + durHtml + '</select>' +
+          '<div class="req-actions">' +
           '<button class="req-btn approve" data-req-id="' + r.id + '" data-action="approve">✅</button>' +
           '<button class="req-btn deny" data-req-id="' + r.id + '" data-action="deny">❌</button>' +
-          '</div>';
+          '</div></div>';
+      } else if (r.status === 'denied') {
+        actions = '<span class="request-status denied">Отказано</span>';
       } else {
-        actions = '<span class="request-status ' + statusClass + '">' + r.status + '</span>';
+        actions = '<span class="request-status approved">Одобрено</span>';
       }
       return '<div class="request-item">' +
         '<div class="req-info">' +
         '<strong>' + escapeHtml(email) + '</strong><br>' +
         escapeHtml(r.mod_name) + ' (' + r.mc_version + ')<br>' +
         '<small style="color:var(--text-dim)">' + time + '</small>' +
+        descHtml + promoInfo +
         '</div>' +
         actions +
         '</div>';
     }).join('');
     list.querySelectorAll('.req-btn.approve').forEach(function(btn) {
-      btn.addEventListener('click', function() { approveRequest(btn.dataset.reqId); });
+      btn.addEventListener('click', function() {
+        var reqId = btn.dataset.reqId;
+        var durSelect = document.querySelector('.promo-dur-select[data-req-id="' + reqId + '"]');
+        var hours = parseInt(durSelect ? durSelect.value : 24);
+        approveRequest(reqId, hours);
+      });
     });
     list.querySelectorAll('.req-btn.deny').forEach(function(btn) {
       btn.addEventListener('click', function() { denyRequest(btn.dataset.reqId); });
@@ -775,15 +828,64 @@ function escapeHtml(str) {
   return d.innerHTML;
 }
 
-async function approveRequest(reqId) {
-  if (!sb) return;
+function escapeHtmlAttr(str) {
+  return (str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+window.deleteUser = async function(userId, email) {
+  if (!sb || !currentUser || currentUser.role !== 'admin') return;
+  if (!confirm('Удалить пользователя ' + email + '? Это действие необратимо.')) return;
+  if (!confirm('Точно удалить ' + email + '? Все данные будут стёрты.')) return;
   try {
+    var resp = await fetch(AUTH_CONFIG.url + '/functions/v1/delete-user', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + getSessionToken(),
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ user_id: userId })
+    });
+    var result = await resp.json();
+    if (result.error) {
+      document.getElementById('admin-status').textContent = 'Ошибка: ' + result.error;
+      document.getElementById('admin-status').style.color = '#ff7b72';
+      return;
+    }
+    document.getElementById('admin-status').textContent = 'Пользователь ' + email + ' удалён';
+    document.getElementById('admin-status').style.color = '#4ade80';
+    loadUsers();
+  } catch (_) {
+    document.getElementById('admin-status').textContent = 'Ошибка сети при удалении';
+    document.getElementById('admin-status').style.color = '#ff7b72';
+  }
+};
+
+async function approveRequest(reqId, durHours) {
+  if (!sb) return;
+  durHours = durHours || 24;
+  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  var code = '';
+  for (var i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  try {
+    var { error: promoError } = await sb.from('promo_codes').insert({
+      code: code,
+      duration_hours: durHours,
+      created_by: currentSession?.user?.id || null
+    });
+    if (promoError) {
+      document.getElementById('admin-status').textContent = 'Ошибка создания промокода: ' + promoError.message;
+      return;
+    }
     var { error } = await sb.from('download_requests').update({
       status: 'approved',
       reviewed_by: currentUser?.id,
-      reviewed_at: new Date().toISOString()
+      reviewed_at: new Date().toISOString(),
+      approved_promo_code: code,
+      approved_promo_duration: durHours
     }).eq('id', reqId);
     if (error) { document.getElementById('admin-status').textContent = 'Ошибка: ' + error.message; return; }
+    document.getElementById('admin-status').textContent = 'Одобрено! Промокод: ' + code + ' (' + durHours + 'ч)';
+    document.getElementById('admin-status').style.color = '#4ade80';
     loadRequests();
   } catch (_) {
     document.getElementById('admin-status').textContent = 'Ошибка сети';
@@ -807,7 +909,7 @@ async function denyRequest(reqId) {
 
 (function() {
   var s = document.createElement('style');
-  s.textContent = '.role-select,.duration-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer}.duration-select{width:auto;min-width:55px}.beta-tag{display:inline-block;font-size:0.55rem;padding:0.1rem 0.4rem;border-radius:3px;background:rgba(255,107,107,0.2);color:#ff6b6b;border:1px solid rgba(255,107,107,0.3);margin-left:0.3rem;vertical-align:middle}.vip-mc-select{padding:0.2rem 0.4rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer;font-size:0.85rem}.vip-mc-row{display:flex;align-items:center;gap:0.5rem;margin:0.8rem 0;font-size:0.85rem}.vip-mc-row label{color:var(--text-dim);white-space:nowrap}.tag.neoforge{background:rgba(130,87,229,0.12);color:#9b7eed;border:1px solid rgba(130,87,229,0.3)}';
+  s.textContent = '.role-select,.duration-select{padding:0.3rem 0.5rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer}.duration-select{width:auto;min-width:55px}.promo-dur-select{padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer;font-size:0.75rem;width:100%}.beta-tag{display:inline-block;font-size:0.55rem;padding:0.1rem 0.4rem;border-radius:3px;background:rgba(255,107,107,0.2);color:#ff6b6b;border:1px solid rgba(255,107,107,0.3);margin-left:0.3rem;vertical-align:middle}.vip-mc-select{padding:0.2rem 0.4rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);cursor:pointer;font-size:0.85rem}.vip-mc-row{display:flex;align-items:center;gap:0.5rem;margin:0.8rem 0;font-size:0.85rem}.vip-mc-row label{color:var(--text-dim);white-space:nowrap}.tag.neoforge{background:rgba(130,87,229,0.12);color:#9b7eed;border:1px solid rgba(130,87,229,0.3)}';
   document.head.appendChild(s);
 })();
 
