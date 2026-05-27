@@ -54,14 +54,41 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Missing user_id" }, 400);
   }
 
+  const apiHeaders = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+
+  // Обнуляем ссылки без on delete cascade
+  const nullifyRefs = [
+    fetch(`${supabaseUrl}/rest/v1/promo_codes?used_by=eq.${user_id}`, {
+      method: "PATCH", headers: { ...apiHeaders, "Content-Type": "application/json" },
+      body: '{"used_by":null}',
+    }),
+    fetch(`${supabaseUrl}/rest/v1/promo_codes?created_by=eq.${user_id}`, {
+      method: "PATCH", headers: { ...apiHeaders, "Content-Type": "application/json" },
+      body: '{"created_by":null}',
+    }),
+    fetch(`${supabaseUrl}/rest/v1/download_requests?reviewed_by=eq.${user_id}`, {
+      method: "PATCH", headers: { ...apiHeaders, "Content-Type": "application/json" },
+      body: '{"reviewed_by":null}',
+    }),
+  ];
+  await Promise.all(nullifyRefs);
+
+  // Удаляем профиль (каскадно удалит vip_subscriptions, user_activity, download_requests)
+  const profileResp = await fetch(
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${user_id}`,
+    { method: "DELETE", headers: apiHeaders }
+  );
+  if (!profileResp.ok) {
+    const err = await profileResp.text();
+    return jsonResponse({ error: "Failed to delete profile: " + err }, 500);
+  }
+
+  // Удаляем пользователя из auth
   const deleteResp = await fetch(
     `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
     {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${serviceKey}`,
-        apikey: serviceKey,
-      },
+      headers: apiHeaders,
     }
   );
 
