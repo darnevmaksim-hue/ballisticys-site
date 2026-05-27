@@ -227,10 +227,6 @@ function setupAuthListener() {
     if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session) {
       try { localStorage.setItem(SS_KEY, JSON.stringify({ access_token: session.access_token, refresh_token: session.refresh_token, user: session.user })); } catch (_) {}
       currentSession = session;
-    } else if (event === 'SIGNED_OUT') {
-      try { localStorage.removeItem(SS_KEY); } catch (_) {}
-      currentSession = null;
-      currentUser = null;
     }
   });
 }
@@ -421,6 +417,7 @@ document.getElementById('forgot-password-btn')?.addEventListener('click', async 
 
 profileLogoutBtn?.addEventListener('click', async () => {
   await sb?.auth.signOut();
+  try { localStorage.removeItem(SS_KEY); localStorage.removeItem(USER_KEY); } catch (_) {}
   currentUser = null;
   currentSession = null;
   updateUI();
@@ -854,8 +851,8 @@ window.deleteUser = async function(userId, email) {
     document.getElementById('admin-status').textContent = 'Пользователь ' + email + ' удалён';
     document.getElementById('admin-status').style.color = '#4ade80';
     loadUsers();
-  } catch (_) {
-    document.getElementById('admin-status').textContent = 'Ошибка сети при удалении';
+  } catch (e) {
+    document.getElementById('admin-status').textContent = 'Ошибка сети при удалении: ' + (e.message || e);
     document.getElementById('admin-status').style.color = '#ff7b72';
   }
 };

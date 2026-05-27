@@ -1,6 +1,20 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type, apikey",
+  "Access-Control-Max-Age": "86400",
+};
+
+function jsonResponse(body: unknown, status: number): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+  });
+}
+
 const GITHUB_RAW = "https://raw.githubusercontent.com/darnevmaksim-hue/ballisticys-site/mod-files/downloads";
 
 const FILE_MAP: Record<string, string> = {
@@ -33,32 +47,27 @@ async function getUserFromJWT(authHeader: string | null): Promise<{ id: string; 
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   const url = new URL(req.url);
   const modName = url.searchParams.get("mod");
   const mcVersion = url.searchParams.get("mc");
 
   if (!modName || !mcVersion) {
-    return new Response(JSON.stringify({ error: "Missing mod or mc param" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Missing mod or mc param" }, 400);
   }
 
   const key = `${modName}|${mcVersion}`;
   let fileName = FILE_MAP[key] || FALLBACK[`${modName}|any`];
   if (!fileName) {
-    return new Response(JSON.stringify({ error: "Unknown mod/version" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Unknown mod/version" }, 404);
   }
 
   const user = await getUserFromJWT(req.headers.get("Authorization"));
   if (!user) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
@@ -85,10 +94,7 @@ Deno.serve(async (req) => {
     return proxyFile(fileName);
   }
 
-  return new Response(JSON.stringify({ error: "Forbidden" }), {
-    status: 403,
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonResponse({ error: "Forbidden" }, 403);
 });
 
 async function proxyFile(fileName: string): Promise<Response> {
