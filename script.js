@@ -974,6 +974,7 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     if (!sb) return;
     const modName = document.getElementById('access-key-mod')?.value;
     const mcVersion = document.getElementById('access-key-mc')?.value;
+    const durationHours = parseInt(document.getElementById('access-key-duration')?.value) || 0;
     if (!modName || !mcVersion) return;
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
@@ -982,6 +983,7 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
       code,
       mod_name: modName,
       mc_version: mcVersion,
+      duration_hours: durationHours > 0 ? durationHours : null,
       created_by: currentSession?.user?.id || null
     });
     if (error) {
@@ -1023,17 +1025,17 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
         .update({ is_used: true, used_by: currentSession.user.id, used_at: new Date().toISOString() })
         .eq('id', ak.id);
       if (useErr) { status.textContent = 'Ошибка: ' + useErr.message; status.style.color = '#ff7b72'; return; }
-      // Создаём одобренный download_request
-      const { error: reqErr } = await sb.from('download_requests').insert({
+      // Создаём запись в mod_access
+      const expiresAt = ak.duration_hours ? new Date(Date.now() + ak.duration_hours * 60 * 60 * 1000).toISOString() : null;
+      const { error: accessErr } = await sb.from('mod_access').insert({
         user_id: currentSession.user.id,
         mod_name: ak.mod_name,
         mc_version: ak.mc_version,
-        status: 'approved',
-        reviewed_by: ak.created_by,
-        reviewed_at: new Date().toISOString()
+        expires_at: expiresAt
       });
-      if (reqErr) { status.textContent = 'Ошибка: ' + reqErr.message; status.style.color = '#ff7b72'; return; }
-      status.textContent = 'Доступ к ' + ak.mod_name + ' (' + ak.mc_version + ') активирован!';
+      if (accessErr) { status.textContent = 'Ошибка: ' + accessErr.message; status.style.color = '#ff7b72'; return; }
+      const durText = ak.duration_hours ? (ak.duration_hours >= 8760 ? '1 год' : ak.duration_hours >= 720 ? '1 месяц' : ak.duration_hours + ' ч') : 'навсегда';
+      status.textContent = 'Доступ к ' + ak.mod_name + ' (' + ak.mc_version + ') активирован на ' + durText + '!';
       status.style.color = '#4ade80';
       input.value = '';
       await loadSession();

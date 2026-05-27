@@ -519,7 +519,7 @@
       <div id="profile-vip-section" class="vip-section hidden">
         <hr class="divider">
         <h3>Генерация ключа доступа к моду</h3>
-        <p class="vip-section-desc">Создайте ключ, чтобы дать доступ к скачиванию мода.</p>
+        <p class="vip-section-desc">Создайте ключ, чтобы дать доступ к скачиванию мода на ограниченное время.</p>
         <div class="vip-mc-row">
           <label>Мод:</label>
           <select id="access-key-mod" class="vip-mc-select">
@@ -533,6 +533,15 @@
           <select id="access-key-mc" class="vip-mc-select">
             <option value="1.21.1">1.21.1</option>
             <option value="1.20.1">1.20.1</option>
+          </select>
+        </div>
+        <div class="vip-mc-row">
+          <label>Длительность:</label>
+          <select id="access-key-duration" class="vip-mc-select">
+            <option value="1">1 час</option>
+            <option value="720">1 месяц (30 дн)</option>
+            <option value="8760">1 год (365 дн)</option>
+            <option value="0">Навсегда</option>
           </select>
         </div>
         <div class="actions">

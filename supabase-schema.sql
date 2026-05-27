@@ -186,6 +186,7 @@ create table if not exists public.access_keys (
   code text not null unique,
   mod_name text not null,
   mc_version text not null,
+  duration_hours integer, -- null = permanent
   is_used boolean default false not null,
   used_by uuid references public.profiles(id),
   used_at timestamp with time zone,
@@ -204,3 +205,24 @@ create policy "VIPs create access keys" on public.access_keys for insert
 create policy "Users use access keys" on public.access_keys for update
   using (is_used = false)
   with check (is_used = true);
+
+-- Таблица временных/вечных доступов к модам
+create table if not exists public.mod_access (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) not null,
+  mod_name text not null,
+  mc_version text not null,
+  expires_at timestamp with time zone, -- null = permanent
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create index if not exists idx_mod_access_user on public.mod_access(user_id);
+
+alter table public.mod_access enable row level security;
+
+create policy "Users view own mod access" on public.mod_access for select
+  using (auth.uid() = user_id);
+create policy "Users insert own mod access" on public.mod_access for insert
+  with check (auth.uid() = user_id);
+create policy "Admins view all mod access" on public.mod_access for select
+  using (public.is_admin());
