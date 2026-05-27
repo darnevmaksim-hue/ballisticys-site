@@ -972,12 +972,16 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
 
   document.getElementById('profile-gen-key-btn')?.addEventListener('click', async () => {
     if (!sb) return;
+    const modName = document.getElementById('access-key-mod')?.value;
+    const mcVersion = document.getElementById('access-key-mc')?.value;
+    if (!modName || !mcVersion) return;
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
     for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    const { error } = await sb.from('promo_codes').insert({
+    const { error } = await sb.from('access_keys').insert({
       code,
-      duration_hours: 24,
+      mod_name: modName,
+      mc_version: mcVersion,
       created_by: currentSession?.user?.id || null
     });
     if (error) {
@@ -1007,6 +1011,37 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
 
     status.textContent = 'Проверка ключа...'; status.style.color = 'var(--text-dim)';
 
+    // Сначала проверяем access_keys (ключ доступа к моду)
+    const { data: accessCodes, error: findErr1 } = await sb.from('access_keys')
+      .select('*')
+      .eq('code', key)
+      .eq('is_used', false)
+      .limit(1);
+    if (!findErr1 && accessCodes && accessCodes.length > 0) {
+      const ak = accessCodes[0];
+      const { error: useErr } = await sb.from('access_keys')
+        .update({ is_used: true, used_by: currentSession.user.id, used_at: new Date().toISOString() })
+        .eq('id', ak.id);
+      if (useErr) { status.textContent = 'Ошибка: ' + useErr.message; status.style.color = '#ff7b72'; return; }
+      // Создаём одобренный download_request
+      const { error: reqErr } = await sb.from('download_requests').insert({
+        user_id: currentSession.user.id,
+        mod_name: ak.mod_name,
+        mc_version: ak.mc_version,
+        status: 'approved',
+        reviewed_by: ak.created_by,
+        reviewed_at: new Date().toISOString()
+      });
+      if (reqErr) { status.textContent = 'Ошибка: ' + reqErr.message; status.style.color = '#ff7b72'; return; }
+      status.textContent = 'Доступ к ' + ak.mod_name + ' (' + ak.mc_version + ') активирован!';
+      status.style.color = '#4ade80';
+      input.value = '';
+      await loadSession();
+      updateUI();
+      return;
+    }
+
+    // Fallback: проверяем promo_codes (старый VIP-ключ)
     const { data: codes, error: findError } = await sb.from('promo_codes')
       .select('*')
       .eq('code', key)
@@ -1282,7 +1317,7 @@ body.vip-theme .vip-dashboard { display: block; }
     var termMsgs = [
       '[+] Scanning network nodes...',
       '[+] 4 hosts discovered — filtering...',
-      '[+] Target acquired: 192.168.137.1:443',
+      '[+] Target acquired: 0.0.0.0:443',
       '[+] Handshake: SHA-256 fingerprint OK',
       '[+] Encrypted tunnel: ESTABLISHED',
       '[+] Ballistic engine: CALIBRATED',

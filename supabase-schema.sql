@@ -177,24 +177,30 @@ create policy "Admins view all requests" on public.download_requests for select
   using (public.is_admin());
 create policy "Admins update requests" on public.download_requests for update
   using (public.is_admin());
-
--- Функция проверки доступа к скачиванию
-create or replace function public.can_download(mod_name text, mc_version text default 'any')
-returns boolean
-language sql
-security definer
-stable
-as $$
-  select
-    public.is_admin()
-    or public.is_vip()
-    or exists (
-      select 1 from public.download_requests
-      where user_id = auth.uid()
-      and status = 'approved'
-      and mod_name = can_download.mod_name
-      and (can_download.mc_version = 'any' or mc_version = can_download.mc_version)
-    );
-$$;
-create policy "Admins update requests" on public.download_requests for update
+create policy "Admins view all requests" on public.download_requests for select
   using (public.is_admin());
+
+-- Таблица ключей доступа к модам
+create table if not exists public.access_keys (
+  id uuid default gen_random_uuid() primary key,
+  code text not null unique,
+  mod_name text not null,
+  mc_version text not null,
+  is_used boolean default false not null,
+  used_by uuid references public.profiles(id),
+  used_at timestamp with time zone,
+  created_by uuid references public.profiles(id) not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create index if not exists idx_access_keys_code on public.access_keys(code);
+
+alter table public.access_keys enable row level security;
+
+create policy "Anyone view unused keys" on public.access_keys for select
+  using (is_used = false);
+create policy "VIPs create access keys" on public.access_keys for insert
+  with check (public.is_vip());
+create policy "Users use access keys" on public.access_keys for update
+  using (is_used = false)
+  with check (is_used = true);
