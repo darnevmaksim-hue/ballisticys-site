@@ -1,4 +1,5 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -31,7 +32,9 @@ Deno.serve(async (req) => {
   const token = authHeader.slice(7);
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, serviceKey);
 
+  // Проверяем JWT вызывающего
   const userResp = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: { Authorization: `Bearer ${token}`, apikey: serviceKey },
   });
@@ -40,12 +43,13 @@ Deno.serve(async (req) => {
   }
   const caller = await userResp.json();
 
-  const profileResp = await fetch(
-    `${supabaseUrl}/rest/v1/profiles?id=eq.${caller.id}&select=role`,
-    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
-  );
-  const profiles = await profileResp.json();
-  if (profiles?.[0]?.role !== "admin") {
+  // Проверяем роль — только admin
+  const { data: callerProfile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", caller.id)
+    .single();
+  if (callerProfile?.role !== "admin") {
     return jsonResponse({ error: "Forbidden" }, 403);
   }
 
@@ -54,44 +58,30 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Missing user_id" }, 400);
   }
 
-  const apiHeaders = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
-
   // Обнуляем ссылки без on delete cascade
-  const nullifyRefs = [
-    fetch(`${supabaseUrl}/rest/v1/promo_codes?used_by=eq.${user_id}`, {
-      method: "PATCH", headers: { ...apiHeaders, "Content-Type": "application/json" },
-      body: '{"used_by":null}',
-    }),
-    fetch(`${supabaseUrl}/rest/v1/promo_codes?created_by=eq.${user_id}`, {
-      method: "PATCH", headers: { ...apiHeaders, "Content-Type": "application/json" },
-      body: '{"created_by":null}',
-    }),
-    fetch(`${supabaseUrl}/rest/v1/download_requests?reviewed_by=eq.${user_id}`, {
-      method: "PATCH", headers: { ...apiHeaders, "Content-Type": "application/json" },
-      body: '{"reviewed_by":null}',
-    }),
-  ];
-  await Promise.all(nullifyRefs);
+  await Promise.all([
+    supabase.from("promo_codes").update({ used_by: null }).eq("used_by", user_id),
+    supabase.from("promo_codes").update({ created_by: null }).eq("created_by", user_id),
+    supabase.from("download_requests").update({ reviewed_by: null }).eq("reviewed_by", user_id),
+  ]);
 
-  // Удаляем профиль (каскадно удалит vip_subscriptions, user_activity, download_requests)
-  const profileResp = await fetch(
-    `${supabaseUrl}/rest/v1/profiles?id=eq.${user_id}`,
-    { method: "DELETE", headers: apiHeaders }
-  );
-  if (!profileResp.ok) {
-    const err = await profileResp.text();
-    return jsonResponse({ error: "Failed to delete profile: " + err }, 500);
+  // Удаляем профиль (каскадно — vip_subscriptions, user_activity, download_requests)
+  const { error: delProfileErr, count } = await supabase
+    .from("profiles")
+    .delete({ count: "exact" })
+    .eq("id", user_id);
+  if (delProfileErr) {
+    return jsonResponse({ error: "Failed to delete profile: " + delProfileErr.message }, 500);
+  }
+  if (count === 0) {
+    return jsonResponse({ error: "Profile not found" }, 404);
   }
 
-  // Удаляем пользователя из auth
+  // Удаляем пользователя из auth через Admin API
   const deleteResp = await fetch(
     `${supabaseUrl}/auth/v1/admin/users/${user_id}`,
-    {
-      method: "DELETE",
-      headers: apiHeaders,
-    }
+    { method: "DELETE", headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   );
-
   if (!deleteResp.ok) {
     const err = await deleteResp.text();
     return jsonResponse({ error: "Failed to delete user: " + err }, 500);
