@@ -33,7 +33,7 @@ async function downloadMod(modName, mcVersion, target) {
     var url = EDGE_FN + '?mod=' + encodeURIComponent(modName) + '&mc=' + encodeURIComponent(mcVersion);
     var resp = await withTimeout(fetch(url, {
       headers: { 'Authorization': 'Bearer ' + token, 'apikey': AUTH_CONFIG.anonKey }
-    }), 30000);
+    }), 60000);
     if (!resp.ok) {
       var err = await resp.json().catch(function() { return { error: resp.statusText }; });
       if (target) { target.disabled = false; target.textContent = 'Ошибка'; }

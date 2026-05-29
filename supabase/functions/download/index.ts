@@ -1,5 +1,4 @@
 import "@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -30,17 +29,14 @@ const FALLBACK: Record<string, string> = {
   "Ballisticys Injector Toolkit|any": "ballisticys-injector-toolkit.zip",
 };
 
-async function getUserFromJWT(authHeader: string | null): Promise<{ id: string; email?: string } | null> {
-  if (!authHeader?.startsWith("Bearer ")) return null;
-  const token = authHeader.slice(7);
+function decodeJWTPayload(token: string): Record<string, unknown> | null {
   try {
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
-    const { data: { user }, error } = await supabase.auth.getUser(token);
-    if (error || !user) return null;
-    return { id: user.id, email: user.email };
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1];
+    const padded = payload.padEnd(payload.length + (4 - (payload.length % 4)) % 4, "=");
+    const decoded = atob(padded.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(decoded);
   } catch {
     return null;
   }
@@ -65,16 +61,23 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Unknown mod/version" }, 404);
   }
 
-  const user = await getUserFromJWT(req.headers.get("Authorization"));
-  if (!user) {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
     return jsonResponse({ error: "Unauthorized" }, 401);
   }
 
+  const token = authHeader.slice(7);
+  const payload = decodeJWTPayload(token);
+  if (!payload?.sub || typeof payload.sub !== "string") {
+    return jsonResponse({ error: "Invalid token" }, 401);
+  }
+
+  const userId = payload.sub as string;
   const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
   const profileResp = await fetch(
-    `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=role`,
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}&select=role`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   );
   const profiles = await profileResp.json();
@@ -85,7 +88,7 @@ Deno.serve(async (req) => {
   }
 
   const reqResp = await fetch(
-    `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${user.id}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${encodeURIComponent(mcVersion)}&status=eq.approved&select=id&limit=1`,
+    `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${userId}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${encodeURIComponent(mcVersion)}&status=eq.approved&select=id&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   );
   const requests = await reqResp.json();
@@ -99,25 +102,32 @@ Deno.serve(async (req) => {
 
 async function proxyFile(fileName: string): Promise<Response> {
   const fileUrl = `${GITHUB_RAW}/${encodeURIComponent(fileName)}`;
-  const resp = await fetch(fileUrl);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
 
-  if (!resp.ok) {
-    return new Response(JSON.stringify({ error: "File not found" }), {
-      status: 404,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+  try {
+    const resp = await fetch(fileUrl, { signal: controller.signal });
+
+    if (!resp.ok) {
+      return new Response(JSON.stringify({ error: "File not found" }), {
+        status: 404,
+        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
+
+    const blob = await resp.blob();
+
+    return new Response(blob, {
+      status: 200,
+      headers: {
+        ...CORS_HEADERS,
+        "Content-Type": resp.headers.get("Content-Type") || "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${fileName}"`,
+        "Content-Length": blob.size.toString(),
+        "Cache-Control": "no-cache",
+      },
     });
+  } finally {
+    clearTimeout(timeout);
   }
-
-  const blob = await resp.blob();
-
-  return new Response(blob, {
-    status: 200,
-    headers: {
-      ...CORS_HEADERS,
-      "Content-Type": resp.headers.get("Content-Type") || "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${fileName}"`,
-      "Content-Length": blob.size.toString(),
-      "Cache-Control": "no-cache",
-    },
-  });
 }
