@@ -973,13 +973,19 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
     if (!sb) return;
     const durationHours = parseInt(document.getElementById('access-key-duration')?.value) || 0;
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
-    const { error } = await sb.from('promo_codes').insert({
-      code,
-      duration_hours: durationHours > 0 ? durationHours : null,
-      created_by: currentSession?.user?.id || null
-    });
+    let code, error;
+    for (let attempt = 0; attempt < 5; attempt++) {
+      code = '';
+      for (let i = 0; i < 16; i++) code += chars[Math.floor(Math.random() * chars.length)];
+      const result = await sb.from('promo_codes').insert({
+        code,
+        duration_hours: durationHours > 0 ? durationHours : null,
+        created_by: currentSession?.user?.id || null
+      });
+      error = result.error;
+      if (!error) break;
+      if (!error.message?.includes('duplicate key')) break;
+    }
     if (error) {
       document.getElementById('profile-status').textContent = 'Ошибка: ' + error.message;
       document.getElementById('profile-status').style.color = '#ff7b72';
