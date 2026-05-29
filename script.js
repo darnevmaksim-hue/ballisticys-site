@@ -24,36 +24,35 @@ function getSessionToken() {
   } catch(_) { return null; }
 }
 
+var DOWNLOAD_MAP = {
+  "Ballistics Calculator (Fabric)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-fabric.jar",
+  "Ballistics Calculator (Fabric)|1.20.1": "bbb-fabric-port-2.0pre4-fabric-port.jar",
+  "Ballistics Calculator (Forge)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-forge.jar",
+  "Ballistics Calculator (Forge)|1.20.1": "blur-mod-1.0.0-forge.jar",
+  "Ballistics Calculator (NeoForge)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-neoforge.jar",
+  "Ballistics Calculator (NeoForge)|1.20.1": "ballistic-calculator-1.0.0-1.20.1-neoforge.jar",
+};
+
+var DOWNLOAD_BASE = "https://raw.githubusercontent.com/darnevmaksim-hue/ballisticys-site/mod-files/downloads";
+
 async function downloadMod(modName, mcVersion, target) {
-  var token = getSessionToken();
-  if (!token) return;
   target = target || event?.target;
   if (target) { target.disabled = true; target.textContent = '⏳ Загрузка...'; }
-  try {
-    var url = EDGE_FN + '?mod=' + encodeURIComponent(modName) + '&mc=' + encodeURIComponent(mcVersion);
-    var resp = await withTimeout(fetch(url, {
-      headers: { 'Authorization': 'Bearer ' + token, 'apikey': AUTH_CONFIG.anonKey }
-    }), 60000);
-    if (!resp.ok) {
-      var err = await resp.json().catch(function() { return { error: resp.statusText }; });
-      if (target) { target.disabled = false; target.textContent = 'Ошибка'; }
-      return;
-    }
-    var blob = await resp.blob();
-    var disposition = resp.headers.get('Content-Disposition') || '';
-    var match = disposition.match(/filename="?(.+?)"?$/);
-    var filename = match ? match[1] : (modName + '.jar');
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(a.href);
-    if (target) { target.disabled = false; target.textContent = 'Скачано'; }
-  } catch(_) {
-    if (target) { target.disabled = false; target.textContent = 'Ошибка сети'; }
+  var key = modName + '|' + mcVersion;
+  var file = DOWNLOAD_MAP[key];
+  if (!file) {
+    if (target) { target.disabled = false; target.textContent = 'Не найдено'; }
+    return;
   }
+  var a = document.createElement('a');
+  a.href = DOWNLOAD_BASE + '/' + encodeURIComponent(file);
+  a.download = file;
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  if (target) { target.disabled = false; target.textContent = 'Скачано'; }
 }
 
 function loadSupabaseSDK() {
