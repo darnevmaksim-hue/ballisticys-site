@@ -104,7 +104,7 @@ async function proxyFile(fileName: string): Promise<Response> {
   if (!resp.ok) {
     return new Response(JSON.stringify({ error: "File not found" }), {
       status: 404,
-      headers: { "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
@@ -113,6 +113,7 @@ async function proxyFile(fileName: string): Promise<Response> {
   return new Response(blob, {
     status: 200,
     headers: {
+      ...CORS_HEADERS,
       "Content-Type": resp.headers.get("Content-Type") || "application/octet-stream",
       "Content-Disposition": `attachment; filename="${fileName}"`,
       "Content-Length": blob.size.toString(),
