@@ -623,10 +623,10 @@ function updateUI() {
   // Restrict MC versions for non-VIP
   var mcSel = document.querySelector('.mc-global-select');
   if (mcSel) {
-    var opt20 = mcSel.querySelector('option[value="1.20.1"]');
-    if (opt20) opt20.style.display = isVipUser ? '' : 'none';
-    if (!isVipUser && mcSel.value === '1.20.1') {
-      mcSel.value = '1.21.1';
+    var opt21 = mcSel.querySelector('option[value="1.21.1"]');
+    if (opt21) opt21.style.display = isVipUser ? '' : 'none';
+    if (!isVipUser && mcSel.value === '1.21.1') {
+      mcSel.value = '1.20.1';
     }
   }
   syncDownloadGates();
