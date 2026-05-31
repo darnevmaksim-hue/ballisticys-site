@@ -168,12 +168,25 @@ function updateRequestAreas() {
     } else if (req.status === 'approved') {
       var wrapper = document.createElement('div');
       wrapper.style.cssText = 'display:flex;flex-direction:column;gap:0.5rem';
-      var btn = document.createElement('button');
-      btn.className = 'btn primary';
-      btn.style.cssText = 'padding:0.5rem 1rem;font-size:0.8rem';
-      btn.textContent = 'Скачать';
-      btn.addEventListener('click', function(e) { downloadMod(modName, mc, e.target); });
-      wrapper.appendChild(btn);
+      var usedKey = 'dl_used_' + req.id;
+      var alreadyUsed = false;
+      try { alreadyUsed = localStorage.getItem(usedKey) === '1'; } catch(_) {}
+      if (alreadyUsed) {
+        wrapper.innerHTML = '<p style="font-size:0.8rem;color:var(--text-dim)">Файл скачан. Отправьте новый запрос если нужно.</p>';
+      } else {
+        var btn = document.createElement('button');
+        btn.className = 'btn primary';
+        btn.style.cssText = 'padding:0.5rem 1rem;font-size:0.8rem';
+        btn.textContent = 'Скачать';
+        btn.addEventListener('click', function(e) {
+          downloadMod(modName, mc, e.target);
+          try { localStorage.setItem(usedKey, '1'); } catch(_) {}
+          setTimeout(function() {
+            updateRequestAreas();
+          }, 500);
+        });
+        wrapper.appendChild(btn);
+      }
       if (req.approved_promo_code) {
         var promoBox = document.createElement('div');
         promoBox.className = 'promo-code-display';
@@ -355,6 +368,7 @@ function closeAuth() {
 
 function closeAdmin() {
   adminModal?.classList.add('hidden');
+  stopAdminPolling();
 }
 
 openAuthBtn?.addEventListener('click', () => {
@@ -436,6 +450,7 @@ document.getElementById('signup-submit-btn')?.addEventListener('click', async ()
     authSignupModal?.classList.add('hidden');
     await loadSession();
     updateUI();
+    startUserPolling();
   } else {
     status.textContent = 'Успешно! Проверьте почту для подтверждения.';
     status.style.color = '#4ade80';
@@ -492,6 +507,7 @@ document.getElementById('login-submit-btn')?.addEventListener('click', async () 
   authLoginModal?.classList.add('hidden');
   await loadSession();
   updateUI();
+  startUserPolling();
 });
 
 document.getElementById('forgot-password-btn')?.addEventListener('click', async () => {
@@ -520,6 +536,7 @@ profileLogoutBtn?.addEventListener('click', async () => {
   currentSession = null;
   updateUI();
   profileMenu?.classList.add('hidden');
+  stopUserPolling();
 });
 
 profileTrigger?.addEventListener('click', (e) => {
@@ -616,6 +633,7 @@ adminPanelLink?.addEventListener('click', (e) => {
     adminModal?.classList.remove('hidden');
     profileMenu?.classList.add('hidden');
     loadAdminData();
+    startAdminPolling();
   }
 });
 
@@ -624,6 +642,7 @@ document.getElementById('profile-manage-btn')?.addEventListener('click', () => {
   if (currentUser?.role === 'admin') {
     adminModal?.classList.remove('hidden');
     loadAdminData();
+    startAdminPolling();
   } else {
     document.getElementById('profile-info-email').textContent = currentUser?.email || '—';
     const roleEl = document.getElementById('profile-info-role');
@@ -1041,6 +1060,7 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
 
   await loadSession();
   updateUI();
+  if (currentUser) startUserPolling();
 
   // Прячем лоадер
   setTimeout(function() {
@@ -1564,6 +1584,7 @@ function showRequestResult(req) {
     deniedSection.classList.add('hidden');
     document.getElementById('result-promo-code').textContent = req.approved_promo_code || '—';
     document.getElementById('result-promo-dur').textContent = req.approved_promo_duration || 24;
+    document.getElementById('result-dl-version').textContent = req.mc_version;
   } else {
     approvedSection.classList.add('hidden');
     deniedSection.classList.remove('hidden');
@@ -1583,9 +1604,9 @@ function hideRequestResult() {
 
 function downloadApprovedVersion() {
   if (!currentResponseReq) return;
-  var sel = document.getElementById('result-dl-version');
-  var mc = sel ? sel.value : '1.21.1';
-  downloadMod(currentResponseReq.mod_name, mc, null);
+  downloadMod(currentResponseReq.mod_name, currentResponseReq.mc_version, null);
+  try { localStorage.setItem('dl_used_' + currentResponseReq.id, '1'); } catch(_) {}
+  hideRequestResult();
 }
 
 // === Event handlers for result modals ===
@@ -1601,11 +1622,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Result modal close
   var closeResult = document.getElementById('close-request-result');
   if (closeResult) {
-    closeResult.addEventListener('click', hideRequestResult);
+    closeResult.addEventListener('click', function() { hideRequestResult(); if (currentResponseReq) { try { localStorage.setItem('dl_used_' + currentResponseReq.id, '1'); } catch(_) {} } });
   }
   var resultBackdrop = document.getElementById('request-result-backdrop');
   if (resultBackdrop) {
-    resultBackdrop.addEventListener('click', hideRequestResult);
+    resultBackdrop.addEventListener('click', function() { hideRequestResult(); if (currentResponseReq) { try { localStorage.setItem('dl_used_' + currentResponseReq.id, '1'); } catch(_) {} } });
   }
 
   // Download button in approved result
@@ -1736,6 +1757,38 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// === POLLING SYSTEM ===
+
+var adminPollTimer = null;
+var userPollTimer = null;
+
+function startAdminPolling() {
+  stopAdminPolling();
+  adminPollTimer = setInterval(function() {
+    if (adminModal?.classList.contains('hidden')) {
+      stopAdminPolling();
+      return;
+    }
+    loadRequests();
+  }, 5000);
+}
+
+function stopAdminPolling() {
+  if (adminPollTimer) { clearInterval(adminPollTimer); adminPollTimer = null; }
+}
+
+function startUserPolling() {
+  stopUserPolling();
+  userPollTimer = setInterval(function() {
+    if (!currentUser || !sb) { return; }
+    loadRequestStatus().then(checkForRequestResponses, function() {});
+  }, 10000);
+}
+
+function stopUserPolling() {
+  if (userPollTimer) { clearInterval(userPollTimer); userPollTimer = null; }
+}
 
 // Delegated click handler for download buttons
 document.addEventListener('click', function(e) {
