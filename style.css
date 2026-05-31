@@ -1256,135 +1256,145 @@ body.theme-ios .hero::after {
 
 /* Mountain */
 body.theme-mountain {
-  --mt-bg: #0f1520; --mt-panel: rgba(20,30,50,0.88);
+  --mt-bg: #0b111e; --mt-panel: rgba(16,24,40,0.92);
   --mt-text: #e8e4d8; --mt-dim: #7a7a6a;
-  --mt-accent: #c8a96e; --mt-frost: #89b0ae;
-  --mt-pine: #4a7c59; --mt-border: rgba(200,169,110,0.12);
-  --mt-snow: #f0f0ea;
+  --mt-accent: #e8c87a; --mt-frost: #7ab0ae;
+  --mt-pine: #3d7a4a; --mt-border: rgba(232,200,122,0.15);
+  --mt-snow: #f5f0ea;
   background: var(--mt-bg) !important; color: var(--mt-text);
 }
 body.theme-mountain::before {
   content: ''; position: fixed; inset: 0; z-index: -2;
   background:
     /* Stars */
-    radial-gradient(1px 1px at 10% 8%, rgba(255,255,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 20% 12%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 30% 5%, rgba(255,255,255,0.8) 0%, transparent 100%),
-    radial-gradient(1px 1px at 42% 15%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 7%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 65% 18%, rgba(255,255,255,0.7) 0%, transparent 100%),
-    radial-gradient(1px 1px at 78% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 14%, rgba(255,255,255,0.6) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 15% 25%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 50% 22%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 85% 20%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1.2px 1.2px at 35% 30%, rgba(200,169,110,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 28%, rgba(200,169,110,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 5% 35%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1.2px 1.2px at 95% 32%, rgba(200,169,110,0.4) 0%, transparent 100%),
-    /* Sky gradient */
-    linear-gradient(180deg, #070b14 0%, #0a0f1a 15%, #141e2e 35%, #1a2a3a 55%, #1e3040 72%, #2a4040 85%, #3a5040 100%);
+    radial-gradient(1.5px 1.5px at 8% 6%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 15% 12%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 22% 4%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 18%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 38% 8%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 45% 22%, rgba(232,200,122,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 52% 5%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 68% 10%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 75% 25%, rgba(232,200,122,0.4) 0%, transparent 100%),
+    radial-gradient(2px 2px at 82% 7%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 16%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 96% 9%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 12% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 48% 28%, rgba(232,200,122,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 65% 32%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 88% 26%, rgba(232,200,122,0.3) 0%, transparent 100%),
+    /* Sky gradient — deep night to dawn */
+    linear-gradient(180deg,
+      #050810 0%,
+      #0a1025 15%,
+      #141e3e 28%,
+      #1a2a4a 40%,
+      #2a3a4a 52%,
+      #3a4a4a 63%,
+      #4a5a4a 73%,
+      #4a6a4a 82%,
+      #3a5a3a 90%,
+      #2a4a2a 100%);
   pointer-events: none;
 }
 body.theme-mountain::after {
-  content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: 40vh; z-index: -1;
+  content: ''; position: fixed; left: 0; right: 0; bottom: 0; height: 45vh; z-index: -1;
   background:
-    /* Back mountain range (darkest, farthest) */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300'%3E%3Cpath d='M0 300 L0 160 L20 150 L40 135 L60 145 L80 120 L100 105 L120 115 L140 90 L160 75 L180 85 L200 60 L220 45 L240 55 L260 35 L280 20 L300 30 L320 10 L340 25 L360 15 L380 30 L400 50 L420 40 L440 60 L460 45 L480 55 L500 70 L520 50 L540 40 L560 60 L580 35 L600 25 L620 45 L640 30 L660 20 L680 40 L700 55 L720 35 L740 50 L760 60 L780 40 L800 30 L820 50 L840 35 L860 20 L880 40 L900 50 L920 30 L940 45 L960 55 L980 35 L1000 45 L1000 300Z' fill='rgba(200,169,110,0.04)'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat,
-    /* Mid mountain range */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300'%3E%3Cpath d='M0 300 L0 190 L30 180 L60 165 L90 175 L120 150 L150 140 L180 150 L210 125 L240 110 L270 120 L300 95 L330 80 L360 90 L390 70 L420 55 L450 65 L480 45 L510 60 L540 75 L570 55 L600 40 L630 55 L660 45 L690 60 L720 75 L750 55 L780 45 L810 60 L840 50 L870 35 L900 50 L930 60 L960 45 L990 55 L1000 50 L1000 300Z' fill='rgba(200,169,110,0.06)'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat,
-    /* Front mountain range (closest, most visible) */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300'%3E%3Cpath d='M0 300 L0 230 L40 220 L80 205 L120 215 L160 190 L200 180 L240 190 L280 165 L320 150 L360 160 L400 135 L440 120 L480 130 L520 110 L560 95 L600 105 L640 85 L680 70 L720 80 L760 65 L800 50 L840 60 L880 45 L920 55 L960 65 L1000 50 L1000 300Z' fill='rgba(200,169,110,0.08)'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
-  background-blend-mode: normal;
+    /* Farthest mountains — dark silhouette */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300'%3E%3Cpath d='M0 300 L0 120 L25 105 L50 90 L75 100 L100 70 L125 55 L150 65 L175 35 L200 20 L225 30 L250 10 L275 25 L300 40 L325 20 L350 5 L375 15 L400 30 L425 10 L450 25 L475 35 L500 50 L525 30 L550 15 L575 25 L600 40 L625 20 L650 10 L675 25 L700 40 L725 20 L750 5 L775 15 L800 30 L825 10 L850 25 L875 35 L900 20 L925 10 L950 25 L975 15 L1000 5 L1000 300Z' fill='rgba(10,15,30,0.9)'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat,
+    /* Mid mountains — dense pine forest silhouette */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300'%3E%3Cpath d='M0 300 L0 160 L15 155 L20 140 L25 145 L35 120 L40 125 L45 100 L50 105 L55 85 L60 90 L65 70 L70 75 L75 55 L80 60 L85 45 L90 50 L95 35 L100 40 L105 50 L110 55 L115 40 L120 45 L125 30 L130 35 L135 20 L140 25 L145 40 L150 45 L155 30 L160 35 L165 20 L170 25 L175 15 L180 20 L185 35 L190 40 L195 25 L200 30 L205 15 L210 20 L215 10 L220 15 L225 25 L230 30 L235 15 L240 20 L245 10 L250 15 L255 30 L260 35 L265 20 L270 25 L275 10 L280 15 L285 5 L290 10 L295 20 L300 25 L305 10 L310 15 L315 5 L320 10 L325 20 L330 25 L335 10 L340 15 L345 5 L350 10 L355 20 L360 25 L365 10 L370 15 L375 5 L380 10 L385 15 L390 20 L395 10 L400 15 L405 5 L410 10 L415 20 L420 25 L425 10 L430 15 L435 5 L440 10 L445 20 L450 25 L455 10 L460 15 L465 5 L470 10 L475 20 L480 25 L485 10 L490 15 L495 5 L500 10 L505 20 L510 25 L515 10 L520 15 L525 5 L530 10 L535 20 L540 25 L545 10 L550 15 L555 5 L560 10 L565 20 L570 25 L575 10 L580 15 L585 5 L590 10 L595 15 L600 20 L605 10 L610 15 L615 5 L620 10 L625 20 L630 25 L635 10 L640 15 L645 5 L650 10 L655 20 L660 25 L665 10 L670 15 L675 5 L680 10 L685 20 L690 25 L695 10 L700 15 L705 5 L710 10 L715 20 L720 25 L725 10 L730 15 L735 5 L740 10 L745 20 L750 25 L755 10 L760 15 L765 5 L770 10 L775 20 L780 25 L785 10 L790 15 L795 5 L800 10 L805 15 L810 20 L815 10 L820 15 L825 5 L830 10 L835 20 L840 25 L845 10 L850 15 L855 5 L860 10 L865 20 L870 25 L875 10 L880 15 L885 5 L890 10 L895 20 L900 25 L905 10 L910 15 L915 5 L920 10 L925 20 L930 25 L935 10 L940 15 L945 5 L950 10 L955 20 L960 25 L965 10 L970 15 L975 5 L980 10 L985 20 L990 25 L995 10 L1000 15 L1000 300Z' fill='rgba(10,18,28,0.85)'/%3E%3C/svg%3E") 0 50% / 100% 100% no-repeat,
+    /* Front mountains — warmer, with dawn glow */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 300'%3E%3Cpath d='M0 300 L0 190 L20 180 L40 170 L60 175 L80 155 L100 145 L120 150 L140 130 L160 120 L180 125 L200 105 L220 95 L240 100 L260 80 L280 70 L300 75 L320 55 L340 45 L360 50 L380 35 L400 40 L420 50 L440 55 L460 40 L480 45 L500 30 L520 35 L540 25 L560 30 L580 40 L600 45 L620 30 L640 35 L660 20 L680 25 L700 35 L720 40 L740 25 L760 30 L780 15 L800 20 L820 30 L840 35 L860 20 L880 25 L900 15 L920 20 L940 30 L960 35 L980 20 L1000 25 L1000 300Z' fill='rgba(25,35,45,0.9)'/%3E%3C/svg%3E") 0 0 / 100% 100% no-repeat;
   pointer-events: none;
 }
-body.theme-mountain .hero-copy h1 { color: var(--mt-text); font-family: 'Georgia', serif; font-weight: 400; text-shadow: 0 2px 15px rgba(0,0,0,0.4); }
+body.theme-mountain .hero {
+  position: relative;
+}
+body.theme-mountain .hero::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 50%; z-index: -1;
+  background: linear-gradient(0deg, rgba(232,200,122,0.06) 0%, transparent 100%);
+  pointer-events: none;
+}
+body.theme-mountain .hero-copy h1 { color: var(--mt-text); font-family: 'Georgia', serif; font-weight: 700; text-shadow: 0 2px 20px rgba(0,0,0,0.5); letter-spacing: 0.02em; }
 body.theme-mountain .hero-sub { border-left: 3px solid var(--mt-accent); color: var(--mt-dim) !important; }
-body.theme-mountain .top-note { color: var(--mt-accent) !important; letter-spacing: 0.15em; font-size: 0.7rem; text-transform: uppercase; }
+body.theme-mountain .top-note { color: var(--mt-accent) !important; letter-spacing: 0.2em; font-size: 0.65rem; text-transform: uppercase; opacity: 0.8; }
 body.theme-mountain .panel {
   background: var(--mt-panel); border: 1px solid var(--mt-border);
-  border-radius: 8px; box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+  border-radius: 10px; box-shadow: 0 4px 30px rgba(0,0,0,0.4);
 }
-body.theme-mountain .mod-card { background: var(--mt-panel); border: 1px solid var(--mt-border); border-radius: 8px; }
-body.theme-mountain .mod-card:hover { border-color: var(--mt-accent); box-shadow: 0 4px 24px rgba(200,169,110,0.08), inset 0 0 0 1px rgba(200,169,110,0.05); }
-body.theme-mountain .btn.primary { background: linear-gradient(135deg, var(--mt-accent), #b8985a); border: none; color: #0f1520; border-radius: 6px; font-weight: 600; letter-spacing: 0.03em; box-shadow: 0 2px 10px rgba(200,169,110,0.2); }
-body.theme-mountain .btn.primary:hover { background: linear-gradient(135deg, #d4b87a, #c8a96e); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,169,110,0.3); }
-body.theme-mountain .btn.ghost { border: 1px solid var(--mt-border); color: var(--mt-accent); border-radius: 6px; backdrop-filter: blur(4px); }
-body.theme-mountain .tag.fabric { background: rgba(74,124,89,0.15); color: var(--mt-pine); }
-body.theme-mountain .tag.forge { background: rgba(200,169,110,0.15); color: var(--mt-accent); }
-body.theme-mountain .tag.neoforge { background: rgba(137,176,174,0.15); color: var(--mt-frost); }
-body.theme-mountain .tag.injector { background: rgba(200,169,110,0.08); color: var(--mt-dim); }
-body.theme-mountain .background-grid { opacity: 0.12; background-image: repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(200,169,110,0.02) 30px, rgba(200,169,110,0.02) 31px); }
-body.theme-mountain .profile-trigger { background: linear-gradient(135deg, var(--mt-accent), #b8985a); border: none; border-radius: 6px; padding: 0.4rem 1rem; color: #0f1520; box-shadow: 0 2px 8px rgba(200,169,110,0.2); }
-body.theme-mountain .profile-menu { background: var(--mt-panel); border: 1px solid var(--mt-border); border-radius: 8px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+body.theme-mountain .mod-card { background: rgba(16,24,40,0.8); border: 1px solid var(--mt-border); border-radius: 10px; }
+body.theme-mountain .mod-card:hover { border-color: var(--mt-accent); box-shadow: 0 4px 30px rgba(232,200,122,0.06), inset 0 0 0 1px rgba(232,200,122,0.05); }
+body.theme-mountain .btn.primary { background: linear-gradient(135deg, var(--mt-accent), #c8a050); border: none; color: #0b111e; border-radius: 8px; font-weight: 700; letter-spacing: 0.04em; box-shadow: 0 2px 12px rgba(232,200,122,0.15); }
+body.theme-mountain .btn.primary:hover { background: linear-gradient(135deg, #e8d08a, #d4b87a); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(232,200,122,0.25); }
+body.theme-mountain .btn.ghost { border: 1px solid var(--mt-border); color: var(--mt-accent); border-radius: 8px; backdrop-filter: blur(4px); }
+body.theme-mountain .tag.fabric { background: rgba(61,122,74,0.2); color: #5a9a6a; }
+body.theme-mountain .tag.forge { background: rgba(232,200,122,0.15); color: var(--mt-accent); }
+body.theme-mountain .tag.neoforge { background: rgba(122,176,174,0.15); color: var(--mt-frost); }
+body.theme-mountain .tag.injector { background: rgba(232,200,122,0.08); color: var(--mt-dim); }
+body.theme-mountain .background-grid { opacity: 0.08; background-image: repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(232,200,122,0.015) 30px, rgba(232,200,122,0.015) 31px); }
+body.theme-mountain .profile-trigger { background: linear-gradient(135deg, var(--mt-accent), #b89850); border: none; border-radius: 8px; padding: 0.4rem 1rem; color: #0b111e; box-shadow: 0 2px 10px rgba(232,200,122,0.15); }
+body.theme-mountain .profile-menu { background: rgba(16,24,40,0.95); border: 1px solid var(--mt-border); border-radius: 10px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
 body.theme-mountain .admin-tab.active { color: var(--mt-accent); border-bottom-color: var(--mt-accent); }
 body.theme-mountain .footer { border-top: 1px solid var(--mt-border); color: var(--mt-dim); }
-body.theme-mountain .vip-card { background: var(--mt-panel) !important; border: 1px solid var(--mt-border) !important; border-radius: 8px; }
-body.theme-mountain .vip-section { border-color: var(--mt-border); background: rgba(200,169,110,0.03); }
+body.theme-mountain .vip-card { background: rgba(16,24,40,0.85) !important; border: 1px solid var(--mt-border) !important; border-radius: 10px; }
+body.theme-mountain .vip-section { border-color: var(--mt-border); background: rgba(232,200,122,0.02); }
 body.theme-mountain .vip-section h3 { color: var(--mt-accent); }
-body.theme-mountain .role-badge.vip { background: rgba(74,124,89,0.15); color: var(--mt-pine); }
-body.theme-mountain .role-badge.admin { background: rgba(200,169,110,0.15); color: var(--mt-accent); }
-body.theme-mountain .vip-badge { background: rgba(200,169,110,0.12); color: var(--mt-accent); border: 1px solid var(--mt-border); }
-body.theme-mountain .filter.active { background: var(--mt-accent); border-color: var(--mt-accent); color: #0f1520; }
+body.theme-mountain .role-badge.vip { background: rgba(61,122,74,0.15); color: #5a9a6a; }
+body.theme-mountain .role-badge.admin { background: rgba(232,200,122,0.15); color: var(--mt-accent); }
+body.theme-mountain .vip-badge { background: rgba(232,200,122,0.12); color: var(--mt-accent); border: 1px solid var(--mt-border); }
+body.theme-mountain .filter.active { background: var(--mt-accent); border-color: var(--mt-accent); color: #0b111e; }
 body.theme-mountain .filter { border-color: var(--mt-border); color: var(--mt-dim); }
-body.theme-mountain .chips span { background: rgba(200,169,110,0.06); border-color: var(--mt-border); color: var(--mt-accent); }
+body.theme-mountain .chips span { background: rgba(232,200,122,0.06); border-color: var(--mt-border); color: var(--mt-accent); }
 body.theme-mountain .mc-global-row label { color: var(--mt-dim); }
-body.theme-mountain .mc-global-select { background: var(--mt-panel); border: 1px solid var(--mt-border); border-radius: 6px; }
-body.theme-mountain .promo-code { background: rgba(200,169,110,0.06); border-color: var(--mt-accent); color: var(--mt-accent); }
-body.theme-mountain .theme-dropdown .theme-opt[data-theme="mountain"] { border-color: var(--mt-accent); color: var(--mt-accent); background: rgba(200,169,110,0.08); }
+body.theme-mountain .mc-global-select { background: rgba(16,24,40,0.9); border: 1px solid var(--mt-border); border-radius: 6px; }
+body.theme-mountain .promo-code { background: rgba(232,200,122,0.06); border-color: var(--mt-accent); color: var(--mt-accent); }
+body.theme-mountain .theme-dropdown .theme-opt[data-theme="mountain"] { border-color: var(--mt-accent); color: var(--mt-accent); background: rgba(232,200,122,0.08); }
 body.theme-mountain .guide-grid article h3 { color: var(--mt-accent); }
 body.theme-mountain .guide-grid ol li::marker { color: var(--mt-pine); }
-body.theme-mountain .beta-tag { background: rgba(200,169,110,0.12); color: var(--mt-accent); border-color: rgba(200,169,110,0.3); }
-body.theme-mountain .modal-card { background: var(--mt-panel); border: 1px solid var(--mt-border); border-radius: 8px; }
-body.theme-mountain .stage-card { border: 1px solid var(--mt-border); background: rgba(20,30,50,0.7); border-radius: 8px; }
+body.theme-mountain .beta-tag { background: rgba(232,200,122,0.12); color: var(--mt-accent); border-color: rgba(232,200,122,0.3); }
+body.theme-mountain .modal-card { background: rgba(16,24,40,0.95); border: 1px solid var(--mt-border); border-radius: 10px; }
+body.theme-mountain .stage-card { border: 1px solid var(--mt-border); background: rgba(16,24,40,0.7); border-radius: 10px; }
 body.theme-mountain .dash-widget {
-  background: var(--mt-panel); border: 1px solid var(--mt-border);
-  border-radius: 8px;
+  background: rgba(16,24,40,0.85); border: 1px solid var(--mt-border);
+  border-radius: 10px;
 }
 body.theme-mountain .dash-widget-head {
-  background: rgba(200,169,110,0.04); border-bottom-color: var(--mt-border);
+  background: rgba(232,200,122,0.04); border-bottom-color: var(--mt-border);
   color: var(--mt-accent); font-family: 'Georgia', serif;
   font-size: 0.55rem; letter-spacing: 0.15em;
 }
-body.theme-mountain .dash-terminal { background: rgba(10,15,26,0.92); border-color: rgba(200,169,110,0.06); border-radius: 8px; }
+body.theme-mountain .dash-terminal { background: rgba(8,12,20,0.92); border-color: rgba(232,200,122,0.06); border-radius: 10px; }
 body.theme-mountain .term-prompt { color: var(--mt-accent); }
 body.theme-mountain .term-cmd { color: rgba(232,228,216,0.7); }
-body.theme-mountain .term-output { color: rgba(232,228,216,0.45); }
+body.theme-mountain .term-output { color: rgba(232,228,216,0.4); }
 body.theme-mountain .term-line:last-child .term-output::after { color: var(--mt-accent); }
-body.theme-mountain .clock-time { color: var(--mt-accent); text-shadow: 0 0 20px rgba(200,169,110,0.2); font-family: 'Georgia', serif; font-weight: 400; }
+body.theme-mountain .clock-time { color: var(--mt-accent); text-shadow: 0 0 30px rgba(232,200,122,0.15); font-family: 'Georgia', serif; font-weight: 700; }
 body.theme-mountain .clock-date { color: var(--mt-dim); opacity: 0.8; font-family: 'JetBrains Mono', monospace; }
 body.theme-mountain .clock-uptime { color: var(--mt-frost); font-family: 'JetBrains Mono', monospace; }
 body.theme-mountain .clock-tz { color: var(--mt-dim); opacity: 0.4; }
 body.theme-mountain .net-label { color: var(--mt-accent); }
-body.theme-mountain .net-bar-wrap { background: rgba(200,169,110,0.06); border: 1px solid rgba(200,169,110,0.08); border-radius: 3px; height: 8px; }
+body.theme-mountain .net-bar-wrap { background: rgba(232,200,122,0.06); border: 1px solid rgba(232,200,122,0.08); border-radius: 3px; height: 8px; }
 body.theme-mountain .net-bar { border-radius: 3px; }
-body.theme-mountain .net-in { background: linear-gradient(90deg, var(--mt-accent), #b8985a); }
-body.theme-mountain .net-out { background: linear-gradient(90deg, var(--mt-frost), #5a807e); }
-body.theme-mountain .net-pps { background: linear-gradient(90deg, var(--mt-pine), #2d5a3d); }
+body.theme-mountain .net-in { background: linear-gradient(90deg, var(--mt-accent), #c8a050); }
+body.theme-mountain .net-out { background: linear-gradient(90deg, var(--mt-frost), #5a8886); }
+body.theme-mountain .net-pps { background: linear-gradient(90deg, var(--mt-pine), #2a5a3a); }
 body.theme-mountain .net-val { color: var(--mt-text); }
 body.theme-mountain .net-detail { color: var(--mt-dim); }
 body.theme-mountain .net-detail-label { color: var(--mt-accent); }
-body.theme-mountain .sec-lock { filter: drop-shadow(0 0 8px rgba(200,169,110,0.2)); }
-body.theme-mountain .sec-status { color: var(--mt-accent); text-shadow: 0 0 10px rgba(200,169,110,0.15); letter-spacing: 0.15em; }
+body.theme-mountain .sec-lock { filter: drop-shadow(0 0 10px rgba(232,200,122,0.15)); }
+body.theme-mountain .sec-status { color: var(--mt-accent); text-shadow: 0 0 15px rgba(232,200,122,0.1); letter-spacing: 0.15em; }
 body.theme-mountain .sec-detail-row { border-bottom-color: var(--mt-border); }
 body.theme-mountain .sec-detail-label { color: var(--mt-dim); }
 body.theme-mountain .sec-detail-val { color: var(--mt-text); }
-body.theme-mountain .sec-ok { color: var(--mt-pine); }
+body.theme-mountain .sec-ok { color: #5a9a6a; }
 body.theme-mountain .sec-badge { border-color: var(--mt-accent); color: var(--mt-accent); }
-body.theme-mountain .hero::after {
-  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 40%; z-index: -1;
-  background: linear-gradient(0deg, rgba(200,169,110,0.05) 0%, transparent 100%);
-  pointer-events: none;
-}
-body.theme-mountain ::selection { background: rgba(200,169,110,0.2); }
+body.theme-mountain .hw-hero { position: relative; }
+body.theme-mountain ::selection { background: rgba(232,200,122,0.2); }
 @keyframes mt-star {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
-}
-@keyframes mt-mist {
-  0% { transform: translateX(0); opacity: 0.3; }
-  50% { transform: translateX(30px); opacity: 0.5; }
-  100% { transform: translateX(0); opacity: 0.3; }
 }
 
 /* Dashboard */
