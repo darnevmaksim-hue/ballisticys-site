@@ -62,6 +62,9 @@ Deno.serve(async (req) => {
   await Promise.all([
     supabase.from("promo_codes").update({ used_by: null }).eq("used_by", user_id),
     supabase.from("promo_codes").update({ created_by: null }).eq("created_by", user_id),
+    supabase.from("access_keys").update({ used_by: null }).eq("used_by", user_id),
+    supabase.from("access_keys").update({ created_by: null }).eq("created_by", user_id),
+    supabase.from("mod_access").delete().eq("user_id", user_id),
     supabase.from("download_requests").update({ reviewed_by: null }).eq("reviewed_by", user_id),
   ]);
 

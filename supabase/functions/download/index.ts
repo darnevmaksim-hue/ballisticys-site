@@ -87,6 +87,26 @@ Deno.serve(async (req) => {
     return proxyFile(fileName);
   }
 
+  // Check mod_access table (access keys give mod-specific access)
+  const now = new Date().toISOString();
+  const modAccessResp = await fetch(
+    `${supabaseUrl}/rest/v1/mod_access?user_id=eq.${userId}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${encodeURIComponent(mcVersion)}&or=(expires_at.is.null,expires_at.gt.${now})&select=id&limit=1`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  );
+  const modAccessData = await modAccessResp.json();
+  if (Array.isArray(modAccessData) && modAccessData.length > 0) {
+    return proxyFile(fileName);
+  }
+  // Fallback: check mod_access with "any" mc_version
+  const modAccessAnyResp = await fetch(
+    `${supabaseUrl}/rest/v1/mod_access?user_id=eq.${userId}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.any&or=(expires_at.is.null,expires_at.gt.${now})&select=id&limit=1`,
+    { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+  );
+  const modAccessAnyData = await modAccessAnyResp.json();
+  if (Array.isArray(modAccessAnyData) && modAccessAnyData.length > 0) {
+    return proxyFile(fileName);
+  }
+
   let reqResp = await fetch(
     `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${userId}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${encodeURIComponent(mcVersion)}&status=eq.approved&select=id&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }

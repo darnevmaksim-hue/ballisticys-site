@@ -119,6 +119,32 @@ body {
   word-break: break-all;
 }
 
+.theme-selector {
+  position: relative; margin-left: 0.5rem;
+}
+.theme-selector #theme-toggle-btn {
+  font-size: 0.75rem; padding: 0.3rem 0.7rem;
+}
+.theme-dropdown {
+  position: absolute; top: calc(100% + 4px); right: 0;
+  background: var(--panel-bg); border: 1px solid var(--panel-border);
+  border-radius: 8px; padding: 0.3rem; min-width: 130px;
+  z-index: 50;
+}
+.theme-dropdown .theme-opt {
+  display: block; width: 100%; padding: 0.4rem 0.7rem; font-size: 0.75rem;
+  border-radius: 5px; border: 1px solid transparent;
+  color: var(--text-dim); background: transparent; cursor: pointer;
+  font-family: var(--font-main); text-align: left; transition: all 0.15s;
+}
+.theme-dropdown .theme-opt:hover {
+  background: rgba(88,166,255,0.08); color: var(--text-main);
+}
+body:not([class*="theme-"]) .theme-dropdown .theme-opt[data-theme=""] {
+  border-color: var(--accent-color); color: var(--text-main);
+  background: rgba(88,166,255,0.08);
+}
+
 .profile-menu-btn,
 .profile-menu-link {
   width: 100%;
@@ -956,7 +982,7 @@ body.modal-open {
   .dash-grid { grid-template-columns: 1fr !important; }
   .auth-modal-content { width: 90%; margin: 2rem auto; padding: 1.5rem; }
   .admin-tabs { overflow-x: auto; gap: 0.5rem; }
-  body.vip-theme .hero::after { display: none; }
+  body.theme-hacker .hero::after { display: none; }
   .stage-card .num { font-size: 1.8rem; }
   .btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }

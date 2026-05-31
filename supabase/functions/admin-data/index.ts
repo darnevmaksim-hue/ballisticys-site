@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
       let data: unknown;
       switch (type) {
         case "promo":
-          data = await apiFetch("promo_codes?order=created_at.desc", supabaseUrl, serviceKey);
+          data = await apiFetch("access_keys?order=created_at.desc", supabaseUrl, serviceKey);
           break;
         case "users":
           data = await apiFetch("profiles?order=created_at.desc&limit=50", supabaseUrl, serviceKey);
@@ -99,10 +99,15 @@ Deno.serve(async (req) => {
       switch (type) {
         case "create_promo": {
           const code = body.code || generateCode(12);
-          await apiFetch("promo_codes", supabaseUrl, serviceKey, {
+          const modName = body.mod_name || "Ballistics Calculator (Fabric)";
+          let mcVer = body.mc_version || "1.20.1";
+          if (modName === "Injector") mcVer = "any";
+          await apiFetch("access_keys", supabaseUrl, serviceKey, {
             method: "POST",
             body: JSON.stringify({
               code,
+              mod_name: modName,
+              mc_version: mcVer,
               duration_hours: body.duration_hours ?? 0,
               created_by: caller.id,
             }),
@@ -145,10 +150,22 @@ Deno.serve(async (req) => {
           const { req_id, dur_hours } = body;
           const hours = dur_hours || 24;
           const code = generateCode(12);
-          await apiFetch("promo_codes", supabaseUrl, serviceKey, {
-            method: "POST",
-            body: JSON.stringify({ code, duration_hours: hours, created_by: caller.id }),
-          });
+          // Get request details for mod_name/mc_version
+          const reqData = await apiFetch(`download_requests?id=eq.${req_id}&select=mod_name,mc_version`, supabaseUrl, serviceKey);
+          const reqInfo = Array.isArray(reqData) ? reqData[0] : null;
+          // Create access key (not VIP promo)
+          if (reqInfo) {
+            await apiFetch("access_keys", supabaseUrl, serviceKey, {
+              method: "POST",
+              body: JSON.stringify({
+                code,
+                mod_name: reqInfo.mod_name,
+                mc_version: reqInfo.mc_version,
+                duration_hours: hours || 0,
+                created_by: caller.id,
+              }),
+            });
+          }
           await apiFetch(`download_requests?id=eq.${req_id}`, supabaseUrl, serviceKey, {
             method: "PATCH",
             body: JSON.stringify({
