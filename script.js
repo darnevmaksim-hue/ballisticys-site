@@ -551,26 +551,13 @@ document.addEventListener('click', (e) => {
   }
 });
 
-function toggleVipCards(show) {
-  const hint = document.querySelector('.vip-hint');
-  if (hint) hint.textContent = show ? 'Версии для 1.21.1 доступны только для VIP и Админов' : 'Версии для 1.21.1 доступны только для VIP и Админов';
-  var sel = document.querySelector('.mc-global-select');
-  if (!show && sel && sel.value === '1.21.1') {
-    sel.value = '1.20.1';
-    changeGlobalMc(sel);
-  }
-}
+function toggleVipCards() {}
 
 function applyCurrentFilter() {
   const active = document.querySelector('.filter.active');
   if (!active) return;
   const filter = active.dataset.filter;
-  var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
   document.querySelectorAll('.mod-card').forEach(function(card) {
-    if (card.dataset.vip === 'true' && !isVipUser) {
-      card.style.display = 'none';
-      return;
-    }
     var visibleData = card.querySelector('.mc-data:not([style*="none"])') || card.querySelector('ul:not(.mc-data)');
     var hasVisible = !!visibleData;
     if (hasVisible && filter !== 'all' && card.dataset.core !== filter) hasVisible = false;
