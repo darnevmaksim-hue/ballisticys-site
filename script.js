@@ -619,7 +619,7 @@ function updateUI() {
   if (dash) dash.classList.toggle('hidden', !isVip);
   // Theme selector
   var themeSel = document.getElementById('theme-selector');
-  if (themeSel) themeSel.classList.toggle('hidden', !isVip && currentUser?.role !== 'admin');
+  if (themeSel) themeSel.classList.remove('hidden');
   syncDownloadGates();
   var sel = document.querySelector('.mc-global-select');
   if (sel) changeGlobalMc(sel);
@@ -1185,7 +1185,7 @@ var THEME_KEY = 'ballisticys_theme';
   var isVipActive = isVip(currentUser);
   // Apply saved theme
   var savedTheme = localStorage.getItem(THEME_KEY) || '';
-  if ((isVipActive || currentUser?.role === 'admin') && savedTheme) {
+  if (savedTheme) {
     body.classList.add('theme-' + savedTheme);
   }
 
@@ -1289,7 +1289,6 @@ var THEME_KEY = 'ballisticys_theme';
   })();
 
   window.setTheme = function(theme) {
-    if (!isVip(currentUser) && currentUser?.role !== 'admin') return;
     body.className = body.className.replace(/theme-\S+/g, '').trim();
     if (theme) {
       body.classList.add('theme-' + theme);
