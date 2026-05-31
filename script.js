@@ -44,30 +44,46 @@ async function downloadMod(modName, mcVersion, target) {
     if (target) { target.disabled = false; target.textContent = 'Не найдено'; }
     return;
   }
-  // Try authorized download via edge function
   var token = getSessionToken();
-  if (token) {
+  // Check if this file is VIP-only
+  var isVipOnly = false;
+  if (target && target.dataset && target.dataset.vip === 'true') isVipOnly = true;
+  else {
+    var sel = 'button.mc-dl[data-mod="' + modName.replace(/"/g,'\\"') + '"][data-mc="' + mcVersion + '"]:not([data-vip])';
+    var freeBtn = document.querySelector(sel);
+    if (!freeBtn) isVipOnly = true;
+  }
+  if (isVipOnly) {
+    if (!token) {
+      if (target) { target.disabled = false; target.textContent = 'Войдите в аккаунт'; }
+      return;
+    }
     try {
       var edgeUrl = EDGE_FN + '?mod=' + encodeURIComponent(modName) + '&mc=' + encodeURIComponent(mcVersion);
       var resp = await fetch(edgeUrl, {
         headers: { Authorization: 'Bearer ' + token }
       });
-      if (resp.ok) {
-        var blob = await resp.blob();
-        var blobUrl = URL.createObjectURL(blob);
-        var a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = file;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(blobUrl);
-        if (target) { target.disabled = false; target.textContent = 'Скачано'; }
+      if (!resp.ok) {
+        if (target) { target.disabled = false; target.textContent = 'Нет доступа'; }
         return;
       }
-    } catch (_) {}
+      var blob = await resp.blob();
+      var blobUrl = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = file;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      if (target) { target.disabled = false; target.textContent = 'Скачано'; }
+      return;
+    } catch (_) {
+      if (target) { target.disabled = false; target.textContent = 'Ошибка'; }
+      return;
+    }
   }
-  // Fallback: direct GitHub download (public files or fallback)
+  // Free files: direct download
   var a = document.createElement('a');
   a.href = DOWNLOAD_BASE + '/' + encodeURIComponent(file);
   a.download = file;
