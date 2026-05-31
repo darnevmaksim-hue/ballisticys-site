@@ -960,3 +960,17 @@ body.modal-open {
   .stage-card .num { font-size: 1.8rem; }
   .btn { padding: 0.6rem 1.2rem; font-size: 0.85rem; }
 }
+
+#request-response-modal .modal-card {
+  text-align: center;
+  max-width: 400px;
+}
+
+#request-result-approved, #request-result-denied {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

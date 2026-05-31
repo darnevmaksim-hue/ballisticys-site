@@ -163,13 +163,14 @@ Deno.serve(async (req) => {
         }
 
         case "deny_request": {
-          const { req_id } = body;
+          const { req_id, reason } = body;
           await apiFetch(`download_requests?id=eq.${req_id}`, supabaseUrl, serviceKey, {
             method: "PATCH",
             body: JSON.stringify({
               status: "denied",
               reviewed_by: caller.id,
               reviewed_at: new Date().toISOString(),
+              deny_reason: reason || null,
             }),
           });
           return jsonResponse({ success: true }, 200);

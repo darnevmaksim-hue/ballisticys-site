@@ -558,6 +558,76 @@
     </section>
   </div>
 
+  <!-- МОДАЛКА ОТВЕТА НА ЗАПРОС (шаг 1: уведомление) -->
+  <div id="request-response-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="request-response-backdrop"></div>
+    <section class="modal-card">
+      <h2 id="response-title">Ваш запрос обработан</h2>
+      <p id="response-text" style="margin:1rem 0;color:var(--text-dim)">Нажмите «Далее», чтобы увидеть результат.</p>
+      <div class="actions">
+        <button id="response-next-btn" class="btn primary" type="button">Далее</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- МОДАЛКА РЕЗУЛЬТАТА ЗАПРОСА (шаг 2) -->
+  <div id="request-result-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="request-result-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-request-result" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <div id="request-result-approved" class="hidden">
+        <h2 style="color:#4ade80">✓ Доступ разрешён</h2>
+        <p style="margin:0.5rem 0;color:var(--text-dim)">Вы можете скачать мод и активировать VIP-промокод.</p>
+        <div style="margin:1rem 0;padding:1rem;background:var(--bg-color);border-radius:10px;border:1px solid var(--panel-border)">
+          <div class="vip-mc-row">
+            <label>Версия для скачивания:</label>
+            <select id="result-dl-version" class="vip-mc-select" style="padding:0.4rem">
+              <option value="1.21.1">1.21.1 (VIP)</option>
+              <option value="1.20.1">1.20.1</option>
+            </select>
+          </div>
+          <button id="result-dl-btn" class="btn primary" style="margin-top:0.5rem;width:100%" type="button">Скачать</button>
+        </div>
+        <div id="result-promo-box" style="margin:1rem 0;padding:1rem;background:var(--bg-color);border-radius:10px;border:1px solid var(--panel-border)">
+          <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:0.5rem">Промокод для активации VIP (одноразовый):</p>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <span id="result-promo-code" style="font-size:1.2rem;font-weight:700;color:#4ade80;font-family:monospace;letter-spacing:0.1em;flex:1">—</span>
+            <button id="result-copy-promo-btn" class="btn primary" style="padding:0.4rem 1rem" type="button">Копировать</button>
+          </div>
+          <p style="font-size:0.8rem;color:var(--text-dim);margin-top:0.3rem">Действует <span id="result-promo-dur">24</span>ч</p>
+        </div>
+      </div>
+      <div id="request-result-denied" class="hidden">
+        <h2 style="color:#ef4444">✕ Запрос отклонён</h2>
+        <p style="margin:0.5rem 0;color:var(--text-dim)">Причина отказа:</p>
+        <div id="result-deny-reason" style="padding:0.8rem;background:var(--bg-color);border-radius:8px;border:1px solid #ef444444;color:var(--text-main);margin-bottom:1rem"></div>
+        <p style="font-size:0.85rem;color:var(--text-dim)">Вы можете подать заявку снова через 30 минут.</p>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem">
+          <button id="result-reapply-btn" class="btn primary" style="flex:1" type="button">Подать заново</button>
+          <button id="result-appeal-btn" class="btn ghost" style="flex:1" type="button">Оспорить</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- МОДАЛКА АПЕЛЛЯЦИИ -->
+  <div id="request-appeal-modal" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="request-appeal-backdrop"></div>
+    <section class="modal-card">
+      <button id="close-request-appeal" class="modal-close" type="button" aria-label="Закрыть">×</button>
+      <h2>Оспорить отказ</h2>
+      <p style="color:var(--text-dim);margin-bottom:0.5rem">Опишите, почему вам срочно нужен доступ:</p>
+      <div class="auth-box">
+        <textarea id="appeal-desc" class="auth-input" rows="4" placeholder="Опишите ситуацию..."></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem">
+        <button id="appeal-submit-btn" class="btn primary" style="flex:1" type="button">Отправить</button>
+        <button id="appeal-cancel-btn" class="btn ghost" type="button">Отмена</button>
+      </div>
+      <p id="appeal-status" class="auth-status">Статус: ожидаем.</p>
+    </section>
+  </div>
+
   <script src="auth-config.js"></script>
   <script src="script.js?v=15"></script>
 </body>

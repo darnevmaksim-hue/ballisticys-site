@@ -230,7 +230,8 @@ function renderRequestsFinal(data, list, durHtml, emailMap) {
         '<button class="req-btn deny" data-req-id="' + r.id + '" data-action="deny">❌</button>' +
         '</div></div>';
     } else if (r.status === 'denied') {
-      actions = '<span class="request-status denied">Отказано</span>';
+      var denyInfo = r.deny_reason ? '<br><small style="color:#ff7b72">Причина отказа: <em>' + escapeHtml(r.deny_reason) + '</em></small>' : '';
+      actions = '<span class="request-status denied">Отказано</span>' + denyInfo;
     } else {
       actions = '<span class="request-status approved">Одобрено</span>';
     }
@@ -252,7 +253,12 @@ function renderRequestsFinal(data, list, durHtml, emailMap) {
     });
   });
   list.querySelectorAll('.req-btn.deny').forEach(function(btn) {
-    btn.addEventListener('click', function() { denyRequest(btn.dataset.reqId); });
+    btn.addEventListener('click', function() {
+      var reason = prompt('Укажите причину отказа (обязательно):');
+      if (reason === null) return;
+      if (!reason || reason.trim().length < 2) { reason = 'Причина не указана'; }
+      denyRequest(btn.dataset.reqId, reason.trim());
+    });
   });
 }
 
@@ -278,6 +284,7 @@ async function requestDownload(modName, mcVersion, description, btnEl) {
       return;
     }
     await loadRequestStatus();
+    checkForRequestResponses();
     updateRequestAreas();
   } catch (_) {
     btnEl.textContent = 'Ошибка сети';
@@ -985,15 +992,15 @@ async function approveRequest(reqId, durHours) {
   loadRequests();
 }
 
-async function denyRequest(reqId) {
+async function denyRequest(reqId, reason) {
   var statusEl = document.getElementById('admin-status');
   try {
-    await callAdminAPI('deny_request', { req_id: reqId });
+    await callAdminAPI('deny_request', { req_id: reqId, reason: reason || null });
     if (statusEl) { statusEl.textContent = 'Запрос отклонён'; statusEl.style.color = '#ff7b72'; }
   } catch (e) {
     if (!sb) { if (statusEl) statusEl.textContent = 'Ошибка: ' + e.message; return; }
     try {
-      var { error } = await sb.from('download_requests').update({ status: 'denied', reviewed_by: currentUser?.id, reviewed_at: new Date().toISOString() }).eq('id', reqId);
+      var { error } = await sb.from('download_requests').update({ status: 'denied', reviewed_by: currentUser?.id, reviewed_at: new Date().toISOString(), deny_reason: reason || null }).eq('id', reqId);
       if (error) { if (statusEl) { statusEl.textContent = 'Ошибка: ' + error.message; statusEl.style.color = '#ff7b72'; } return; }
     } catch (_) { if (statusEl) statusEl.textContent = 'Ошибка сети'; }
   }
@@ -1476,6 +1483,7 @@ async function loadSession() {
         .limit(1), 15000);
       currentUser.vipUntil = subs?.length ? subs[0].end_time : null;
       await loadRequestStatus().catch(function() {});
+      checkForRequestResponses();
     } catch (_) {
       // Если сервер недоступен — используем кеш
       var cached = null;
@@ -1488,6 +1496,246 @@ async function loadSession() {
     currentUser = null;
   }
 }
+
+// === МОДАЛЬНАЯ СИСТЕМА ОТВЕТОВ НА ЗАПРОСЫ ===
+
+var SEEN_REQUESTS_KEY = 'ballisticys_seen_requests';
+
+function markRequestSeen(reqId) {
+  try {
+    var seen = JSON.parse(localStorage.getItem(SEEN_REQUESTS_KEY) || '{}');
+    seen[reqId] = Date.now();
+    localStorage.setItem(SEEN_REQUESTS_KEY, JSON.stringify(seen));
+  } catch (_) {}
+}
+
+function isRequestNew(req) {
+  try {
+    var seen = JSON.parse(localStorage.getItem(SEEN_REQUESTS_KEY) || '{}');
+    if (seen[req.id]) return false;
+    var reviewedAt = Date.parse(req.reviewed_at);
+    if (!reviewedAt) return false;
+    return Date.now() - reviewedAt < 86400000; // в течение 24ч
+  } catch (_) { return false; }
+}
+
+function checkForRequestResponses() {
+  if (!requestCache || !currentUser || !sb) return;
+  var pendingResponse = null;
+  for (var i = 0; i < requestCache.length; i++) {
+    var r = requestCache[i];
+    if ((r.status === 'approved' || r.status === 'denied') && isRequestNew(r)) {
+      pendingResponse = r;
+      break;
+    }
+  }
+  if (!pendingResponse) return;
+  markRequestSeen(pendingResponse.id);
+  currentResponseReq = pendingResponse;
+  showResponseNotification(pendingResponse);
+}
+
+var currentResponseReq = null;
+
+function showResponseNotification(req) {
+  var modal = document.getElementById('request-response-modal');
+  var title = document.getElementById('response-title');
+  var text = document.getElementById('response-text');
+  if (req.status === 'approved') {
+    title.textContent = '✓ Ваш запрос обработан';
+    text.textContent = 'Администратор одобрил ваш запрос. Нажмите «Далее», чтобы скачать мод.';
+  } else {
+    title.textContent = '✕ Вам пришёл ответ';
+    text.textContent = 'Администратор рассмотрел ваш запрос. Нажмите «Продолжить», чтобы узнать подробности.';
+  }
+  var nextBtn = document.getElementById('response-next-btn');
+  nextBtn.textContent = req.status === 'approved' ? 'Далее' : 'Продолжить';
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+}
+
+function showRequestResult(req) {
+  document.getElementById('request-response-modal').classList.add('hidden');
+  var modal = document.getElementById('request-result-modal');
+  var approvedSection = document.getElementById('request-result-approved');
+  var deniedSection = document.getElementById('request-result-denied');
+  if (req.status === 'approved') {
+    approvedSection.classList.remove('hidden');
+    deniedSection.classList.add('hidden');
+    document.getElementById('result-promo-code').textContent = req.approved_promo_code || '—';
+    document.getElementById('result-promo-dur').textContent = req.approved_promo_duration || 24;
+  } else {
+    approvedSection.classList.add('hidden');
+    deniedSection.classList.remove('hidden');
+    var reasonEl = document.getElementById('result-deny-reason');
+    reasonEl.textContent = req.deny_reason || 'Причина не указана';
+    currentResponseReq = req;
+  }
+  modal.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+}
+
+function hideRequestResult() {
+  document.getElementById('request-result-modal').classList.add('hidden');
+  document.body.classList.remove('modal-open');
+  currentResponseReq = null;
+}
+
+function downloadApprovedVersion() {
+  if (!currentResponseReq) return;
+  var sel = document.getElementById('result-dl-version');
+  var mc = sel ? sel.value : '1.21.1';
+  downloadMod(currentResponseReq.mod_name, mc, null);
+}
+
+// === Event handlers for result modals ===
+document.addEventListener('DOMContentLoaded', function() {
+  // Response notification → next
+  var nextBtn = document.getElementById('response-next-btn');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() {
+      if (currentResponseReq) showRequestResult(currentResponseReq);
+    });
+  }
+
+  // Result modal close
+  var closeResult = document.getElementById('close-request-result');
+  if (closeResult) {
+    closeResult.addEventListener('click', hideRequestResult);
+  }
+  var resultBackdrop = document.getElementById('request-result-backdrop');
+  if (resultBackdrop) {
+    resultBackdrop.addEventListener('click', hideRequestResult);
+  }
+
+  // Download button in approved result
+  var dlBtn = document.getElementById('result-dl-btn');
+  if (dlBtn) {
+    dlBtn.addEventListener('click', downloadApprovedVersion);
+  }
+
+  // Copy promo code
+  var copyBtn = document.getElementById('result-copy-promo-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function() {
+      var code = document.getElementById('result-promo-code');
+      if (!code) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(code.textContent);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = code.textContent;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      copyBtn.textContent = 'Скопировано!';
+      setTimeout(function() { copyBtn.textContent = 'Копировать'; }, 2000);
+    });
+  }
+
+  // Reapply button
+  var reapplyBtn = document.getElementById('result-reapply-btn');
+  if (reapplyBtn) {
+    reapplyBtn.addEventListener('click', function() {
+      hideRequestResult();
+      if (currentResponseReq) {
+        // Создать новый запрос для того же мода
+        var mc = currentResponseReq.mc_version;
+        var modName = currentResponseReq.mod_name;
+        // Показать уведомление
+        var selMc = document.querySelector('.mc-global-select');
+        if (selMc) selMc.value = mc;
+        changeGlobalMc(selMc);
+        // Вызвать событие change
+        if (selMc) {
+          var evt = new Event('change');
+          selMc.dispatchEvent(evt);
+        }
+      }
+    });
+  }
+
+  // Appeal button
+  var appealBtn = document.getElementById('result-appeal-btn');
+  if (appealBtn) {
+    appealBtn.addEventListener('click', function() {
+      hideRequestResult();
+      document.getElementById('request-appeal-modal').classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    });
+  }
+
+  // Appeal modal
+  var closeAppeal = document.getElementById('close-request-appeal');
+  if (closeAppeal) {
+    closeAppeal.addEventListener('click', function() {
+      document.getElementById('request-appeal-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
+  }
+  var appealBackdrop = document.getElementById('request-appeal-backdrop');
+  if (appealBackdrop) {
+    appealBackdrop.addEventListener('click', function() {
+      document.getElementById('request-appeal-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
+  }
+  var appealCancel = document.getElementById('appeal-cancel-btn');
+  if (appealCancel) {
+    appealCancel.addEventListener('click', function() {
+      document.getElementById('request-appeal-modal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+    });
+  }
+  var appealSubmit = document.getElementById('appeal-submit-btn');
+  if (appealSubmit) {
+    appealSubmit.addEventListener('click', function() {
+      var desc = document.getElementById('appeal-desc');
+      var statusEl = document.getElementById('appeal-status');
+      if (!desc || !desc.value.trim()) {
+        if (statusEl) { statusEl.textContent = 'Опишите ситуацию'; statusEl.style.color = '#ff7b72'; }
+        return;
+      }
+      if (!currentResponseReq || !sb || !currentUser) {
+        if (statusEl) { statusEl.textContent = 'Ошибка: войдите в аккаунт'; statusEl.style.color = '#ff7b72'; }
+        return;
+      }
+      appealSubmit.disabled = true;
+      appealSubmit.textContent = '⏳ Отправка...';
+      sb.from('download_requests').insert({
+        user_id: currentUser.id,
+        mod_name: currentResponseReq.mod_name,
+        mc_version: currentResponseReq.mc_version,
+        status: 'pending',
+        description: '[АПЕЛЛЯЦИЯ] ' + desc.value.trim()
+      }).then(function(result) {
+        if (result.error) {
+          if (statusEl) { statusEl.textContent = 'Ошибка: ' + result.error.message; statusEl.style.color = '#ff7b72'; }
+          appealSubmit.disabled = false;
+          appealSubmit.textContent = 'Отправить';
+          return;
+        }
+        document.getElementById('request-appeal-modal').classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        if (statusEl) { statusEl.textContent = 'Апелляция отправлена'; statusEl.style.color = '#4ade80'; }
+        loadRequestStatus().then(checkForRequestResponses, function() {});
+        setTimeout(function() {
+          if (statusEl) statusEl.textContent = 'Статус: ожидаем.';
+        }, 3000);
+      });
+    });
+  }
+
+  // Response backdrop click = proceed to result
+  var responseBackdrop = document.getElementById('request-response-backdrop');
+  if (responseBackdrop) {
+    responseBackdrop.addEventListener('click', function() {
+      if (currentResponseReq) showRequestResult(currentResponseReq);
+    });
+  }
+});
 
 // Delegated click handler for download buttons
 document.addEventListener('click', function(e) {
