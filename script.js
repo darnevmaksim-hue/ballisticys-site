@@ -44,6 +44,30 @@ async function downloadMod(modName, mcVersion, target) {
     if (target) { target.disabled = false; target.textContent = 'Не найдено'; }
     return;
   }
+  // Try authorized download via edge function
+  var token = getSessionToken();
+  if (token) {
+    try {
+      var edgeUrl = EDGE_FN + '?mod=' + encodeURIComponent(modName) + '&mc=' + encodeURIComponent(mcVersion);
+      var resp = await fetch(edgeUrl, {
+        headers: { Authorization: 'Bearer ' + token }
+      });
+      if (resp.ok) {
+        var blob = await resp.blob();
+        var blobUrl = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = file;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+        if (target) { target.disabled = false; target.textContent = 'Скачано'; }
+        return;
+      }
+    } catch (_) {}
+  }
+  // Fallback: direct GitHub download (public files or fallback)
   var a = document.createElement('a');
   a.href = DOWNLOAD_BASE + '/' + encodeURIComponent(file);
   a.download = file;
@@ -172,6 +196,69 @@ function updateRequestAreas() {
       s.textContent = 'Отказано';
       area.appendChild(s);
     }
+  });
+}
+
+function renderRequestsHTML(data, list, durHtml) {
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-dim)">Нет запросов</p>';
+    return;
+  }
+  var userIds = [...new Set(data.map(function(r) { return r.user_id; }))];
+  var emailMap = {};
+  // Пытаемся получить email'ы через raceAdminLoad или прямой запрос
+  (async function() {
+    try {
+      var profiles = await raceAdminLoad('users', sb ? sb.from('profiles').select('id, email').in('id', userIds) : null);
+      if (Array.isArray(profiles)) profiles.forEach(function(p) { emailMap[p.id] = p.email || 'unknown'; });
+    } catch (_) {}
+    // Для тех, кого не нашли
+    data.forEach(function(r) { if (!emailMap[r.user_id]) emailMap[r.user_id] = 'unknown'; });
+    renderRequestsFinal(data, list, durHtml, emailMap);
+  })();
+}
+
+function renderRequestsFinal(data, list, durHtml, emailMap) {
+  list.innerHTML = data.map(function(r) {
+    var email = emailMap[r.user_id] || 'unknown';
+    var time = new Date(r.created_at).toLocaleString('ru-RU');
+    var descHtml = r.description ? '<br><small style="color:var(--text-dim)">Причина: <em>' + escapeHtml(r.description) + '</em></small>' : '';
+    var promoInfo = '';
+    if (r.status === 'approved' && r.approved_promo_code) {
+      promoInfo = '<br><small style="color:#4ade80">Промокод: <strong>' + escapeHtml(r.approved_promo_code) + '</strong> (' + (r.approved_promo_duration || 24) + 'ч)</small>';
+    }
+    var actions = '';
+    if (r.status === 'pending') {
+      actions = '<div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end">' +
+        '<select class="promo-dur-select" data-req-id="' + r.id + '" style="padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);font-size:0.75rem">' + durHtml + '</select>' +
+        '<div class="req-actions">' +
+        '<button class="req-btn approve" data-req-id="' + r.id + '" data-action="approve">✅</button>' +
+        '<button class="req-btn deny" data-req-id="' + r.id + '" data-action="deny">❌</button>' +
+        '</div></div>';
+    } else if (r.status === 'denied') {
+      actions = '<span class="request-status denied">Отказано</span>';
+    } else {
+      actions = '<span class="request-status approved">Одобрено</span>';
+    }
+    return '<div class="request-item">' +
+      '<div class="req-info">' +
+      '<strong>' + escapeHtml(email) + '</strong><br>' +
+      escapeHtml(r.mod_name) + ' (' + r.mc_version + ')<br>' +
+      '<small style="color:var(--text-dim)">' + time + '</small>' +
+      descHtml + promoInfo +
+      '</div>' + actions + '</div>';
+  }).join('');
+  // Привязываем обработчики кнопок
+  list.querySelectorAll('.req-btn.approve').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var reqId = btn.dataset.reqId;
+      var durSelect = document.querySelector('.promo-dur-select[data-req-id="' + reqId + '"]');
+      var hours = parseInt(durSelect ? durSelect.value : 24);
+      approveRequest(reqId, hours);
+    });
+  });
+  list.querySelectorAll('.req-btn.deny').forEach(function(btn) {
+    btn.addEventListener('click', function() { denyRequest(btn.dataset.reqId); });
   });
 }
 
@@ -492,6 +579,7 @@ function syncDownloadGates() {
 }
 
 function updateUI() {
+  var isVip = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
   if (currentUser) {
     openAuthBtn?.classList.add('hidden');
     profileRoot?.classList.remove('hidden');
@@ -499,7 +587,6 @@ function updateUI() {
     profileRole.textContent = currentUser.role || 'user';
     profileInitial.textContent = currentUser.email[0].toUpperCase();
     adminPanelLink?.classList.toggle('hidden', currentUser.role !== 'admin');
-    const isVip = currentUser.role === 'vip' || currentUser.role === 'admin';
     toggleVipCards(isVip);
     applyCurrentFilter();
     loadRequestStatus().then(updateRequestAreas);
@@ -507,6 +594,15 @@ function updateUI() {
     openAuthBtn?.classList.remove('hidden');
     profileRoot?.classList.add('hidden');
     toggleVipCards(false);
+  }
+  // VIP dashboard
+  var dash = document.getElementById('vip-dashboard');
+  if (dash) dash.classList.toggle('hidden', !isVip);
+  // VIP theme button
+  var themeBtn = document.getElementById('vip-theme-btn');
+  if (themeBtn) {
+    themeBtn.classList.toggle('hidden', !isVip);
+    if (isVip) themeBtn.onclick = window.toggleVipTheme || null;
   }
   syncDownloadGates();
   var sel = document.querySelector('.mc-global-select');
@@ -610,112 +706,169 @@ document.querySelectorAll('.admin-tab').forEach(tab => {
   });
 });
 
+async function callAdminAPI(type, body) {
+  var token = getSessionToken();
+  if (!token) throw new Error('No session token');
+  var method = body ? 'POST' : 'GET';
+  var url = AUTH_CONFIG.url + '/functions/v1/admin-data?type=' + encodeURIComponent(type);
+  var opts = { method: method, headers: { Authorization: 'Bearer ' + token } };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  var resp = await fetch(url, opts);
+  var result = await resp.json();
+  if (result.error) throw new Error(result.error);
+  return result.data;
+}
+
+function renderPromoCodes(data, list) {
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-dim)">Нет промокодов</p>';
+    return;
+  }
+  list.innerHTML = data.map(function(c) {
+    var used = c.used_by ? '(использован)' : '';
+    return '<div class="promo-item ' + (c.is_used ? 'used' : '') + '">' +
+      '<code>' + c.code + '</code>' +
+      '<span>' + (c.duration_hours ? c.duration_hours + 'ч' : '∞') + ' ' + used + '</span>' +
+      '</div>';
+  }).join('');
+}
+
 async function loadAdminData() {
-  await withTimeout(Promise.all([loadPromoCodes(), loadUsers(), loadVIPList(), loadRequests()]), 30000);
+  var status = document.getElementById('admin-status');
+  try {
+    await withTimeout(Promise.all([loadPromoCodes(), loadUsers(), loadVIPList(), loadRequests()]), 30000);
+    if (status) { status.textContent = 'Статус: данные загружены.'; status.style.color = '#4ade80'; }
+  } catch (_) {
+    if (status) { status.textContent = 'Статус: ошибка загрузки данных.'; status.style.color = '#ff7b72'; }
+  }
+}
+
+async function raceAdminLoad(type, sbPromise) {
+  var edgePromise = callAdminAPI(type).then(function(d) {
+    if (!d || (Array.isArray(d) && d.length === 0)) throw new Error('empty');
+    return d;
+  });
+  var promises = [withTimeout(edgePromise, 5000)];
+  if (sbPromise) {
+    promises.push(
+      withTimeout(sbPromise, 12000).then(function(r) {
+        if (r.error) throw new Error(r.error.message || 'DB error');
+        return r.data;
+      })
+    );
+  }
+  var results = await Promise.allSettled(promises);
+  for (var r of results) {
+    if (r.status === 'fulfilled' && r.value) return r.value;
+  }
+  // All failed — показываем первую ошибку
+  var first = results.find(function(r) { return r.status === 'rejected'; });
+  throw first?.reason || new Error('Нет данных');
 }
 
 async function loadPromoCodes() {
-  const list = document.getElementById('promo-list');
-  if (!list || !sb) return;
+  var list = document.getElementById('promo-list');
+  if (!list) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
   try {
-    const { data, error } = await withTimeout(sb.from('promo_codes').select('*').order('created_at', { ascending: false }), 15000);
-    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
-    if (!data || data.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-dim)">Нет промокодов</p>';
-      return;
-    }
-    list.innerHTML = data.map(c => {
-      const used = c.used_by ? '(использован)' : '';
-      return '<div class="promo-item ' + (c.is_used ? 'used' : '') + '">' +
-        '<code>' + c.code + '</code>' +
-        '<span>' + (c.duration_hours ? c.duration_hours + 'ч' : '∞') + ' ' + used + '</span>' +
-        '</div>';
-    }).join('');
-  } catch (_) {
-    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+    var data = await raceAdminLoad('promo', sb ? sb.from('promo_codes').select('*').order('created_at', { ascending: false }) : null);
+    renderPromoCodes(data, list);
+  } catch (e) {
+    list.innerHTML = '<p style="color:#ff7b72">' + (e.message || 'Ошибка') + '</p>';
   }
 }
 
 document.getElementById('promo-generate-btn')?.addEventListener('click', async () => {
   const duration = parseInt(document.getElementById('promo-duration')?.value || '0');
-  if (!sb) return;
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = '';
-  for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
-  const { error } = await sb.from('promo_codes').insert({
-    code,
-    duration_hours: duration,
-    created_by: currentSession?.user?.id || null
-  });
-  if (error) {
-    document.getElementById('promo-result').innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>';
-    return;
-  }
   const result = document.getElementById('promo-result');
-  if (result) {
-    result.innerHTML = '<div class="promo-code-display">' +
-      '<span class="promo-code">' + code + '</span>' +
-      '<button class="btn primary" onclick="navigator.clipboard.writeText(\'' + code + '\')">Копировать</button>' +
-      '</div>';
+  try {
+    var res = await callAdminAPI('create_promo', { duration_hours: duration });
+    if (result) {
+      result.innerHTML = '<div class="promo-code-display">' +
+        '<span class="promo-code">' + res.code + '</span>' +
+        '<button class="btn primary" onclick="navigator.clipboard.writeText(\'' + res.code + '\')">Копировать</button>' +
+        '</div>';
+    }
+  } catch (e) {
+    if (!sb) { if (result) result.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + e.message + '</p>'; return; }
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    const { error } = await sb.from('promo_codes').insert({ code, duration_hours: duration, created_by: currentSession?.user?.id || null });
+    if (error) { if (result) result.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+    if (result) {
+      result.innerHTML = '<div class="promo-code-display">' +
+        '<span class="promo-code">' + code + '</span>' +
+        '<button class="btn primary" onclick="navigator.clipboard.writeText(\'' + code + '\')">Копировать</button>' +
+        '</div>';
+    }
   }
   loadPromoCodes();
 });
 
+function renderUsersList(data, list) {
+  if (!data || data.length === 0) {
+    list.innerHTML = '<p style="color:var(--text-dim)">Нет пользователей</p>';
+    return;
+  }
+  var durOpts = [
+    [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
+    [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
+  ];
+  var durHtml = durOpts.map(function(d) {
+    return '<option value="' + d[0] + '">' + d[1] + '</option>';
+  }).join('');
+  list.innerHTML = data.map(function(u) {
+    var roleHtml = u.role === 'admin'
+      ? '<span class="role-badge admin">admin</span>'
+      : u.role === 'vip'
+        ? '<span class="role-badge vip">vip</span>'
+        : '<span class="role-badge user">user</span>';
+    return '<div class="user-item">' +
+      '<span>' + (u.email || u.id) + '</span> ' + roleHtml + ' ' +
+      '<select class="duration-select">' + durHtml + '</select>' +
+      '<select onchange="changeUserRole(\'' + u.id + '\', this.value, this.previousElementSibling.value)" class="role-select">' +
+      '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
+      '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
+      '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
+      '</select>' +
+      '<button class="req-btn deny" onclick="deleteUser(\'' + u.id + '\', \'' + escapeHtmlAttr(u.email || '') + '\')" style="font-size:0.7rem;padding:0.3rem 0.6rem">Удалить</button>' +
+      '</div>';
+  }).join('');
+}
+
 async function loadUsers() {
-  const list = document.getElementById('users-list');
-  if (!list || !sb) return;
+  var list = document.getElementById('users-list');
+  if (!list) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
   try {
-    const { data, error } = await withTimeout(sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(50), 15000);
-    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
-    if (!data || data.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-dim)">Нет пользователей</p>';
-      return;
-    }
-    list.innerHTML = data.map(function(u) {
-      const roleHtml = u.role === 'admin'
-        ? '<span class="role-badge admin">admin</span>'
-        : u.role === 'vip'
-          ? '<span class="role-badge vip">vip</span>'
-          : '<span class="role-badge user">user</span>';
-      const durOpts = [
-        [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
-        [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
-      ];
-      const durHtml = durOpts.map(function(d) {
-        return '<option value="' + d[0] + '">' + d[1] + '</option>';
-      }).join('');
-      return '<div class="user-item">' +
-        '<span>' + (u.email || u.id) + '</span> ' + roleHtml + ' ' +
-        '<select class="duration-select">' + durHtml + '</select>' +
-        '<select onchange="changeUserRole(\'' + u.id + '\', this.value, this.previousElementSibling.value)" class="role-select">' +
-        '<option value="user"' + (u.role === 'user' ? ' selected' : '') + '>user</option>' +
-        '<option value="vip"' + (u.role === 'vip' ? ' selected' : '') + '>vip</option>' +
-        '<option value="admin"' + (u.role === 'admin' ? ' selected' : '') + '>admin</option>' +
-        '</select>' +
-        '<button class="req-btn deny" onclick="deleteUser(\'' + u.id + '\', \'' + escapeHtmlAttr(u.email || '') + '\')" style="font-size:0.7rem;padding:0.3rem 0.6rem">Удалить</button>' +
-        '</div>';
-    }).join('');
-  } catch (_) {
-    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+    var data = await raceAdminLoad('users', sb ? sb.from('profiles').select('*').order('created_at', { ascending: false }).limit(50) : null);
+    renderUsersList(data, list);
+  } catch (e) {
+    list.innerHTML = '<p style="color:#ff7b72">' + (e.message || 'Ошибка') + '</p>';
   }
 }
 
 window.changeUserRole = async function(userId, newRole, durHours) {
-  if (!sb) return;
-  const { error } = await sb.from('profiles').update({ role: newRole }).eq('id', userId);
-  if (error) { console.error('changeUserRole error:', error); return; }
-  if (newRole === 'vip') {
-    const hours = parseInt(durHours) || 720;
-    await sb.from('vip_subscriptions').insert({
-      user_id: userId,
-      start_time: new Date().toISOString(),
-      end_time: hours > 0 ? new Date(Date.now() + hours * 60 * 60 * 1000).toISOString() : '2999-12-31T23:59:59Z',
-      is_active: true
-    });
-  } else if (newRole !== 'vip') {
-    await sb.from('vip_subscriptions').update({ is_active: false }).eq('user_id', userId).eq('is_active', true);
+  try {
+    await callAdminAPI('change_role', { user_id: userId, role: newRole, dur_hours: parseInt(durHours) || 720 });
+  } catch (e) {
+    if (!sb) { document.getElementById('admin-status').textContent = 'Ошибка: ' + e.message; return; }
+    var { error } = await sb.from('profiles').update({ role: newRole }).eq('id', userId);
+    if (error) { console.error('changeUserRole error:', error); return; }
+    if (newRole === 'vip') {
+      var hours = parseInt(durHours) || 720;
+      await sb.from('vip_subscriptions').insert({
+        user_id: userId, start_time: new Date().toISOString(),
+        end_time: hours > 0 ? new Date(Date.now() + hours * 3600000).toISOString() : '2999-12-31T23:59:59Z',
+        is_active: true
+      });
+    } else if (newRole !== 'vip') {
+      await sb.from('vip_subscriptions').update({ is_active: false }).eq('user_id', userId).eq('is_active', true);
+    }
   }
   loadUsers();
   if (currentSession?.user?.id === userId) {
@@ -725,107 +878,56 @@ window.changeUserRole = async function(userId, newRole, durHours) {
 };
 
 async function loadVIPList() {
-  const list = document.getElementById('vip-list');
-  if (!list || !sb) return;
+  var list = document.getElementById('vip-list');
+  if (!list) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
   try {
-    const { data, error } = await withTimeout(sb.from('profiles').select('id, email, role').or('role.eq.admin,role.eq.vip').limit(50), 15000);
-    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
+    var result = await raceAdminLoad('vip', sb ? sb.from('profiles').select('id, email, role').or('role.eq.admin,role.eq.vip').limit(50) : null);
+    // raceAdminLoad вернёт либо edge результат {profiles, subs}, либо массив profiles (fallback)
+    var data = result.profiles || result || [];
+    var subs = result.subs || [];
     if (!data || data.length === 0) {
       list.innerHTML = '<p style="color:var(--text-dim)">Нет активных VIP</p>';
       return;
     }
-    const { data: subs } = await withTimeout(sb.from('vip_subscriptions').select('*').eq('is_active', true), 15000);
-    const subMap = {};
-    if (subs) {
-      subs.forEach(s => { subMap[s.user_id] = s; });
+    var subMap = {};
+    if (subs.length) {
+      subs.forEach(function(s) { subMap[s.user_id] = s; });
+    } else if (sb) {
+      // Fallback: если subs пуст, пробуем подгрузить отдельно
+      try {
+        var { data: s2 } = await withTimeout(sb.from('vip_subscriptions').select('*').eq('is_active', true), 8000);
+        if (s2) s2.forEach(function(s) { subMap[s.user_id] = s; });
+      } catch (_) {}
     }
     list.innerHTML = data.map(function(u) {
-      const sub = subMap[u.id];
-      const remaining = sub ? Math.max(0, Math.floor((Date.parse(sub.end_time) - Date.now()) / (1000 * 60 * 60 * 24))) + 'д' : '∞';
+      var sub = subMap[u.id];
+      var remaining = sub ? Math.max(0, Math.floor((Date.parse(sub.end_time) - Date.now()) / (1000 * 60 * 60 * 24))) + 'д' : '∞';
       return '<div class="vip-item">' +
         '<span>' + u.email + '</span>' +
         '<span>' + u.role + '</span>' +
         '<span>Осталось: ' + remaining + '</span>' +
         '</div>';
     }).join('');
-  } catch (_) {
-    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+  } catch (e) {
+    list.innerHTML = '<p style="color:#ff7b72">' + (e.message || 'Ошибка') + '</p>';
   }
 }
 
 async function loadRequests() {
-  const list = document.getElementById('requests-list');
-  if (!list || !sb) return;
+  var list = document.getElementById('requests-list');
+  if (!list) return;
   list.innerHTML = '<p style="color:var(--text-dim)">Загрузка...</p>';
+  var durOpts = [
+    [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
+    [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
+  ];
+  var durHtml = durOpts.map(function(d) { return '<option value="' + d[0] + '">' + d[1] + '</option>'; }).join('');
   try {
-    const { data, error } = await withTimeout(
-      sb.from('download_requests').select('id, user_id, mod_name, mc_version, status, description, approved_promo_code, approved_promo_duration, created_at').order('created_at', { ascending: false }).limit(50),
-      15000
-    );
-    if (error) { list.innerHTML = '<p style="color:#ff7b72">Ошибка: ' + error.message + '</p>'; return; }
-    if (!data || data.length === 0) {
-      list.innerHTML = '<p style="color:var(--text-dim)">Нет запросов</p>';
-      return;
-    }
-    var userIds = [...new Set(data.map(function(r) { return r.user_id; }))];
-    var { data: profiles } = await withTimeout(
-      sb.from('profiles').select('id, email').in('id', userIds), 10000
-    );
-    var emailMap = {};
-    if (profiles) profiles.forEach(function(p) { emailMap[p.id] = p.email || 'unknown'; });
-    var durOpts = [
-      [1, '1ч'],[6, '6ч'],[12, '12ч'],[24, '1д'],[72, '3д'],
-      [168, '7д'],[336, '14д'],[720, '30д'],[2160, '90д'],[0, '∞']
-    ];
-    var durHtml = durOpts.map(function(d) {
-      return '<option value="' + d[0] + '">' + d[1] + '</option>';
-    }).join('');
-    list.innerHTML = data.map(function(r) {
-      var email = emailMap[r.user_id] || 'unknown';
-      var statusClass = r.status === 'pending' ? 'pending' : (r.status === 'approved' ? 'approved' : 'denied');
-      var time = new Date(r.created_at).toLocaleString('ru-RU');
-      var descHtml = r.description ? '<br><small style="color:var(--text-dim)">Причина: <em>' + escapeHtml(r.description) + '</em></small>' : '';
-      var promoInfo = '';
-      if (r.status === 'approved' && r.approved_promo_code) {
-        promoInfo = '<br><small style="color:#4ade80">Промокод: <strong>' + escapeHtml(r.approved_promo_code) + '</strong> (' + (r.approved_promo_duration || 24) + 'ч)</small>';
-      }
-      var actions = '';
-      if (r.status === 'pending') {
-        actions = '<div style="display:flex;flex-direction:column;gap:0.3rem;align-items:flex-end">' +
-          '<select class="promo-dur-select" data-req-id="' + r.id + '" style="padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main);font-size:0.75rem">' + durHtml + '</select>' +
-          '<div class="req-actions">' +
-          '<button class="req-btn approve" data-req-id="' + r.id + '" data-action="approve">✅</button>' +
-          '<button class="req-btn deny" data-req-id="' + r.id + '" data-action="deny">❌</button>' +
-          '</div></div>';
-      } else if (r.status === 'denied') {
-        actions = '<span class="request-status denied">Отказано</span>';
-      } else {
-        actions = '<span class="request-status approved">Одобрено</span>';
-      }
-      return '<div class="request-item">' +
-        '<div class="req-info">' +
-        '<strong>' + escapeHtml(email) + '</strong><br>' +
-        escapeHtml(r.mod_name) + ' (' + r.mc_version + ')<br>' +
-        '<small style="color:var(--text-dim)">' + time + '</small>' +
-        descHtml + promoInfo +
-        '</div>' +
-        actions +
-        '</div>';
-    }).join('');
-    list.querySelectorAll('.req-btn.approve').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var reqId = btn.dataset.reqId;
-        var durSelect = document.querySelector('.promo-dur-select[data-req-id="' + reqId + '"]');
-        var hours = parseInt(durSelect ? durSelect.value : 24);
-        approveRequest(reqId, hours);
-      });
-    });
-    list.querySelectorAll('.req-btn.deny').forEach(function(btn) {
-      btn.addEventListener('click', function() { denyRequest(btn.dataset.reqId); });
-    });
-  } catch (_) {
-    list.innerHTML = '<p style="color:#ff7b72">Таймаут загрузки</p>';
+    var data = await raceAdminLoad('requests', sb ? sb.from('download_requests').select('id, user_id, mod_name, mc_version, status, description, approved_promo_code, approved_promo_duration, created_at').order('created_at', { ascending: false }).limit(50) : null);
+    renderRequestsHTML(data, list, durHtml);
+  } catch (e) {
+    list.innerHTML = '<p style="color:#ff7b72">' + (e.message || 'Ошибка') + '</p>';
   }
 }
 
@@ -868,50 +970,40 @@ window.deleteUser = async function(userId, email) {
 };
 
 async function approveRequest(reqId, durHours) {
-  if (!sb) return;
   durHours = durHours || 24;
-  var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  var code = '';
-  for (var i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  var statusEl = document.getElementById('admin-status');
   try {
-    var { error: promoError } = await sb.from('promo_codes').insert({
-      code: code,
-      duration_hours: durHours,
-      created_by: currentSession?.user?.id || null
-    });
-    if (promoError) {
-      document.getElementById('admin-status').textContent = 'Ошибка создания промокода: ' + promoError.message;
-      return;
-    }
-    var { error } = await sb.from('download_requests').update({
-      status: 'approved',
-      reviewed_by: currentUser?.id,
-      reviewed_at: new Date().toISOString(),
-      approved_promo_code: code,
-      approved_promo_duration: durHours
-    }).eq('id', reqId);
-    if (error) { document.getElementById('admin-status').textContent = 'Ошибка: ' + error.message; return; }
-    document.getElementById('admin-status').textContent = 'Одобрено! Промокод: ' + code + ' (' + durHours + 'ч)';
-    document.getElementById('admin-status').style.color = '#4ade80';
-    loadRequests();
-  } catch (_) {
-    document.getElementById('admin-status').textContent = 'Ошибка сети';
+    var result = await callAdminAPI('approve_request', { req_id: reqId, dur_hours: durHours });
+    if (statusEl) { statusEl.textContent = 'Одобрено! Промокод: ' + result.code + ' (' + result.hours + 'ч)'; statusEl.style.color = '#4ade80'; }
+  } catch (e) {
+    if (!sb) { if (statusEl) statusEl.textContent = 'Ошибка: ' + e.message; return; }
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    var code = '';
+    for (var i = 0; i < 12; i++) code += chars[Math.floor(Math.random() * chars.length)];
+    try {
+      var { error: promoError } = await sb.from('promo_codes').insert({ code, duration_hours: durHours, created_by: currentSession?.user?.id || null });
+      if (promoError) { if (statusEl) { statusEl.textContent = 'Ошибка промокода: ' + promoError.message; statusEl.style.color = '#ff7b72'; } return; }
+      var { error } = await sb.from('download_requests').update({ status: 'approved', reviewed_by: currentUser?.id, reviewed_at: new Date().toISOString(), approved_promo_code: code, approved_promo_duration: durHours }).eq('id', reqId);
+      if (error) { if (statusEl) { statusEl.textContent = 'Ошибка: ' + error.message; statusEl.style.color = '#ff7b72'; } return; }
+      if (statusEl) { statusEl.textContent = 'Одобрено! Промокод: ' + code + ' (' + durHours + 'ч)'; statusEl.style.color = '#4ade80'; }
+    } catch (_) { if (statusEl) statusEl.textContent = 'Ошибка сети'; }
   }
+  loadRequests();
 }
 
 async function denyRequest(reqId) {
-  if (!sb) return;
+  var statusEl = document.getElementById('admin-status');
   try {
-    var { error } = await sb.from('download_requests').update({
-      status: 'denied',
-      reviewed_by: currentUser?.id,
-      reviewed_at: new Date().toISOString()
-    }).eq('id', reqId);
-    if (error) { document.getElementById('admin-status').textContent = 'Ошибка: ' + error.message; return; }
-    loadRequests();
-  } catch (_) {
-    document.getElementById('admin-status').textContent = 'Ошибка сети';
+    await callAdminAPI('deny_request', { req_id: reqId });
+    if (statusEl) { statusEl.textContent = 'Запрос отклонён'; statusEl.style.color = '#ff7b72'; }
+  } catch (e) {
+    if (!sb) { if (statusEl) statusEl.textContent = 'Ошибка: ' + e.message; return; }
+    try {
+      var { error } = await sb.from('download_requests').update({ status: 'denied', reviewed_by: currentUser?.id, reviewed_at: new Date().toISOString() }).eq('id', reqId);
+      if (error) { if (statusEl) { statusEl.textContent = 'Ошибка: ' + error.message; statusEl.style.color = '#ff7b72'; } return; }
+    } catch (_) { if (statusEl) statusEl.textContent = 'Ошибка сети'; }
   }
+  loadRequests();
 }
 
 (function() {
@@ -1175,8 +1267,6 @@ body.vip-theme .guide-grid article h3 { color: var(--cyan); }
 body.vip-theme .guide-grid ol li::marker { color: var(--neon); }
 body.vip-theme .promo-code { background: rgba(0,255,65,0.06); border-color: var(--neon); color: var(--neon); }
 /* Dashboard */
-body.vip-theme .vip-dashboard { display: block; }
-.vip-dashboard { display: none; }
 .dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
 .dash-widget {
   background: rgba(0,10,0,0.7); border: 1px solid rgba(0,255,65,0.2);

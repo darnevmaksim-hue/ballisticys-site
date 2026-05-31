@@ -418,6 +418,12 @@ enabled = true
 verify_jwt = false
 import_map = "./functions/delete-user/deno.json"
 entrypoint = "./functions/delete-user/index.ts"
+
+[functions.admin-data]
+enabled = true
+verify_jwt = false
+import_map = "./functions/admin-data/deno.json"
+entrypoint = "./functions/admin-data/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/download/*.html" ]

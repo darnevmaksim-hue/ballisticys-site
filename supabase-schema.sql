@@ -177,8 +177,6 @@ create policy "Admins view all requests" on public.download_requests for select
   using (public.is_admin());
 create policy "Admins update requests" on public.download_requests for update
   using (public.is_admin());
-create policy "Admins view all requests" on public.download_requests for select
-  using (public.is_admin());
 
 -- Таблица ключей доступа к модам
 create table if not exists public.access_keys (
