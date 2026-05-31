@@ -607,6 +607,14 @@ function updateUI() {
   // Theme selector
   var themeSel = document.getElementById('theme-selector');
   if (themeSel) themeSel.classList.remove('hidden');
+  // Restrict themes for non-VIP
+  var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
+  document.querySelectorAll('.theme-dropdown .theme-opt').forEach(function(btn) {
+    var theme = btn.dataset.theme;
+    if (theme === 'hacker' || theme === 'ios') {
+      btn.style.display = isVipUser ? '' : 'none';
+    }
+  });
   syncDownloadGates();
   var sel = document.querySelector('.mc-global-select');
   if (sel) changeGlobalMc(sel);
@@ -1157,7 +1165,7 @@ var THEME_KEY = 'ballisticys_theme';
       user_id: currentSession.user.id,
       mod_name: actKey.mod_name,
       mc_version: actKey.mc_version,
-      expires_at: durHours ? new Date(Date.now() + durHours * 60 * 60 * 1000).toISOString() : null
+      expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString()
     });
 
     const durText = !durHours ? 'навсегда' : (durHours >= 8760 ? '1 год' : durHours >= 720 ? '1 месяц' : durHours + ' ч');
@@ -1172,6 +1180,10 @@ var THEME_KEY = 'ballisticys_theme';
   var isVipActive = isVip(currentUser);
   // Apply saved theme
   var savedTheme = localStorage.getItem(THEME_KEY) || '';
+  if ((savedTheme === 'hacker' || savedTheme === 'ios') && currentUser && currentUser.role !== 'vip' && currentUser.role !== 'admin') {
+    savedTheme = '';
+    localStorage.setItem(THEME_KEY, '');
+  }
   if (savedTheme) {
     body.classList.add('theme-' + savedTheme);
   }
@@ -1278,6 +1290,9 @@ var THEME_KEY = 'ballisticys_theme';
   window.setTheme = function(theme) {
     body.className = body.className.replace(/theme-\S+/g, '').trim();
     if (theme) {
+      if ((theme === 'hacker' || theme === 'ios') && currentUser && currentUser.role !== 'vip' && currentUser.role !== 'admin') {
+        theme = '';
+      }
       body.classList.add('theme-' + theme);
     }
     localStorage.setItem(THEME_KEY, theme);
