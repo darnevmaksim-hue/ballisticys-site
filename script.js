@@ -557,7 +557,12 @@ function applyCurrentFilter() {
   const active = document.querySelector('.filter.active');
   if (!active) return;
   const filter = active.dataset.filter;
+  var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
   document.querySelectorAll('.mod-card').forEach(function(card) {
+    if (card.dataset.vip === 'true' && !isVipUser) {
+      card.style.display = 'none';
+      return;
+    }
     var visibleData = card.querySelector('.mc-data:not([style*="none"])') || card.querySelector('ul:not(.mc-data)');
     var hasVisible = !!visibleData;
     if (hasVisible && filter !== 'all' && card.dataset.core !== filter) hasVisible = false;
@@ -615,9 +620,17 @@ function updateUI() {
       btn.style.display = isVipUser ? '' : 'none';
     }
   });
+  // Restrict MC versions for non-VIP
+  var mcSel = document.querySelector('.mc-global-select');
+  if (mcSel) {
+    var opt20 = mcSel.querySelector('option[value="1.20.1"]');
+    if (opt20) opt20.style.display = isVipUser ? '' : 'none';
+    if (!isVipUser && mcSel.value === '1.20.1') {
+      mcSel.value = '1.21.1';
+    }
+  }
   syncDownloadGates();
-  var sel = document.querySelector('.mc-global-select');
-  if (sel) changeGlobalMc(sel);
+  if (mcSel) changeGlobalMc(mcSel);
 }
 
 adminPanelLink?.addEventListener('click', (e) => {
