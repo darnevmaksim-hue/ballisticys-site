@@ -87,11 +87,20 @@ Deno.serve(async (req) => {
     return proxyFile(fileName);
   }
 
-  const reqResp = await fetch(
+  let reqResp = await fetch(
     `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${userId}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.${encodeURIComponent(mcVersion)}&status=eq.approved&select=id&limit=1`,
     { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
   );
-  const requests = await reqResp.json();
+  let requests = await reqResp.json();
+
+  if (!Array.isArray(requests) || requests.length === 0) {
+    // Fallback: check for "any" mc_version (injector etc.)
+    reqResp = await fetch(
+      `${supabaseUrl}/rest/v1/download_requests?user_id=eq.${userId}&mod_name=eq.${encodeURIComponent(modName)}&mc_version=eq.any&status=eq.approved&select=id&limit=1`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+    );
+    requests = await reqResp.json();
+  }
 
   if (Array.isArray(requests) && requests.length > 0) {
     return proxyFile(fileName);

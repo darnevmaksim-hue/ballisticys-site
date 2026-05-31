@@ -98,7 +98,7 @@ function changeGlobalMc(sel) {
   var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
   var loggedIn = !!currentUser;
   document.querySelectorAll('.mc-data, .mc-dl').forEach(function(el) {
-    var show = el.dataset.mc === mc;
+    var show = el.dataset.mc === mc || el.dataset.mc === 'any';
     if (show && el.dataset.vip === 'true' && !isVipUser) show = false;
     if (show && el.classList.contains('mc-dl') && !loggedIn) show = false;
     el.style.display = show ? '' : 'none';
@@ -125,7 +125,8 @@ function updateRequestAreas() {
   var mc = document.querySelector('.mc-global-select')?.value || '1.20.1';
   var isVipUser = currentUser && (currentUser.role === 'vip' || currentUser.role === 'admin');
   document.querySelectorAll('.request-area').forEach(function(area) {
-    if (area.dataset.mc !== mc) { area.style.display = 'none'; return; }
+    var areaMc = area.dataset.mc;
+    if (areaMc !== mc && areaMc !== 'any') { area.style.display = 'none'; return; }
     if (isVipUser) { area.style.display = 'none'; return; }
     area.style.display = '';
     area.innerHTML = '';
@@ -141,7 +142,7 @@ function updateRequestAreas() {
       area.appendChild(btn);
       return;
     }
-    var existing = requestCache ? requestCache.filter(function(r) { return r.mod_name === modName && r.mc_version === mc; }) : [];
+    var existing = requestCache ? requestCache.filter(function(r) { return r.mod_name === modName && (r.mc_version === mc || r.mc_version === 'any'); }) : [];
     var req = existing.length ? existing[0] : null;
     if (!req) {
       var formDiv = document.createElement('div');
@@ -155,7 +156,7 @@ function updateRequestAreas() {
       sendBtn.className = 'request-btn';
       sendBtn.textContent = 'Отправить запрос';
       sendBtn.addEventListener('click', function() {
-        requestDownload(modName, mc, descInput.value, sendBtn);
+        requestDownload(modName, area.dataset.mc === 'any' ? 'any' : mc, descInput.value, sendBtn);
       });
       formDiv.appendChild(descInput);
       formDiv.appendChild(sendBtn);
@@ -1061,6 +1062,9 @@ var VIP_THEME_KEY = 'ballisticys_vip_theme';
   await loadSession();
   updateUI();
   if (currentUser) startUserPolling();
+  // Инициализируем отображение кнопок и зон запросов
+  var mcSel = document.querySelector('.mc-global-select');
+  if (mcSel) changeGlobalMc(mcSel);
 
   // Прячем лоадер
   setTimeout(function() {
@@ -1682,11 +1686,16 @@ document.addEventListener('DOMContentLoaded', function() {
   var appealBtn = document.getElementById('result-appeal-btn');
   if (appealBtn) {
     appealBtn.addEventListener('click', function() {
+      currentAppealReq = currentResponseReq;
       hideRequestResult();
+      document.getElementById('appeal-desc').value = '';
+      document.getElementById('appeal-status').textContent = 'Статус: ожидаем.';
       document.getElementById('request-appeal-modal').classList.remove('hidden');
       document.body.classList.add('modal-open');
     });
   }
+
+  var currentAppealReq = null;
 
   // Appeal modal
   var closeAppeal = document.getElementById('close-request-appeal');
@@ -1694,6 +1703,7 @@ document.addEventListener('DOMContentLoaded', function() {
     closeAppeal.addEventListener('click', function() {
       document.getElementById('request-appeal-modal').classList.add('hidden');
       document.body.classList.remove('modal-open');
+      currentAppealReq = null;
     });
   }
   var appealBackdrop = document.getElementById('request-appeal-backdrop');
@@ -1701,6 +1711,7 @@ document.addEventListener('DOMContentLoaded', function() {
     appealBackdrop.addEventListener('click', function() {
       document.getElementById('request-appeal-modal').classList.add('hidden');
       document.body.classList.remove('modal-open');
+      currentAppealReq = null;
     });
   }
   var appealCancel = document.getElementById('appeal-cancel-btn');
@@ -1708,6 +1719,7 @@ document.addEventListener('DOMContentLoaded', function() {
     appealCancel.addEventListener('click', function() {
       document.getElementById('request-appeal-modal').classList.add('hidden');
       document.body.classList.remove('modal-open');
+      currentAppealReq = null;
     });
   }
   var appealSubmit = document.getElementById('appeal-submit-btn');
@@ -1719,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (statusEl) { statusEl.textContent = 'Опишите ситуацию'; statusEl.style.color = '#ff7b72'; }
         return;
       }
-      if (!currentResponseReq || !sb || !currentUser) {
+      if (!currentAppealReq || !sb || !currentUser) {
         if (statusEl) { statusEl.textContent = 'Ошибка: войдите в аккаунт'; statusEl.style.color = '#ff7b72'; }
         return;
       }
@@ -1727,8 +1739,8 @@ document.addEventListener('DOMContentLoaded', function() {
       appealSubmit.textContent = '⏳ Отправка...';
       sb.from('download_requests').insert({
         user_id: currentUser.id,
-        mod_name: currentResponseReq.mod_name,
-        mc_version: currentResponseReq.mc_version,
+        mod_name: currentAppealReq.mod_name,
+        mc_version: currentAppealReq.mc_version,
         status: 'pending',
         description: '[АПЕЛЛЯЦИЯ] ' + desc.value.trim()
       }).then(function(result) {
