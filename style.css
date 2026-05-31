@@ -1248,6 +1248,7 @@ body.theme-ios .sec-ok { color: #34c759; }
 body.theme-ios .sec-badge { border-color: var(--ios-accent); color: var(--ios-accent); animation: none; font-weight: 600; }
 body.theme-ios ::selection { background: rgba(0,122,255,0.2); }
 body.theme-ios .hero { position: relative; }
+body.theme-ios #matrix-rain { display: none; }
 body.theme-ios .hero::after {
   content: ''; position: absolute; inset: -1px; z-index: -1;
   background: radial-gradient(ellipse 100% 60% at 50% 0%, rgba(0,122,255,0.08) 0%, transparent 70%);
@@ -1392,6 +1393,7 @@ body.theme-mountain .sec-ok { color: #5a9a6a; }
 body.theme-mountain .sec-badge { border-color: var(--mt-accent); color: var(--mt-accent); }
 body.theme-mountain .hw-hero { position: relative; }
 body.theme-mountain ::selection { background: rgba(232,200,122,0.2); }
+body.theme-mountain #matrix-rain { display: none; }
 @keyframes mt-star {
   0%, 100% { opacity: 0.3; }
   50% { opacity: 1; }
