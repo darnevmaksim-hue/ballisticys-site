@@ -799,7 +799,6 @@ async function loadPromoCodes() {
     list.innerHTML = '<p style="color:#ff7b72">' + (e.message || 'Ошибка') + '</p>';
   }
 }
-}
 
 document.getElementById('promo-generate-btn')?.addEventListener('click', async () => {
   const duration = parseInt(document.getElementById('promo-duration')?.value || '0');
