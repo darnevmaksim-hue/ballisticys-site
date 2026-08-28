@@ -8,54 +8,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-  <style>
-    .page-loader {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #050805;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 1rem;
-      transition: opacity 0.5s ease;
-    }
-    .page-loader.hidden { opacity: 0; pointer-events: none; }
-    .loader-spinner {
-      width: 40px; height: 40px;
-      border: 3px solid rgba(0,255,65,0.1);
-      border-top-color: #00ff41;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loader-text {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      color: #00ff41;
-      letter-spacing: 0.1em;
-      text-shadow: 0 0 10px rgba(0,255,65,0.3);
-    }
-  </style>
 </head>
 <body>
-  <div id="page-loader" class="page-loader">
-    <div class="loader-spinner"></div>
-    <div class="loader-text">Установка защищённого соединения...</div>
-  </div>
   <div class="background-grid"></div>
   <div class="account-dock">
-    <button class="btn ghost" id="open-auth-modal" type="button">Вход</button>
-    <div id="profile-root" class="profile-root hidden">
-      <button id="profile-trigger" class="profile-trigger" type="button" aria-haspopup="menu" aria-expanded="false">
-        <span id="profile-initial">U</span>
-      </button>
-      <div id="profile-menu" class="profile-menu hidden" role="menu">
-        <p id="profile-email" class="profile-email">—</p>
-        <p id="profile-role" class="profile-role">user</p>
-        <button id="profile-manage-btn" class="profile-menu-btn" type="button">Управление аккаунтом</button>
-        <a class="profile-menu-link" href="#downloads">К загрузкам</a>
-        <a class="profile-menu-link hidden" id="admin-panel-link" href="#admin">Админ панель</a>
-        <button id="profile-logout-menu-btn" class="profile-menu-btn danger" type="button">Выйти</button>
-      </div>
-    </div>
     <div class="theme-selector hidden" id="theme-selector">
       <button id="theme-toggle-btn" class="btn ghost" type="button">🎨 Тема</button>
       <div id="theme-dropdown" class="theme-dropdown hidden">
@@ -107,7 +63,7 @@
       </div>
     </section>
 
-    <section class="panel reveal vip-dashboard hidden" id="vip-dashboard">
+    <section class="panel reveal vip-dashboard" id="vip-dashboard">
       <h2>HUD-панель оператора</h2>
       <div class="dash-grid">
         <div class="dash-widget dash-terminal">
@@ -237,12 +193,6 @@
           <p class="tag fabric">Fabric</p>
           <h3>Ballistics Calculator (Fabric)</h3>
           <p>Баллистический калькулятор, PVO, HUD и больше для Fabric.</p>
-              <ul class="mc-data" data-mc="1.21.1" data-vip="true" style="display:none">
-            <li>Ядро: <strong>Fabric >= 0.16.9</strong></li>
-            <li>API: <strong>Fabric API 0.106.1+</strong></li>
-            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
-            <li>Java: <strong>21+</strong></li>
-          </ul>
           <ul class="mc-data" data-mc="1.20.1">
             <li>Ядро: <strong>Fabric Loader >= 0.15.0</strong></li>
             <li>API: <strong>Fabric API</strong></li>
@@ -250,10 +200,7 @@
             <li>Java: <strong>17+</strong></li>
           </ul>
           <div class="card-actions">
-            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Fabric)" data-mc="1.21.1" data-vip="true" style="display:none">Скачать Fabric (1.21.1)</button>
-            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Fabric)" data-mc="1.20.1" style="display:none">Скачать Fabric (1.20.1)</button>
-            <div class="request-area" data-mod="Ballistics Calculator (Fabric)" data-mc="1.21.1"></div>
-            <div class="request-area" data-mod="Ballistics Calculator (Fabric)" data-mc="1.20.1"></div>
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Fabric)" data-mc="1.20.1">Скачать Fabric (1.20.1)</button>
           </div>
         </article>
 
@@ -262,44 +209,28 @@
           <p class="tag forge">Forge</p>
           <h3>Ballistics Calculator (Forge)</h3>
           <p>Forge-сборка с полным функционалом баллистики и управления целями.</p>
-          <ul class="mc-data" data-mc="1.21.1" data-vip="true" style="display:none">
-            <li>Ядро: <strong>Forge 52.0.15+</strong></li>
-            <li>Версия: <strong>2.0.0-1.21.1</strong></li>
-            <li>Java: <strong>21+</strong></li>
-          </ul>
           <ul class="mc-data" data-mc="1.20.1">
             <li>Ядро: <strong>Forge 47+</strong></li>
             <li>Версия: <strong>1.0.0</strong></li>
             <li>Java: <strong>17+</strong></li>
           </ul>
           <div class="card-actions">
-            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Forge)" data-mc="1.21.1" data-vip="true" style="display:none">Скачать Forge (1.21.1)</button>
-            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Forge)" data-mc="1.20.1" style="display:none">Скачать Forge (1.20.1)</button>
-            <div class="request-area" data-mod="Ballistics Calculator (Forge)" data-mc="1.21.1"></div>
-            <div class="request-area" data-mod="Ballistics Calculator (Forge)" data-mc="1.20.1"></div>
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (Forge)" data-mc="1.20.1">Скачать Forge (1.20.1)</button>
           </div>
         </article>
 
         <!-- NeoForge -->
-        <article class="mod-card" data-core="neoforge" data-vip="true">
+        <article class="mod-card" data-core="neoforge">
           <p class="tag neoforge">NeoForge</p>
           <h3>Ballistics Calculator (NeoForge)</h3>
           <p>Современная NeoForge-сборка для новейших версий Minecraft.</p>
-          <ul class="mc-data" data-mc="1.21.1" data-vip="true" style="display:none">
+          <ul class="mc-data" data-mc="1.21.1">
             <li>Ядро: <strong>NeoForge 21.1+</strong></li>
             <li>Версия: <strong>2.0.0-1.21.1</strong></li>
             <li>Java: <strong>21+</strong></li>
           </ul>
-          <ul class="mc-data" data-mc="1.20.1" style="display:none">
-            <li>Ядро: <strong>NeoForge 20.1+</strong></li>
-            <li>Версия: <strong>1.0.0-1.20.1</strong></li>
-            <li>Java: <strong>17+</strong></li>
-          </ul>
           <div class="card-actions">
-            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.21.1" data-vip="true" style="display:none">Скачать NeoForge (1.21.1)</button>
-            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.20.1" style="display:none">Скачать NeoForge (1.20.1)</button>
-            <div class="request-area" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.21.1"></div>
-            <div class="request-area" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.20.1"></div>
+            <button class="btn primary mc-dl" data-mod="Ballistics Calculator (NeoForge)" data-mc="1.21.1">Скачать NeoForge (1.21.1)</button>
           </div>
         </article>
 
@@ -315,9 +246,8 @@
             <li>Java: <strong>17+</strong></li>
           </ul>
           <div class="card-actions">
-            <button class="btn primary mc-dl" data-mod="Ballisticys Injector Toolkit" data-mc="any" data-vip="true" style="display:none">Скачать Injector ZIP</button>
-            <button class="btn ghost mc-dl" data-mod="Ballisticys Injector Toolkit" data-mc="any" data-vip="true" style="display:none">Скачать Agent jar</button>
-            <div class="request-area" data-mod="Ballisticys Injector Toolkit" data-mc="any"></div>
+            <button class="btn primary mc-dl" data-mod="Ballisticys Injector Toolkit" data-mc="any" data-file="ballisticys-injector-toolkit.zip">Скачать Injector ZIP</button>
+            <button class="btn ghost mc-dl" data-mod="Ballisticys Injector Toolkit" data-mc="any" data-file="ballisticys-fabric-agent-1.0.0.jar">Скачать Agent jar</button>
           </div>
         </article>
 
@@ -361,303 +291,6 @@
     <p>Ballisticys Project • Persistent Web Build</p>
   </footer>
 
-  <!-- СТРАНИЦА ВЫБОРА: Вход или Регистрация -->
-  <div id="auth-choice-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="auth-choice-backdrop"></div>
-    <section class="modal-card auth-choice-card">
-      <button id="close-auth-choice" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Добро пожаловать</h2>
-      <p class="auth-choice-title">У вас уже есть аккаунт?</p>
-      <div class="auth-choice-buttons">
-        <button id="go-to-login-btn" class="btn primary large" type="button">Да, войти</button>
-        <button id="go-to-signup-btn" class="btn ghost large" type="button">Нет, зарегистрироваться</button>
-      </div>
-    </section>
-  </div>
-
-  <!-- СТРАНИЦА ВХОДА -->
-  <div id="auth-login-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="auth-login-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-auth-login" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Вход в аккаунт</h2>
-      
-      <div class="auth-box">
-        <input id="login-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
-        <input id="login-password" class="auth-input" type="password" placeholder="Пароль" autocomplete="current-password" />
-      </div>
-      
-      <div class="actions">
-        <button id="login-submit-btn" class="btn primary" type="button">Войти</button>
-      </div>
-      
-      <p class="auth-switch">Нет аккаунта? <button id="switch-to-signup" class="link-btn" type="button">Зарегистрироваться</button></p>
-      
-      <p id="login-forgot" class="auth-switch hidden"><button id="forgot-password-btn" class="link-btn" type="button">Забыли пароль?</button></p>
-      
-      <p id="login-status" class="auth-status">Статус: ожидаем входа.</p>
-    </section>
-  </div>
-
-  <!-- СТРАНИЦА РЕГИСТРАЦИИ -->
-  <div id="auth-signup-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="auth-signup-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-auth-signup" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Регистрация аккаунта</h2>
-      
-      <div class="auth-box">
-        <input id="signup-email" class="auth-input" type="email" placeholder="Email" autocomplete="email" />
-        <input id="signup-password" class="auth-input" type="password" placeholder="Пароль (минимум 8 символов)" autocomplete="new-password" />
-        <input id="signup-password-confirm" class="auth-input" type="password" placeholder="Повторите пароль" autocomplete="new-password" />
-        <p class="note">Минимум 8 символов в пароле</p>
-      </div>
-      
-      <div class="actions">
-        <button id="signup-submit-btn" class="btn primary" type="button">Зарегистрироваться</button>
-      </div>
-      
-      <p class="auth-switch">Уже есть аккаунт? <button id="switch-to-login" class="link-btn" type="button">Войти</button></p>
-      
-      <p id="signup-status" class="auth-status">Статус: ожидаем регистрации.</p>
-    </section>
-  </div>
-
-  <!-- МОДАЛКА НАСТРОЕК -->
-  <div id="auth-setup-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="auth-setup-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-auth-setup" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Настройка Supabase</h2>
-      <p class="admin-warning">Вставьте данные из проекта Supabase (Settings → API)</p>
-      
-      <div class="auth-box">
-        <input id="setup-url" class="auth-input" type="text" placeholder="Supabase URL (https://xxxx.supabase.co)" />
-        <input id="setup-key" class="auth-input" type="text" placeholder="Anon/Public Key" />
-      </div>
-      
-      <div class="actions">
-        <button id="setup-save-btn" class="btn primary" type="button">Сохранить</button>
-      </div>
-      
-      <p id="setup-status" class="auth-status">Статус: не настроено.</p>
-    </section>
-  </div>
-
-  <!-- АДМИН ПАНЕЛЬ -->
-  <div id="admin-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="admin-backdrop"></div>
-    <section class="modal-card admin-card">
-      <button id="close-admin" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Админ панель</h2>
-      
-      <div class="admin-tabs">
-        <button class="admin-tab active" data-tab="promo">Ключи доступа</button>
-        <button class="admin-tab" data-tab="users">Пользователи</button>
-        <button class="admin-tab" data-tab="vip">VIP подписки</button>
-        <button class="admin-tab" data-tab="requests">Запросы</button>
-      </div>
-      
-      <!-- Вкладка ключей доступа -->
-      <div id="admin-promo-tab" class="admin-tab-content">
-        <h3>Создать ключ доступа</h3>
-        <div class="admin-form" style="display:flex;flex-direction:column;gap:0.5rem">
-          <select id="promo-mod-name" style="padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main)">
-            <option value="Ballistics Calculator (Fabric)">Ballistics Calculator (Fabric)</option>
-            <option value="Ballistics Calculator (Forge)">Ballistics Calculator (Forge)</option>
-            <option value="Ballistics Calculator (NeoForge)">Ballistics Calculator (NeoForge)</option>
-            <option value="Injector">Injector</option>
-          </select>
-          <div style="display:flex;gap:0.5rem">
-            <select id="promo-mc-version" style="flex:1;padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main)">
-              <option value="1.20.1">1.20.1</option>
-              <option value="1.21.1">1.21.1</option>
-            </select>
-            <select id="promo-duration" style="padding:0.3rem;background:var(--panel-bg);border:1px solid var(--panel-border);border-radius:4px;color:var(--text-main);font-family:var(--font-main)">
-              <option value="0">Вечный</option>
-              <option value="1">1 час</option>
-              <option value="2">2 часа</option>
-              <option value="3">3 часа</option>
-              <option value="24">Сутки</option>
-              <option value="168">Неделя</option>
-              <option value="744">Месяц</option>
-              <option value="8760">Год</option>
-            </select>
-          </div>
-          <button id="promo-generate-btn" class="btn primary" type="button">Сгенерировать ключ</button>
-        </div>
-        <div id="promo-result" class="promo-result"></div>
-        <h3>Список ключей доступа</h3>
-        <div id="promo-list" class="promo-list"></div>
-      </div>
-      
-      <!-- Вкладка пользователей -->
-      <div id="admin-users-tab" class="admin-tab-content hidden">
-        <h3>Пользователи</h3>
-        <div id="users-list" class="users-list"></div>
-      </div>
-      
-      <!-- Вкладка VIP -->
-      <div id="admin-vip-tab" class="admin-tab-content hidden">
-        <h3>Активные VIP подписки</h3>
-        <div id="vip-list" class="vip-list"></div>
-      </div>
-      
-      <!-- Вкладка запросов -->
-      <div id="admin-requests-tab" class="admin-tab-content hidden">
-        <h3>Запросы на скачивание</h3>
-        <div id="requests-list" class="requests-list"></div>
-      </div>
-      
-      <p id="admin-status" class="auth-status">Статус: ожидаем данных.</p>
-    </section>
-  </div>
-
-  <!-- ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ -->
-  <div id="profile-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="profile-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-profile" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Управление аккаунтом</h2>
-      
-      <div class="profile-info">
-        <p><strong>Email:</strong> <span id="profile-info-email">—</span></p>
-        <p><strong>Роль:</strong> <span id="profile-info-role" class="role-badge user">—</span></p>
-        <p><strong>VIP до:</strong> <span id="profile-info-vip">—</span></p>
-      </div>
-
-      <hr class="divider">
-
-      <h3>Сменить пароль</h3>
-      <div class="auth-box">
-        <input id="profile-new-pass" class="auth-input" type="password" placeholder="Новый пароль (мин. 8 символов)" autocomplete="new-password" />
-        <input id="profile-confirm-pass" class="auth-input" type="password" placeholder="Повторите пароль" autocomplete="new-password" />
-      </div>
-      <div class="actions">
-        <button id="profile-change-pass-btn" class="btn primary" type="button">Сохранить пароль</button>
-      </div>
-
-      <div id="profile-vip-section" class="vip-section hidden">
-        <hr class="divider">
-        <h3>Генерация ключа доступа</h3>
-        <p class="vip-section-desc">Создайте одноразовый ключ для доступа к моду.</p>
-        <div class="vip-mc-row">
-          <label>Мод:</label>
-          <select id="profile-gen-mod-name" class="vip-mc-select" style="flex:1">
-            <option value="Ballistics Calculator (Fabric)">BC Fabric</option>
-            <option value="Ballistics Calculator (Forge)">BC Forge</option>
-            <option value="Ballistics Calculator (NeoForge)">BC NeoForge</option>
-            <option value="Injector">Injector</option>
-          </select>
-        </div>
-        <div class="vip-mc-row">
-          <label>Версия:</label>
-          <select id="profile-gen-mc-version" class="vip-mc-select">
-            <option value="1.20.1">1.20.1</option>
-            <option value="1.21.1">1.21.1</option>
-          </select>
-        </div>
-        <div class="vip-mc-row">
-          <label>Длительность:</label>
-          <select id="access-key-duration" class="vip-mc-select">
-            <option value="1">1 час</option>
-            <option value="720">1 месяц (30 дн)</option>
-            <option value="8760">1 год (365 дн)</option>
-            <option value="0">Навсегда</option>
-          </select>
-        </div>
-        <div class="actions">
-          <button id="profile-gen-key-btn" class="btn primary" type="button">Сгенерировать</button>
-        </div>
-        <div id="profile-gen-key-result" class="promo-result hidden">
-          <div class="promo-code-display">
-            <span class="promo-code" id="profile-gen-key-code">—</span>
-            <button class="btn primary" id="profile-copy-key-btn">Копировать</button>
-          </div>
-        </div>
-      </div>
-
-      <div id="profile-redeem-section" class="vip-section hidden">
-        <hr class="divider">
-        <h3>Активировать ключ доступа</h3>
-        <p class="vip-section-desc">Введите ключ, чтобы получить доступ к скачиванию мода.</p>
-        <div class="auth-box">
-          <input id="profile-redeem-input" class="auth-input" type="text" placeholder="Введите ключ" />
-        </div>
-        <div class="actions">
-          <button id="profile-redeem-btn" class="btn primary" type="button">Активировать</button>
-        </div>
-      </div>
-
-      <p id="profile-status" class="auth-status">Статус: готово.</p>
-    </section>
-  </div>
-
-  <!-- МОДАЛКА ОТВЕТА НА ЗАПРОС (шаг 1: уведомление) -->
-  <div id="request-response-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="request-response-backdrop"></div>
-    <section class="modal-card">
-      <h2 id="response-title">Ваш запрос обработан</h2>
-      <p id="response-text" style="margin:1rem 0;color:var(--text-dim)">Нажмите «Далее», чтобы увидеть результат.</p>
-      <div class="actions">
-        <button id="response-next-btn" class="btn primary" type="button">Далее</button>
-      </div>
-    </section>
-  </div>
-
-  <!-- МОДАЛКА РЕЗУЛЬТАТА ЗАПРОСА (шаг 2) -->
-  <div id="request-result-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="request-result-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-request-result" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <div id="request-result-approved" class="hidden">
-        <h2 style="color:#4ade80">✓ Доступ разрешён</h2>
-        <p style="margin:0.5rem 0;color:var(--text-dim)">Вы можете скачать мод и активировать ключ доступа.</p>
-        <div style="margin:1rem 0;padding:1rem;background:var(--bg-color);border-radius:10px;border:1px solid var(--panel-border)">
-          <p style="font-size:0.9rem;color:var(--text-dim);margin-bottom:0.5rem">Версия: <strong id="result-dl-version" style="color:var(--text-main)">—</strong></p>
-          <button id="result-dl-btn" class="btn primary" style="margin-top:0.5rem;width:100%" type="button">Скачать</button>
-        </div>
-        <div id="result-promo-box" style="margin:1rem 0;padding:1rem;background:var(--bg-color);border-radius:10px;border:1px solid var(--panel-border)">
-          <p style="font-size:0.85rem;color:var(--text-dim);margin-bottom:0.5rem">Ключ доступа к моду (одноразовый):</p>
-          <div style="display:flex;gap:0.5rem;align-items:center">
-            <span id="result-promo-code" style="font-size:1.2rem;font-weight:700;color:#4ade80;font-family:monospace;letter-spacing:0.1em;flex:1">—</span>
-            <button id="result-copy-promo-btn" class="btn primary" style="padding:0.4rem 1rem" type="button">Копировать</button>
-          </div>
-          <p style="font-size:0.8rem;color:var(--text-dim);margin-top:0.3rem">Действует <span id="result-promo-dur">24</span>ч</p>
-        </div>
-      </div>
-      <div id="request-result-denied" class="hidden">
-        <h2 style="color:#ef4444">✕ Запрос отклонён</h2>
-        <p style="margin:0.5rem 0;color:var(--text-dim)">Причина отказа:</p>
-        <div id="result-deny-reason" style="padding:0.8rem;background:var(--bg-color);border-radius:8px;border:1px solid #ef444444;color:var(--text-main);margin-bottom:1rem"></div>
-        <p style="font-size:0.85rem;color:var(--text-dim)">Вы можете подать заявку снова через 30 минут.</p>
-        <div style="display:flex;gap:0.5rem;margin-top:1rem">
-          <button id="result-reapply-btn" class="btn primary" style="flex:1" type="button">Подать заново</button>
-          <button id="result-appeal-btn" class="btn ghost" style="flex:1" type="button">Оспорить</button>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <!-- МОДАЛКА АПЕЛЛЯЦИИ -->
-  <div id="request-appeal-modal" class="modal hidden" role="dialog" aria-modal="true">
-    <div class="modal-backdrop" id="request-appeal-backdrop"></div>
-    <section class="modal-card">
-      <button id="close-request-appeal" class="modal-close" type="button" aria-label="Закрыть">×</button>
-      <h2>Оспорить отказ</h2>
-      <p style="color:var(--text-dim);margin-bottom:0.5rem">Опишите, почему вам срочно нужен доступ:</p>
-      <div class="auth-box">
-        <textarea id="appeal-desc" class="auth-input" rows="4" placeholder="Опишите ситуацию..."></textarea>
-      </div>
-      <div style="display:flex;gap:0.5rem">
-        <button id="appeal-submit-btn" class="btn primary" style="flex:1" type="button">Отправить</button>
-        <button id="appeal-cancel-btn" class="btn ghost" type="button">Отмена</button>
-      </div>
-      <p id="appeal-status" class="auth-status">Статус: ожидаем.</p>
-    </section>
-  </div>
-
-  <script src="auth-config.js"></script>
-  <script src="script.js?v=15"></script>
+  <script src="script.js?v=16"></script>
 </body>
 </html>
