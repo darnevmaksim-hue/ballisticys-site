@@ -1,8 +1,10 @@
 const DOWNLOAD_BASE = "https://raw.githubusercontent.com/darnevmaksim-hue/ballisticys-site/mod-files/downloads";
 
 const DOWNLOAD_MAP = {
-  "Ballistics Calculator (Fabric)|1.20.1": "bbb-fabric-port-2.0pre4-fabric-port.jar",
-  "Ballistics Calculator (Forge)|1.20.1": "blur-mod-1.0.0-forge.jar",
+  "Ballistics Calculator (Fabric)|1.20.1": "ballistic-calculator-2.0.0-1.20.1-fabric.jar",
+  "Ballistics Calculator (Fabric)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-fabric.jar",
+  "Ballistics Calculator (Forge)|1.20.1": "ballistic-calculator-2.0.0-1.20.1-forge.jar",
+  "Ballistics Calculator (Forge)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-forge.jar",
   "Ballistics Calculator (NeoForge)|1.21.1": "ballistic-calculator-2.0.0-1.21.1-neoforge.jar",
 };
 
